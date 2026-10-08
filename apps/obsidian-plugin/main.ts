@@ -3,8 +3,9 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 
-interface CortexSettings { bridgeUrl: string; backend: string }
-const DEFAULTS: CortexSettings = { bridgeUrl: 'http://127.0.0.1:8765', backend: 'codex' };
+interface CortexSettings { bridgeUrl: string; backend: string; token: string }
+async function bridgeRequest(plugin: CortexPlugin, options: any) { return requestUrl({ ...options, headers: { ...(options.headers || {}), Authorization: `Bearer ${plugin.settings.token}` } }); }
+const DEFAULTS: CortexSettings = { bridgeUrl: 'http://127.0.0.1:8765', backend: 'codex', token: '' };
 
 class CortexPromptModal extends Modal {
   plugin: CortexPlugin;
@@ -37,13 +38,13 @@ class CortexPromptModal extends Modal {
     if (this.terminalSocket) { this.terminal?.focus(); return; }
     button.disabled = true;
     try {
-      const response = await requestUrl({ url: `${this.plugin.settings.bridgeUrl}/api/sessions`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ backend: this.plugin.settings.backend, cols: 100, rows: 24 }) });
+      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/sessions`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ backend: this.plugin.settings.backend, cols: 100, rows: 24 }) });
       const data = response.json; this.terminalSessionId = data.id; container.style.display = 'block';
       this.terminal = new Terminal({ cursorBlink: true, scrollback: 3000, fontSize: 12, theme: { background: '#090d12', foreground: '#d6e1e8', cursor: '#88f0cc' } });
       this.terminalFit = new FitAddon(); this.terminal.loadAddon(this.terminalFit); this.terminal.open(container); this.terminalFit.fit();
       const wsUrl = `${this.plugin.settings.bridgeUrl.replace(/^http/, 'ws')}${data.websocket}`;
       this.terminalSocket = new WebSocket(wsUrl);
-      this.terminalSocket.onopen = () => this.terminalSocket?.send(JSON.stringify({ type: 'resize', cols: this.terminal?.cols || 100, rows: this.terminal?.rows || 24 }));
+      this.terminalSocket.onopen = () => { this.terminalSocket?.send(JSON.stringify({ type: 'auth', token: this.plugin.settings.token })); this.terminalSocket?.send(JSON.stringify({ type: 'resize', cols: this.terminal?.cols || 100, rows: this.terminal?.rows || 24 })); };
       this.terminalSocket.onmessage = event => { const message = JSON.parse(event.data); if (message.type === 'output') this.terminal?.write(message.data); else if (message.type === 'exit') this.terminal?.writeln(`\r\n[process exited with code ${message.code}]`); };
       this.terminal.onData(data => { if (this.terminalSocket?.readyState === WebSocket.OPEN) this.terminalSocket.send(JSON.stringify({ type: 'input', data })); });
       this.terminal.onResize(({ cols, rows }) => { if (this.terminalSocket?.readyState === WebSocket.OPEN) this.terminalSocket.send(JSON.stringify({ type: 'resize', cols, rows })); });
@@ -71,7 +72,7 @@ class CortexPromptModal extends Modal {
     try {
       const bytes = new Uint8Array(await blob.arrayBuffer()); let binary = '';
       for (let offset = 0; offset < bytes.length; offset += 0x8000) binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
-      const response = await requestUrl({ url: `${this.plugin.settings.bridgeUrl}/api/voice/turn`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio_base64: btoa(binary), content_type: blob.type || 'audio/webm', backend: this.plugin.settings.backend, background: true, request_id: crypto.randomUUID() }) });
+      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/voice/turn`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio_base64: btoa(binary), content_type: blob.type || 'audio/webm', backend: this.plugin.settings.backend, background: true, request_id: crypto.randomUUID() }) });
       this.recordButton.setText('Record voice command (local Whisper)');
       const data = response.json;
       this.input.value = data.transcript || '';
@@ -90,20 +91,20 @@ class CortexPromptModal extends Modal {
       const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (!Recognition) { this.showError('This Obsidian environment does not provide browser speech recognition.'); return; }
       const recognition = new Recognition(); recognition.lang = 'en-US';
-      recognition.onresult = (event: any) => { this.input.value = event.results[0][0].transcript; void this.runText(); };
+      recognition.onresult = (event: any) => { this.input.value = event.results[0][0].transcript; void this.runText(undefined, true); };
       recognition.onerror = (event: any) => this.showError(`Browser speech fallback failed: ${event.error}`);
       recognition.start(); new Notice('Browser fallback enabled. Audio may be processed by a browser or OS service.');
     };
   }
-  async runText(button?: HTMLButtonElement) {
+  async runText(button?: HTMLButtonElement, speakOutLoud = false) {
     const prompt = this.input.value.trim(); if (!prompt) return;
     if (button) { button.disabled = true; button.setText('Working…'); }
     try {
-      const response = await requestUrl({ url: `${this.plugin.settings.bridgeUrl}/api/requests`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt, backend: this.plugin.settings.backend, background: true, request_id: crypto.randomUUID() }) });
+      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/requests`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt, backend: this.plugin.settings.backend, background: true, request_id: crypto.randomUUID() }) });
       const data = response.json;
-      if (data.status === 'running') { this.watchRequest(data.id, false); return; }
-      if (data.status === 'awaiting_approval') { this.showApproval(data); return; }
-      await this.showResult(data, false);
+      if (data.status === 'running') { this.watchRequest(data.id, speakOutLoud); return; }
+      if (data.status === 'awaiting_approval') { this.speakAfterApproval = speakOutLoud; this.showApproval(data); return; }
+      await this.showResult(data, speakOutLoud);
     } catch (err) { this.showError(`CortexOS Bridge error: ${String(err)}`); }
     finally { if (button) { button.disabled = false; button.setText('Run request'); } }
   }
@@ -113,6 +114,7 @@ class CortexPromptModal extends Modal {
     const interrupt = this.resultEl.createEl('button', { text: 'Interrupt skill run' });
     const wsUrl = `${this.plugin.settings.bridgeUrl.replace(/^http/, 'ws')}/api/requests/${requestId}/stream`;
     const socket = new WebSocket(wsUrl);
+    socket.onopen = () => socket.send(JSON.stringify({ type: 'auth', token: this.plugin.settings.token }));
     interrupt.onclick = () => { if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'interrupt' })); };
     socket.onmessage = event => {
       const message = JSON.parse(event.data);
@@ -123,12 +125,22 @@ class CortexPromptModal extends Modal {
     socket.onerror = () => { output.textContent += '\n[Could not connect to the live output stream.]'; };
   }
   showApproval(data: any) {
-    this.resultEl.empty(); this.resultEl.createEl('p', { text: 'This request may send, spend, or publish. Approve explicitly before CortexOS continues.' });
+    this.resultEl.empty(); this.resultEl.createEl('p', { text: `Risk: ${data.risk_level || 'unknown'}. ${data.reason || 'Explicit review is required before execution.'}` });
     const approve = this.resultEl.createEl('button', { text: 'Approve and run' });
     approve.onclick = async () => {
       approve.disabled = true; approve.setText('Working…');
-      try { const response = await requestUrl({ url: `${this.plugin.settings.bridgeUrl}/api/requests/${data.id}/approve?background=true`, method: 'POST' }); const result = response.json; if (result.status === 'running') this.watchRequest(data.id, this.speakAfterApproval); else await this.showResult(result, this.speakAfterApproval); }
-      catch (err) { this.showError(`Approval request failed: ${String(err)}`); }
+      try { const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/requests/${data.id}/approve?background=true`, method: 'POST' }); const result = response.json; if (result.status === 'running') this.watchRequest(data.id, this.speakAfterApproval); else await this.showResult(result, this.speakAfterApproval); }
+      catch (err) { approve.disabled = false; approve.setText('Approve and run'); this.showError(`Approval request failed: ${String(err)}`); }
+    };
+    const reject = this.resultEl.createEl('button', { text: 'Reject' });
+    reject.onclick = async () => {
+      reject.disabled = true;
+      try {
+        const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/requests/${data.id}/reject`, method: 'POST' });
+        if (response.json.status === 'error') throw new Error(response.json.error || 'Request is no longer pending');
+        this.speakAfterApproval = false;
+        this.resultEl.empty(); this.resultEl.createEl('p', { text: 'Request rejected; no action was taken.' });
+      } catch (err) { reject.disabled = false; this.showError(`Could not reject request: ${String(err)}`); }
     };
   }
   async showResult(data: any, speakOutLoud: boolean) {
@@ -145,7 +157,7 @@ class CortexPromptModal extends Modal {
   }
   async speak(text: string) {
     try {
-      const response = await requestUrl({ url: `${this.plugin.settings.bridgeUrl}/api/voice/speak`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: text.slice(0, 5000) }) });
+      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/voice/speak`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: text.slice(0, 5000) }) });
       const audio = new Audio(URL.createObjectURL(new Blob([response.arrayBuffer], { type: 'audio/wav' })));
       await audio.play();
     } catch (err) {
@@ -158,7 +170,7 @@ class CortexPromptModal extends Modal {
   onClose() {
     this.stream?.getTracks().forEach(track => track.stop());
     this.terminalSocket?.close(); this.terminal?.dispose();
-    if (this.terminalSessionId) void requestUrl({ url: `${this.plugin.settings.bridgeUrl}/api/sessions/${this.terminalSessionId}`, method: 'DELETE' }).catch(() => {});
+    if (this.terminalSessionId) void bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/sessions/${this.terminalSessionId}`, method: 'DELETE' }).catch(() => {});
     this.contentEl.empty();
   }
 }
@@ -170,18 +182,18 @@ class CortexAutomationModal extends Modal {
     const { contentEl } = this; contentEl.createEl('h2', { text: 'Skill automation review' });
     contentEl.createEl('p', { text: 'Five user-confirmed successful runs make a skill eligible for review. Approval does not remove per-run gates for sending, spending, or publishing.' });
     try {
-      const response = await requestUrl({ url: `${this.plugin.settings.bridgeUrl}/api/skills` });
+      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/skills` });
       for (const skill of response.json as any[]) {
         const row = contentEl.createDiv(); row.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--background-modifier-border)';
         row.createEl('strong', { text: skill.name });
-        row.createEl('p', { text: `${skill.successful_runs || 0}/5 confirmed successful runs · ${skill.approval_required ? 'Per-run approval required' : 'No external-action gate'} · promotion: ${skill.promotion_status}` });
+        row.createEl('p', { text: `${skill.successful_runs || 0}/5 confirmed successful runs · Risk: ${skill.risk_level || 'unknown'} · ${skill.approval_required ? 'Per-run approval required' : 'No explicit approval flag'} · promotion: ${skill.promotion_status}` });
         const action = row.createEl('button', { text: skill.promotion_status === 'pending_review' ? 'Approve promotion' : skill.promotion_status === 'approved' ? 'Approved' : 'Promote to automation?' });
         action.disabled = skill.promotion_status === 'approved' || (skill.promotion_status !== 'pending_review' && (skill.successful_runs || 0) < 5);
         action.onclick = async () => {
           action.disabled = true;
           try {
             const endpoint = skill.promotion_status === 'pending_review' ? 'promote/approve' : 'promote';
-            await requestUrl({ url: `${this.plugin.settings.bridgeUrl}/api/skills/${encodeURIComponent(skill.id)}/${endpoint}`, method: 'POST' });
+            await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/skills/${encodeURIComponent(skill.id)}/${endpoint}`, method: 'POST' });
             new Notice(skill.promotion_status === 'pending_review' ? 'Automation promotion approved.' : 'Promotion review recorded.');
             this.close(); new CortexAutomationModal(this.app, this.plugin).open();
           } catch (err) { new Notice(`Promotion review failed: ${String(err)}`); action.disabled = false; }
@@ -210,6 +222,7 @@ class CortexSettingsTab extends PluginSettingTab {
   display() {
     const { containerEl } = this; containerEl.empty(); containerEl.createEl('h2', { text: 'CortexOS Bridge' });
     new Setting(containerEl).setName('Bridge URL').setDesc('Keep the Bridge bound to localhost.').addText(text => text.setValue(this.plugin.settings.bridgeUrl).onChange(async value => { this.plugin.settings.bridgeUrl = value; await this.plugin.saveSettings(); }));
+    new Setting(containerEl).setName('Bridge token').setDesc('Get it with `python -m cortexos token` on the Bridge machine.').addText(text => text.setPlaceholder('Paste local token').setValue(this.plugin.settings.token).onChange(async value => { this.plugin.settings.token = value.trim(); await this.plugin.saveSettings(); }));
     new Setting(containerEl).setName('Backend').addDropdown(drop => drop.addOption('codex', 'Codex').addOption('claude', 'Claude Code').setValue(this.plugin.settings.backend).onChange(async value => { this.plugin.settings.backend = value; await this.plugin.saveSettings(); }));
   }
 }

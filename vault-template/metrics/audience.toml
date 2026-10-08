@@ -1,0 +1,10 @@
+# CortexOS metrics schema v1. Edit values with real data; blank means unknown.
+schema_version = 1
+kind = "audience"
+
+[[metrics]]
+key = "followers"
+value = ""
+unit = "people"
+updated = ""
+source = ""

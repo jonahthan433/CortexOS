@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 config/cortexos.toml
+config/cortexos.token
 vault/
 apps/hud/node_modules/
 apps/hud/terminal.bundle.js

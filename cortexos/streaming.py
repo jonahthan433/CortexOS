@@ -44,7 +44,6 @@ class RequestStreams:
         return self.streams.get(request_id)
 
     async def serve(self, websocket, stream: RequestStream, interrupt) -> None:
-        await websocket.accept()
         cursor = 0
 
         async def output_loop() -> None:

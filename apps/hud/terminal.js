@@ -17,7 +17,7 @@ window.CortexTerminal = {
     terminal.open(element);
     fit.fit();
     const socket = new WebSocket(url);
-    socket.onopen = () => socket.send(JSON.stringify({ type: 'resize', cols: terminal.cols, rows: terminal.rows }));
+    socket.onopen = () => { socket.send(JSON.stringify({ type: 'auth', token: localStorage.getItem('cortexos-token') || '' })); socket.send(JSON.stringify({ type: 'resize', cols: terminal.cols, rows: terminal.rows })); };
     socket.onmessage = event => {
       let message;
       try { message = JSON.parse(event.data); } catch { return; }

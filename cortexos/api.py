@@ -4,6 +4,7 @@ import base64
 import binascii
 import asyncio
 import uuid
+import hmac
 
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.responses import Response
@@ -21,12 +22,38 @@ from .voice import LocalVoice, VoiceUnavailable
 settings = Settings.load()
 service = CortexService(settings)
 voice = LocalVoice(settings)
-terminals = TerminalManager(settings)
+terminals = TerminalManager(settings, service.vault)
 request_streams = RequestStreams()
 background_tasks: dict[str, asyncio.Task] = {}
 scheduler_task: asyncio.Task | None = None
 app = FastAPI(title="CortexOS Bridge", version="0.1.0")
 hud_dir = settings.root / "apps" / "hud"
+
+
+def token_matches(candidate: str) -> bool:
+    return hmac.compare_digest(candidate.encode("utf-8"), settings.bridge_token.encode("utf-8"))
+
+
+@app.middleware("http")
+async def require_bridge_token(request, call_next):
+    if request.url.path.startswith("/api/"):
+        supplied = request.headers.get("authorization", "")
+        token = supplied[7:] if supplied.lower().startswith("bearer ") else ""
+        if not token or not token_matches(token):
+            return Response(status_code=401, content="Bridge token required", headers={"WWW-Authenticate": "Bearer"})
+    return await call_next(request)
+
+
+async def authenticate_websocket(websocket: WebSocket) -> bool:
+    await websocket.accept()
+    try:
+        message = await asyncio.wait_for(websocket.receive_json(), timeout=5)
+        if message.get("type") == "auth" and token_matches(str(message.get("token", ""))):
+            return True
+    except (asyncio.TimeoutError, ValueError):
+        pass
+    await websocket.close(code=4401, reason="Bridge token required")
+    return False
 
 
 class RequestBody(BaseModel):
@@ -65,6 +92,8 @@ def start_background_request(prompt: str, backend: str | None, skill_id: str | N
     request_id = request_id or str(uuid.uuid4())
     if request_id in background_tasks:
         raise HTTPException(status_code=409, detail="Request ID is already active")
+    if service.vault.request_exists(request_id):
+        raise HTTPException(status_code=409, detail="Request ID has already been used; submit a new request instead.")
     stream = request_streams.create(request_id)
 
     async def run_background():
@@ -124,7 +153,8 @@ def voice_status():
 
 @app.get("/api/sessions")
 def list_sessions():
-    return [{"id": session.id, "backend": session.backend, "alive": session.exit_code is None}
+    return [{"id": session.id, "backend": session.backend, "alive": session.exit_code is None,
+             "started": session.started, "exit_code": session.exit_code, "sequence": session.sequence}
             for session in terminals.sessions.values()]
 
 
@@ -157,6 +187,8 @@ async def terminal_socket(websocket: WebSocket, session_id: str):
     if session is None:
         await websocket.close(code=4404, reason="Terminal session not found")
         return
+    if not await authenticate_websocket(websocket):
+        return
     await terminal_websocket(websocket, session)
 
 
@@ -167,6 +199,8 @@ async def request_stream_socket(websocket: WebSocket, request_id: str):
     stream = request_streams.get(request_id)
     if stream is None:
         await websocket.close(code=4404, reason="Request stream not found")
+        return
+    if not await authenticate_websocket(websocket):
         return
     await request_streams.serve(websocket, stream, service.agent.interrupt)
 
@@ -193,7 +227,7 @@ async def start_scheduler():
 @app.get("/api/skills")
 def skills():
     return [{"id": s.id, "name": s.name, "domain": s.domain, "description": s.description,
-             "approval_required": s.approval_required, "automation_ready": s.automation_ready,
+             "risk_level": s.risk_level, "approval_required": s.approval_required, "automation_ready": s.automation_ready,
              **service.vault.skill_stats(s.id)} for s in service.registry.list()]
 
 
@@ -224,7 +258,8 @@ def metrics():
 
 @app.get("/api/approvals")
 def pending_approvals():
-    return [{"id": request_id, "skill": item.get("skill_id"), "prompt": item.get("prompt")}
+    return [{"id": request_id, "skill": item.get("skill_id"), "prompt": item.get("prompt"),
+             "risk_level": item.get("risk_level"), "reason": item.get("reason")}
             for request_id, item in service.pending.items()]
 
 
@@ -232,12 +267,18 @@ def pending_approvals():
 async def submit(body: RequestBody):
     if body.background:
         return start_background_request(body.prompt, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
-    return await service.submit(body.prompt, body.backend, body.skill_id)
+    result = await service.submit(body.prompt, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
+    if result.get("status") == "error" and "Request ID has already been used" in result.get("error", ""):
+        raise HTTPException(status_code=409, detail=result["error"])
+    return result
 
 
 @app.post("/api/voice/command")
 async def voice_command(body: RequestBody):
-    return await service.submit(body.prompt, body.backend, body.skill_id)
+    result = await service.submit(body.prompt, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
+    if result.get("status") == "error" and "Request ID has already been used" in result.get("error", ""):
+        raise HTTPException(status_code=409, detail=result["error"])
+    return result
 
 
 @app.post("/api/voice/turn")
@@ -263,7 +304,7 @@ async def voice_turn(body: VoiceTurnBody):
         result = start_background_request(transcript, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
         result["transcript"] = transcript
     else:
-        result = await service.submit(transcript, body.backend, body.skill_id)
+        result = await service.submit(transcript, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
         result["transcript"] = transcript
     return result
 
@@ -284,6 +325,11 @@ async def approve(request_id: str, background: bool = False):
     if background:
         return start_background_approval(request_id)
     return await service.approve(request_id)
+
+
+@app.post("/api/requests/{request_id}/reject")
+def reject(request_id: str):
+    return service.reject(request_id)
 
 
 @app.post("/api/requests/{request_id}/feedback")

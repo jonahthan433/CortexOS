@@ -1,0 +1,10 @@
+# CortexOS metrics schema v1. Edit values with real data; blank means unknown.
+schema_version = 1
+kind = "usage"
+
+[[metrics]]
+key = "requests"
+value = ""
+unit = "count"
+updated = ""
+source = ""

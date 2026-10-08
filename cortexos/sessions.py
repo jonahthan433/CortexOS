@@ -13,6 +13,7 @@ from collections import deque
 from dataclasses import dataclass, field
 
 from .config import Settings
+from .vault import Vault, now
 
 
 @dataclass
@@ -28,6 +29,11 @@ class TerminalSession:
     condition: asyncio.Condition = field(default_factory=asyncio.Condition)
     eof: asyncio.Event = field(default_factory=asyncio.Event)
     exit_code: int | None = None
+    started: str = field(default_factory=lambda: now().isoformat())
+    input_bytes: int = 0
+    output_bytes: int = 0
+    receipt_written: bool = False
+    vault: Vault | None = None
 
     async def append(self, text: str) -> None:
         async with self.condition:
@@ -43,7 +49,9 @@ class TerminalSession:
     def write(self, value: str) -> None:
         if self.exit_code is not None:
             return
-        os.write(self.master_fd, value.encode("utf-8", errors="replace"))
+        data = value.encode("utf-8", errors="replace")
+        os.write(self.master_fd, data)
+        self.input_bytes += len(data)
 
     def interrupt(self) -> None:
         if self.exit_code is None:
@@ -56,8 +64,9 @@ class TerminalSession:
 class TerminalManager:
     """PTY-backed, interactive Claude Code and Codex sessions for a local Bridge."""
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, vault: Vault | None = None):
         self.settings = settings
+        self.vault = vault
         self.sessions: dict[str, TerminalSession] = {}
         self.reader_tasks: set[asyncio.Task] = set()
 
@@ -90,7 +99,7 @@ class TerminalManager:
             os.close(slave_fd)
             raise
         os.close(slave_fd)
-        session = TerminalSession(str(uuid.uuid4()), backend, process, master_fd, cols, rows)
+        session = TerminalSession(str(uuid.uuid4()), backend, process, master_fd, cols, rows, vault=self.vault)
         self.sessions[session.id] = session
         loop = asyncio.get_running_loop()
 
@@ -104,6 +113,7 @@ class TerminalManager:
                 session.eof.set()
                 return
             if chunk:
+                session.output_bytes += len(chunk)
                 task = asyncio.create_task(session.append(chunk.decode("utf-8", errors="replace")))
                 self.reader_tasks.add(task)
                 task.add_done_callback(self.reader_tasks.discard)
@@ -127,6 +137,18 @@ class TerminalManager:
             session.eof.set()
         session.exit_code = exit_code
         await session.append(f"\r\n\x1b[90m[process exited with code {exit_code}]\x1b[0m\r\n")
+        self._write_receipt(session)
+
+    def _write_receipt(self, session: TerminalSession) -> None:
+        if session.receipt_written or not session.vault:
+            return
+        session.receipt_written = True
+        session.vault.receipt(f"terminal-{session.id}", {
+            "event": "terminal_session", "session_id": session.id, "backend": session.backend,
+            "started": session.started, "ended": now().isoformat(), "exit_code": session.exit_code,
+            "input_bytes": session.input_bytes, "output_bytes": session.output_bytes,
+            "command_text_logged": False,
+        })
 
     def get(self, session_id: str) -> TerminalSession | None:
         return self.sessions.get(session_id)
@@ -173,7 +195,6 @@ class TerminalManager:
 
 
 async def terminal_websocket(websocket, session: TerminalSession) -> None:
-    await websocket.accept()
     cursor = 0
 
     async def output_loop() -> None:

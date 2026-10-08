@@ -15,7 +15,7 @@ skills/<domain>/<skill-id>/
   SKILL.md
 ```
 
-The manifest keys are `id`, `name`, `domain`, `description`, `trigger_phrases`, `tier`, `approval_required`, `automation_ready`, and `instructions`. Keep IDs stable and globally unique. Set `approval_required` to true whenever the task could send, spend, or publish.
+The manifest keys are `id`, `name`, `domain`, `description`, `trigger_phrases`, `tier`, `risk_level`, `approval_required`, `automation_ready`, and `instructions`. Keep IDs stable and globally unique. Choose `risk_level` from `read_only`, `local_write`, `external_action`, `financial`, or `unknown`. Use `external_action` or `financial` and set `approval_required` to true whenever execution could send, spend, publish, or otherwise affect an external account. Unknown/missing risk is approval-gated. Promotion never changes the per-run gate.
 
 ## Adding a skill
 

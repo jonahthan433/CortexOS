@@ -13,11 +13,11 @@ Web HUD ─────────┘        │                               
 ```
 
 - **Two front doors:** the web HUD and Obsidian plugin are clients of one Bridge API. They do not each implement their own agent logic.
-- **Bridge:** owns skill discovery, request receipts, routing, approval state, and backend selection. It binds to loopback by default.
+- **Bridge:** owns skill discovery, request receipts, routing, approval state, and backend selection. It binds to loopback and protects `/api` with a local shared token.
 - **Skill backbone:** skills are portable Markdown instructions plus a small `skill.json` manifest. `done by hand twice → capture a skill`; after five successful runs, review the skill for automation. Automation never bypasses the approval policy.
-- **Router:** tier 1 handles explicit saved-data/rule lookups; tier 2 is an optional OpenAI-compatible fast model; tier 3 runs an installed Claude Code or Codex CLI. Conservative keyword/intent rules route new requests to tier 3. An optional Jev-compatible classifier can be added behind the router interface.
+- **Router:** tier 1 handles explicit saved-data/rule lookups; tier 2 is an optional OpenAI-compatible fast model; tier 3 runs an installed Claude Code or Codex CLI. Skill manifests declare structured risk. Unscoped Tier 3 work uses a structured classifier when available and fails closed when classification is unavailable or uncertain.
 - **Memory:** all durable data is plain Markdown under the selected vault. `raw/` is the user capture area, `wiki/` contains organized notes and `_master-index.md`, and `output/` holds generated deliverables. Request logs and skill receipts are kept separately for predictable indexing.
-- **Safety:** sending, spending, and publishing skills declare `approval_required`; the bridge refuses to execute them until a human approves. The scaffold does not ship connectors that could perform these actions.
+- **Safety:** every skill declares `risk_level` and `approval_required`. External, financial, unknown, or explicitly gated risks require fresh approval for every run, including promoted and scheduled runs. The scaffold does not ship connectors that could perform these actions.
 - **Local-first voice:** faster-whisper STT and Kokoro TTS run behind replaceable local adapters. Both interfaces record and speak through the Bridge, with browser/OS speech offered only as a labeled fallback.
 
 ## Project structure
@@ -39,20 +39,27 @@ Requires Python 3.11+.
 
 ```bash
 cd CortexOS
-python -m venv .venv
-. .venv/bin/activate
-pip install -e .
-cp config/cortexos.example.toml config/cortexos.toml
-python -m cortexos init-vault ./my-vault
+sudo apt-get update
+sudo apt-get install -y espeak-ng
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -e ".[voice]"
+if [ ! -f config/cortexos.toml ]; then cp config/cortexos.example.toml config/cortexos.toml; fi
+cd apps/hud && npm install && npm run build
+cd ../obsidian-plugin && npm install && npm run build
+cd ../..
+python -m cortexos init-vault ./vault
+python -m cortexos token
 python -m cortexos serve
 ```
 
-The Bridge defaults to `http://127.0.0.1:8765`. Configure your vault path and provider in `config/cortexos.toml`. To run tier 3, install and authenticate either `claude` or `codex`, then select the provider in configuration or with `--backend`.
+The Bridge defaults to `http://127.0.0.1:8765`. Paste the printed token into the HUD when prompted, or into the Obsidian plugin settings. This is a single-user local access barrier, not multi-user authentication; do not expose the Bridge beyond loopback. Configure your vault path and provider in `config/cortexos.toml`. To run Tier 3, install and authenticate `claude` or `codex`.
 
-See [docs/setup.md](docs/setup.md), [docs/architecture.md](docs/architecture.md), and [docs/skills.md](docs/skills.md).
+See [docs/setup.md](docs/setup.md), [docs/smoke-test.md](docs/smoke-test.md), [docs/architecture.md](docs/architecture.md), and [docs/skills.md](docs/skills.md).
 
 ## Status
 
-Implemented: skill catalog and manifests, starter skills across requested domains, conservative three-tier router, tier 1 commands and metric lookup, optional OpenAI-compatible tier 2, Claude Code/Codex CLI tier 3, local HTTP API, human approval endpoint, vault bootstrap, request/receipt logging, CLI, local web HUD, Obsidian desktop plugin, local Whisper/Kokoro voice for both interfaces, xterm.js terminal sessions, live/cancellable output for headless Tier 3 requests, five-confirmation skill promotion review, approved-skill background scheduling, blank real-metric entry forms, and a local HUD panel layout editor.
+Implemented locally (not yet release-certified): skill catalog with explicit risk metadata, structured risk classification and fail-closed fallback, persistent approval/scheduler state, token-protected Bridge APIs, request/receipt logging, local HUD and Obsidian clients, Whisper/Kokoro voice adapters, interactive/re-attachable PTY sessions with summary receipts, five-confirmation skill promotion review, approved-skill scheduling, human-editable TOML metrics, and panel layout controls. The small noninteractive smoke runner is provided but has not been run as part of this change.
 
-Install the `voice` extra and `espeak-ng` to enable local Whisper/Kokoro. Build the xterm.js bundles in `apps/hud` and `apps/obsidian-plugin` for interactive sessions. The browser/OS speech fallback is manual and explicitly labeled because it may not remain on-device. Live social/usage figures still require user-entered data or configured connectors; CortexOS does not invent them. See [docs/setup.md](docs/setup.md) for schedules, promotion review, metric templates, and panel layout customization.
+See [docs/setup.md](docs/setup.md) for the complete install sequence, Bridge token setup, metric schema, and recovery limits. Run [docs/smoke-test.md](docs/smoke-test.md) for user-run checks. Live social/usage figures require real user-entered data or future connectors; CortexOS does not invent them.

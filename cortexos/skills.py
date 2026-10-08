@@ -14,6 +14,7 @@ class Skill:
     description: str
     trigger_phrases: list[str]
     tier: int
+    risk_level: str
     approval_required: bool
     automation_ready: bool
     path: Path
@@ -41,6 +42,7 @@ class SkillRegistry:
                     description=data.get("description", ""),
                     trigger_phrases=data.get("trigger_phrases", []),
                     tier=int(data.get("tier", 3)),
+                    risk_level=data.get("risk_level", "unknown") if data.get("risk_level") in {"read_only", "local_write", "external_action", "financial", "unknown"} else "unknown",
                     approval_required=bool(data.get("approval_required", False)),
                     automation_ready=bool(data.get("automation_ready", False)),
                     path=manifest.parent,

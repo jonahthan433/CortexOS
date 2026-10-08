@@ -3,118 +3,69 @@
 ## Requirements
 
 - Python 3.11 or newer.
-- Optional: Claude Code (`claude`) or Codex CLI (`codex`), installed and authenticated for tier 3.
-- Optional: a local OpenAI-compatible server such as Ollama for tier 2.
-- Obsidian is optional; any folder can serve as the vault.
-- For local voice, install `espeak-ng`; the Python voice extra provides faster-whisper and Kokoro.
+- Node.js and npm to build the xterm.js terminal bundles.
+- `espeak-ng` for Kokoro phonemization.
+- Optional Tier 3: the Claude Code CLI, Codex CLI, or both, installed and authenticated.
+- Optional Tier 2 and unscoped action classification: an OpenAI-compatible fast model endpoint.
+- Optional Obsidian desktop. The local web HUD works without it.
 
-## Install
+## Install and launch
 
-```bash
-cd CortexOS
-python -m venv .venv
-. .venv/bin/activate
-pip install -e .
-cp config/cortexos.example.toml config/cortexos.toml
-```
-
-### Install local voice (Whisper + Kokoro)
-
-On Debian/Ubuntu, install Kokoro's phonemizer dependency, then install CortexOS's optional local voice engines:
+From the CortexOS checkout:
 
 ```bash
 sudo apt-get update
-sudo apt-get install espeak-ng
-pip install -e ".[voice]"
-```
-
-On the first request, faster-whisper downloads the configured Whisper model (`base.en` by default) and Kokoro loads its voice assets. To fetch/warm both models before using the HUD:
-
-```bash
-python -c "from faster_whisper import WhisperModel; WhisperModel('base.en', device='cpu', compute_type='int8')"
-python -c "from kokoro import KPipeline; KPipeline(lang_code='a')"
-```
-
-Set `[voice].stt_model`, `stt_device`, `stt_compute_type`, `tts_language`, and `tts_voice` in `config/cortexos.toml` to change models, hardware, language, and voice. CPU/int8 is the default. CUDA acceleration requires matching CUDA/cuDNN libraries for CTranslate2; see the [faster-whisper GPU notes](https://github.com/SYSTRAN/faster-whisper#gpu).
-
-Edit `config/cortexos.toml`: set `bridge.vault` to your Obsidian vault path, select `codex` or `claude`, and adjust executable names/arguments if needed. Do not put API secrets into the vault. For a local model, set `fast_model_enabled = true` and use the server's local endpoint.
-
-Bootstrap an existing or new vault:
-
-```bash
-python -m cortexos init-vault /path/to/YourVault
-```
-
-Start the Bridge:
-
-```bash
+sudo apt-get install -y espeak-ng
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -e "[voice]"
+if [ ! -f config/cortexos.toml ]; then cp config/cortexos.example.toml config/cortexos.toml; fi
+cd apps/hud && npm install && npm run build
+cd ../obsidian-plugin && npm install && npm run build
+cd ../..
+python -m cortexos init-vault ./vault
+python -m cortexos token
 python -m cortexos serve
 ```
 
-The API listens at `http://127.0.0.1:8765` by default. Available endpoints include `GET /api/status`, `GET /api/skills`, `POST /api/requests`, `POST /api/requests/{id}/approve`, and `POST /api/sessions`. FastAPI's local OpenAPI page is at `/docs`.
+Open <http://127.0.0.1:8765/> and paste the token printed by `python -m cortexos token` when prompted. The token lives in git-ignored `config/cortexos.token` with owner-only permissions. Keep a copy in a password manager if needed; do not commit or share it. The Bridge is for one trusted local user only. The token is a local access barrier, not multi-user authentication or a substitute for TLS; keep `host` at `127.0.0.1` and do not expose the Bridge to a LAN or the internet.
 
-The web HUD is served at `http://127.0.0.1:8765/` by the same process.
+To start without voice, use `pip install -e .` and set `[voice].enabled = false`. The first local voice use downloads the configured Whisper and Kokoro models; model downloads need network access, subsequent inference runs locally.
 
-## Build the HUD terminal
+The example selects Codex. Install and authenticate the desired provider CLI before using Tier 3; change `bridge.backend` to `claude` for Claude Code. The interactive terminal has its own backend selector.
 
-The HUD bundles xterm.js locally so terminal code is not fetched from a CDN:
+## Models and router
 
-```bash
-cd apps/hud
-npm install
-npm run build
-cd ../..
-```
+Tier 2 is disabled by default. To enable it, start a local OpenAI-compatible server, set `router.fast_model_enabled = true`, and configure its URL/model in `config/cortexos.toml`. Short factual requests can use Tier 2. Otherwise, substantial work uses the selected Tier 3 CLI. The same fast model supplies structured JSON action-risk decisions for requests without a skill manifest. If classification is disabled, unavailable, malformed, or uncertain, such Tier 3 requests wait for approval. Tier 1 rules use local data and do not need a model.
 
-Interactive PTY sessions require Linux or macOS plus the selected CLI installed and authenticated. They run with the configured vault as their working directory. The HUD can send keystrokes, resize a live Claude Code/Codex TUI, and interrupt or end the session. Tier 3 skill requests run headlessly; their live stdout/stderr appears in the task stream and can be interrupted there.
-
-## Confirmations, promotions, and schedules
-
-After a skill finishes, mark the run successful only when it delivered the expected result. CortexOS stores that confirmation under `receipts/`. The Bridge accepts one confirmation per completed run, validates the run receipt and skill ID, and enables promotion review after five successful confirmations. Use the HUD card's promotion button or Obsidian's **Review skill automation promotions** command. Promotion approval is a separate human decision saved in `receipts/promotions/`; it does not remove a skill's per-run send, spend, or publish approval gate.
-
-The local scheduler reads `vault/automations.toml` every 30 seconds. Bootstrap creates a comments-only file with no jobs enabled. To add a job, use this format only after promoting that skill:
-
-```toml
-[[jobs]]
-id = "weekly-review"
-skill_id = "productivity-weekly-review"
-enabled = true
-interval_minutes = 10080
-prompt = "Prepare my weekly review from the latest notes."
-```
-
-Only approved skills run; request submission still enforces the normal action approval policy. Keep schedules local and disable a job with `enabled = false`.
-
-Bootstrap also creates blank `metrics/audience.md` and `metrics/usage.md` entry forms. They contain no sample figures. Fill in actual values and sources; unknown fields remain blank. The HUD reads metric files directly from the configured vault and refreshes them with the system data.
-
-## Customize the HUD
-
-Choose **Customize panels** to hide panels or move them up and down. The layout is saved in browser local storage on this device, independently of vault data. New panel modules can be added by giving their wrapper a unique `data-panel` key.
+Voice defaults use CPU/int8. Configure `[voice]` to select different models. `/api/voice/status` reports dependency readiness; the first model load can still fail if model assets or `espeak-ng` are unavailable.
 
 ## Obsidian plugin
 
-Build the desktop plugin bundle:
+Copy the generated `main.js`, `main.css` (rename to `styles.css`), and `manifest.json` from `apps/obsidian-plugin` into `<vault>/.obsidian/plugins/cortexos-bridge/`. Enable the plugin. In settings, enter the Bridge URL and the token from `python -m cortexos token`. The Bridge writes canonical deliverables to its configured vault; the plugin also saves a convenience response copy in the active vault.
+
+## Vault, risk declarations, and persistent state
+
+Bootstrap preserves existing files and creates `raw/`, `wiki/`, `output/`, `requests/`, `receipts/`, and `metrics/`, along with `AGENTS.md`, `CLAUDE.md`, a comments-only `automations.toml`, and `state.json`. Promotion history and user votes are receipts. `state.json` is atomically replaced and contains pending approvals and scheduler claim times; it is local operational state, not a user metrics file.
+
+Every `skills/**/skill.json` must declare `risk_level` (`read_only`, `local_write`, `external_action`, `financial`, or `unknown`) and `approval_required`. Invalid or missing risk metadata becomes `unknown` and requires approval. External, financial, and unknown risks always require a fresh approval for every run, including scheduled and promoted runs. `approval_required: true` also gates a skill. Promotion does not modify these fields. For requests without a matching skill, the fast-model classifier returns a structured risk decision; failures and unknown outcomes require approval. Provider prompts also prohibit external actions for unapproved runs. Review permissions granted to provider CLIs: this local application prompt is not an OS sandbox. No social, email, payment, or CRM connectors ship with this version.
+
+PTY sessions can be reattached from the HUD while their Bridge process remains running. A Bridge restart ends the actual child process; receipts keep only backend, timestamps, byte counts, and exit code, not terminal text or commands. This avoids persisting secrets but means a terminated PTY cannot be resurrected after a Bridge restart.
+
+## Metrics
+
+Edit the human-readable `vault/metrics/*.toml` files. The minimal schema uses `schema_version = 1`, a `kind`, and one or more `[[metrics]]` records with `key`, `value`, `unit`, `updated`, and `source`. Values are strings so blank means unknown; enter only actual measured or user-provided values. The HUD displays blanks as an em dash. Markdown metric files from older vaults remain readable, but new files use the TOML schema.
+
+## Promotion and scheduler
+
+Five distinct user-confirmed successful skill runs make that skill eligible for automation review. The promotion ledger records a separate review approval. Add enabled jobs to `automations.toml` only after promotion is approved. No schedules are enabled by default. The scheduler writes a job's last-run claim before dispatch: a crash may skip a run, but a restart will not silently replay it. If a job has an external-action risk, its normal per-run approval remains required.
+
+Use the smoke steps in [smoke-test.md](smoke-test.md). The noninteractive checks can also be run with:
 
 ```bash
-cd apps/obsidian-plugin
-npm install
-npm run build
+source .venv/bin/activate
+python scripts/smoke_noninteractive.py
 ```
 
-Copy `main.js`, generated `main.css` (rename it to `styles.css`), and `manifest.json` into `<vault>/.obsidian/plugins/cortexos-bridge/`, then enable CortexOS Bridge in Obsidian's Community plugins settings. Set the Bridge URL and backend in plugin settings. The Bridge must be running on the same computer. The plugin writes a convenience copy of its response into `output/CortexOS/` in the active vault. It streams Tier 3 output, can interrupt a run, and can open an interactive PTY-backed CLI session from its command modal.
-
-Use a skill directly:
-
-```bash
-python -m cortexos ask "Prepare a weekly review from my notes" --skill productivity-weekly-review
-```
-
-## Safety and scope
-
-The starter router and approval API are local tools, not an authentication system for network exposure. Keep `host` at `127.0.0.1`; do not expose the Bridge to a LAN or public internet without adding authentication and origin controls. Skills that send, spend, or publish should require approval. Provider CLIs may have broad local permissions; use their own sandbox/permissions settings for your environment.
-
-## Voice
-
-The HUD and Obsidian plugin record audio locally in the app, post it to the loopback Bridge, transcribe with faster-whisper, submit the transcript through the standard CortexOS router, and can play the result using local Kokoro-generated WAV. Audio is processed in memory and is not written into the vault. Endpoints: `GET /api/voice/status`, `POST /api/voice/turn` (base64 encoded audio JSON), and `POST /api/voice/speak` (JSON text; WAV response).
-
-Browser/OS speech is a manually selected last resort after local STT or TTS fails. It may use a non-local service. The UI labels this before invoking it; local voice is always attempted first.
+That script uses a temporary vault, a stub provider, blank metric templates, and a scheduler dry-run. It does not call real providers, start a server, or change the configured vault. This command is provided for you to run; it has not been run as part of this code change.
