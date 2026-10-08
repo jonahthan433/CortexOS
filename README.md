@@ -1,4 +1,5 @@
 # CortexOS
+Custom Agentic OS
 
 CortexOS is a local-first personal AI operating system built around portable skills, one local Bridge, and an Obsidian-compatible Markdown vault.
 
