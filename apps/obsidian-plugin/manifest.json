@@ -1,0 +1,9 @@
+{
+  "id": "cortexos-bridge",
+  "name": "CortexOS Bridge",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Run CortexOS skills from your vault through the local Bridge.",
+  "author": "CortexOS",
+  "isDesktopOnly": true
+}

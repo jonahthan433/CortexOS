@@ -1,0 +1,33 @@
+[bridge]
+host = "127.0.0.1"
+port = 8765
+vault = "./vault"
+skills = "./skills"
+backend = "codex" # codex | claude
+
+[router]
+fast_model_enabled = false
+fast_model_base_url = "http://127.0.0.1:11434/v1"
+fast_model_name = "qwen2.5:3b"
+fast_model_api_key = "local"
+
+[providers.codex]
+command = "codex"
+args = ["exec", "--full-auto", "-"]
+terminal_command = "codex"
+terminal_args = []
+
+[providers.claude]
+command = "claude"
+args = ["-p", "--output-format", "text"]
+terminal_command = "claude"
+terminal_args = []
+
+[voice]
+enabled = true
+stt_model = "base.en"
+stt_device = "cpu"
+stt_compute_type = "int8"
+tts_language = "a" # Kokoro: a=American English, b=British English
+tts_voice = "af_heart"
+browser_fallback = true

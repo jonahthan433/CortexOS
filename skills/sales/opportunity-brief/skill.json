@@ -1,0 +1,1 @@
+{"id":"sales-opportunity-brief","name":"Opportunity brief","domain":"Sales","description":"Turn supplied prospect notes into a qualification brief and next-step draft.","trigger_phrases":["opportunity brief","qualify this lead","sales brief","prospect summary"],"tier":3,"approval_required":false,"automation_ready":false,"instructions":"SKILL.md"}

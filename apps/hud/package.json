@@ -1,0 +1,1 @@
+{"name":"cortexos-hud","version":"0.1.0","private":true,"scripts":{"build":"esbuild terminal.js --bundle --format=iife --outfile=terminal.bundle.js"},"dependencies":{"@xterm/addon-fit":"^0.10.0","@xterm/xterm":"^5.5.0"},"devDependencies":{"esbuild":"^0.25.0"}}

@@ -1,0 +1,1 @@
+{"id":"community-pulse","name":"Community pulse","domain":"Community","description":"Summarize supplied community feedback into themes and suggested responses.","trigger_phrases":["community pulse","summarize community feedback","community themes"],"tier":3,"approval_required":false,"automation_ready":false,"instructions":"SKILL.md"}

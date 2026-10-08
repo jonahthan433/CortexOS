@@ -1,0 +1,1 @@
+{"id":"research-decision-brief","name":"Research decision brief","domain":"Research","description":"Compare evidence and produce a sourced decision brief from supplied or available sources.","trigger_phrases":["research brief","compare these options","decision brief","research this"],"tier":3,"approval_required":false,"automation_ready":false,"instructions":"SKILL.md"}

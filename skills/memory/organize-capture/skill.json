@@ -1,0 +1,1 @@
+{"id":"memory-organize-capture","name":"Organize a raw capture","domain":"Memory","description":"Turn a user-selected raw note into a durable wiki article and index link.","trigger_phrases":["organize this note","organize my capture","turn this into a wiki note"],"tier":3,"approval_required":false,"automation_ready":false,"instructions":"SKILL.md"}

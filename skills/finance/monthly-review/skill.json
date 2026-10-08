@@ -1,0 +1,1 @@
+{"id":"finance-monthly-review","name":"Monthly finance review","domain":"Finance","description":"Summarize user-provided financial records without moving money or giving unsupported certainty.","trigger_phrases":["monthly finance review","finance summary","review my expenses"],"tier":3,"approval_required":false,"automation_ready":false,"instructions":"SKILL.md"}
