@@ -194,6 +194,8 @@ class FastModel:
     async def classify(self, prompt: str) -> str:
         """Cheap intent classifier; only a confident QUICK result can select tier 2."""
         decision = await self.jev.decide("tier", prompt)
+        if decision == "tier1_local":
+            return "LOCAL"
         if decision == "tier2_fast":
             return "QUICK"
         if decision == "tier3_agent":

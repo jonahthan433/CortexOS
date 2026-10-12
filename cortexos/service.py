@@ -48,8 +48,13 @@ class CortexService:
         # Enforce the action gate before every tier, including local rule lookups.
         decision = {"risk_level": skill.risk_level, "requires_approval": skill.approval_required or skill.risk_level in {"external_action", "financial", "unknown"},
                     "reason": "Declared in skill manifest"} if skill else None
-        if route.tier == 3 and decision is None:
-            decision = await self.fast_model.classify_action(prompt)
+        tier_decision = None
+        if decision is None and route.tier != 1:
+            # Tier 1/2 are local reads and read-only answers; only agent work
+            # (or an undecidable request) passes through the action gate.
+            tier_decision = await self.fast_model.classify(prompt)
+            if tier_decision == "WORK":
+                decision = await self.fast_model.classify_action(prompt)
         if decision and decision["requires_approval"]:
             pending = {"prompt": prompt, "backend": backend, "skill_id": skill.id if skill else None,
                        "risk_level": decision["risk_level"], "reason": decision["reason"],
@@ -90,13 +95,18 @@ class CortexService:
                 # Fallback is visible and uses the selected agent backend.
                 route = type(route)(3, skill, f"tier 2 unavailable: {exc}")
 
-        if route.tier == 3 and not skill and backend is None and self.settings.fast_model_enabled:
-            try:
-                if await self.fast_model.classify(prompt) == "QUICK":
+        if route.tier == 3 and not skill and backend is None:
+            # Jev routes tier1_local here (prompt wasn't a literal command): demote to the
+            # tier-1 local handler. Tier 2 answering still requires a configured fast model.
+            # Reuse the gate-phase verdict; a second call can disagree (nondeterministic jev).
+            if tier_decision == "LOCAL":
+                return self._finish(request_id, prompt, str(self.status()), "completed", 1, backend, skill)
+            if tier_decision == "QUICK" and self.settings.fast_model_enabled:
+                try:
                     result = await self.fast_model.answer(prompt)
                     return self._finish(request_id, prompt, result, "completed", 2, backend, skill)
-            except Exception:
-                pass  # Conservative fallback: continue to the selected agent backend.
+                except Exception:
+                    pass  # Conservative fallback: continue to the selected agent backend.
 
         if route.tier == 3 or (skill and skill.tier == 3):
             return await self._execute(request_id, prompt, backend, skill, on_output=on_output)
