@@ -21,7 +21,7 @@ class Settings:
     fast_model_name: str = "qwen2.5:3b"
     fast_model_api_key: str = "local"
     jev_enabled: bool = False
-    jev_base_url: str = "https://openrouter.ai/api/v1"
+    jev_base_url: str = "https://openrouter.ai/api"
     jev_api_key: str = ""
     jev_model: str = "typesafe/jev-1.13"
     providers: dict[str, dict[str, Any]] | None = None
@@ -91,7 +91,7 @@ class Settings:
             fast_model_name=router.get("fast_model_name", "qwen2.5:3b"),
             fast_model_api_key=router.get("fast_model_api_key", "local"),
             jev_enabled=bool(router.get("jev_enabled", False)),
-            jev_base_url=router.get("jev_base_url", "https://openrouter.ai/api/v1"),
+            jev_base_url=router.get("jev_base_url", "https://openrouter.ai/api"),
             jev_api_key=router.get("jev_api_key", ""),
             jev_model=router.get("jev_model", "typesafe/jev-1.13"),
             providers=data.get("providers", {}),

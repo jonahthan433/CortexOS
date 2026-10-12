@@ -135,39 +135,40 @@ class JevRouter:
         if not self.settings.jev_enabled or not self.settings.jev_api_key:
             return None
         rubrics = {
-            "tier": ("tier1_local: an instant local command such as showing saved data, listing skills or metrics. "
-                      "tier2_fast: a short read-only factual or explanatory question needing no tools or deliverable. "
-                      "tier3_agent: real work such as research, writing a deliverable, or any action."),
-            "risk": ("read_only: analysis or drafting with no side effects. local_write: writes only inside the vault. "
-                      "external_action: sends, publishes, or changes an account. financial: moves money or makes purchases. "
-                      "unknown: ambiguous; treat as requiring approval."),
+            "tier": {
+                "tier1_local": "an instant local command: showing saved data, listing skills or metrics, opening a saved report",
+                "tier2_fast": "a short read-only factual or explanatory question needing no tools or deliverable",
+                "tier3_agent": "real work: research, writing a deliverable, or any action",
+            },
+            "risk": {
+                "read_only": "analysis or drafting with no side effects",
+                "local_write": "writes only inside the vault",
+                "external_action": "sends, publishes, or changes an account",
+                "financial": "moves money or makes purchases",
+                "unknown": "ambiguous; treat as requiring approval",
+            },
         }
         payload = {
             "model": self.settings.jev_model,
-            "messages": [
-                {"role": "system", "content": (
-                    "You are a decision model. Given the request and the labelled options with rubrics, "
-                    "reply with exactly one option label and nothing else.")},
-                {"role": "user", "content": json.dumps({
-                    "options": self.OPTIONS[kind], "rubrics": rubrics[kind],
-                    "request": prompt, **(extra or {})})},
-            ],
-            "temperature": 0, "max_tokens": 8,
+            "state": f"User request: {prompt}",
+            "questions": {kind: {"type": "choice",
+                                  "instructions": f"Classify this request. Options with rubrics: {self.OPTIONS[kind]}. Prefer tier1_local for anything the system can answer instantly from saved local data.",
+                                  "criteria": rubrics[kind]}},
         }
+        payload["questions"][kind].update(extra or {})
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 response = await client.post(
-                    self.settings.jev_base_url.rstrip("/") + "/chat/completions",
+                    self.settings.jev_base_url.rstrip("/") + "/alpha/decisions",
                     headers={"Authorization": f"Bearer {self.settings.jev_api_key}"},
                     json=payload)
                 response.raise_for_status()
-                value = response.json()["choices"][0]["message"]["content"].strip().lower()
+                answer = response.json()["answers"][kind]
+                value = str(answer.get("choice", "")).lower()
+                confidence = float(answer.get("confidence", 0) or 0)
         except Exception:
             return None
-        for option in self.OPTIONS[kind]:
-            if option in value:
-                return option
-        return None
+        return value if confidence >= 0.5 and value in self.OPTIONS[kind] else None
 
 
 class FastModel:
