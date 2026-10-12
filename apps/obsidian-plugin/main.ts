@@ -50,6 +50,22 @@ class CortexPromptModal extends Modal {
     terminalButton.onclick = () => this.openTerminal(terminalBox, terminalButton);
     this.resultEl = contentEl.createDiv({ cls: 'cortex-response' });
   }
+  renderSkillButtons(skills: any[]) {
+    let grid = this.contentEl.querySelector('.cortex-skill-grid');
+    if (!grid) {
+      grid = this.contentEl.createDiv({ cls: 'cortex-skill-grid' });
+      (grid as HTMLElement).style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin:10px 0';
+      this.skillSelect.parentElement?.insertBefore(grid, this.skillSelect.nextSibling);
+    }
+    grid.empty();
+    for (const skill of skills) {
+      const button = grid.createEl('button', { text: skill.name });
+      button.style.cssText = 'border:1px solid #263744;background:#0a121a;color:#aebdc5;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px';
+      button.onclick = () => { this.skillSelect.value = skill.id; void this.runText(); };
+    }
+    const count = grid.createEl('small', { text: `${skills.length} skills · one click to run` });
+    count.style.cssText = 'color:#5d7079;font-size:9px;align-self:center;margin-left:4px';
+  }
   async loadSkills() {
     try {
       const agents = await this.plugin.refreshAgents();
@@ -72,6 +88,7 @@ class CortexPromptModal extends Modal {
         option.value = skill.id;
       }
       this.skillSelect.value = selected;
+      this.renderSkillButtons(response.json as any[]);
     } catch (err) {
       this.showError(`Could not load skills from the Bridge: ${String(err)}`);
     }
