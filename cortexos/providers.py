@@ -126,6 +126,8 @@ class JevRouter:
     OPTIONS = {
         "tier": ["tier1_local", "tier2_fast", "tier3_agent"],
         "risk": ["read_only", "local_write", "external_action", "financial", "unknown"],
+        "role": ["research", "content", "memory", "productivity", "community",
+                 "clients", "sales", "finance", "automation", "ops"],
     }
 
     def __init__(self, settings: Settings):
@@ -135,6 +137,18 @@ class JevRouter:
         if not self.settings.jev_enabled or not self.settings.jev_api_key:
             return None
         rubrics = {
+            "role": {
+                "research": "finding, comparing, or briefing on information",
+                "content": "writing, outlining, or repurposing content",
+                "memory": "organizing notes, captures, or the vault",
+                "productivity": "planning, reviewing work, or managing tasks",
+                "community": "summarizing or responding to community feedback",
+                "clients": "preparing client-facing material such as meeting briefs",
+                "sales": "qualifying leads or preparing outreach",
+                "finance": "reviewing financial records or expenses",
+                "automation": "assessing what to automate next",
+                "ops": "system health, backups, or operational tasks",
+            },
             "tier": {
                 "tier1_local": "an instant local command: showing saved data, listing skills or metrics, opening a saved report",
                 "tier2_fast": "a short read-only factual or explanatory question needing no tools or deliverable",

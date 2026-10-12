@@ -17,6 +17,8 @@ from .service import CortexService
 from .sessions import TerminalManager, terminal_websocket
 from .streaming import RequestStreams, MetricsBroadcaster
 from .scheduler import run_scheduler
+from .agents import AgentCoordinator
+from .ops import HealthCheck, BackupManager, backup_loop
 from .voice import LocalVoice, VoiceUnavailable
 
 settings = Settings.load()
@@ -27,6 +29,10 @@ request_streams = RequestStreams()
 metrics_bus = MetricsBroadcaster()
 background_tasks: dict[str, asyncio.Task] = {}
 scheduler_task: asyncio.Task | None = None
+backup_task: asyncio.Task | None = None
+coordinator = AgentCoordinator(service.registry, service.vault, jev=service.fast_model.jev)
+health = HealthCheck(service=service, vault=service.vault, voice=voice)
+backups = BackupManager(service.vault)
 app = FastAPI(title="CortexOS Bridge", version="0.1.0")
 hud_dir = settings.root / "apps" / "hud"
 
@@ -149,7 +155,7 @@ def status():
 
 @app.get("/api/agents")
 def agents():
-    return {"default": settings.backend, "agents": settings.agents}
+    return {"default": settings.backend, "agents": settings.agents, "coordinator": coordinator.status()}
 
 
 @app.get("/api/voice/status")
@@ -216,6 +222,9 @@ async def shutdown_sessions():
     if scheduler_task:
         scheduler_task.cancel()
         await asyncio.gather(scheduler_task, return_exceptions=True)
+    if backup_task:
+        backup_task.cancel()
+        await asyncio.gather(backup_task, return_exceptions=True)
     for task in list(background_tasks.values()):
         task.cancel()
     if background_tasks:
@@ -228,6 +237,8 @@ async def start_scheduler():
     global scheduler_task
     service.vault.bootstrap()
     scheduler_task = asyncio.create_task(run_scheduler(service))
+    global backup_task
+    backup_task = asyncio.create_task(backup_loop(backups))
 
 
 @app.get("/api/skills")
@@ -366,6 +377,30 @@ async def feedback(request_id: str, body: FeedbackBody):
     await metrics_bus.broadcast({"type": "metrics", "metrics": service.vault.metrics(),
                                  "history": service.vault.metrics_history()})
     return result
+
+
+@app.get("/api/health")
+def health_check():
+    return health.snapshot()
+
+
+@app.get("/api/agents/route")
+async def agent_route(prompt: str):
+    agent = await coordinator.route(prompt)
+    if agent is None:
+        return {"agent": None}
+    return {"agent": {"id": agent.id, "name": agent.name, "role": agent.role, "lane": agent.lane}}
+
+
+@app.post("/api/backups")
+def create_backup():
+    path = backups.create()
+    return {"status": "created", "path": str(path)}
+
+
+@app.get("/api/backups")
+def list_backups():
+    return backups.list()
 
 
 if hud_dir.is_dir():

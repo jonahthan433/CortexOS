@@ -1,0 +1,1 @@
+{"id":"backup-restore","name":"Backup and restore","domain":"Ops","description":"Create a timestamped vault backup or list existing backups.","trigger_phrases":["backup the vault","create a backup","list backups","restore a backup"],"tier":3,"approval_required":true,"automation_ready":false,"instructions":"SKILL.md","risk_level":"local_write"}
