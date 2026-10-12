@@ -7,7 +7,7 @@ import uuid
 import hmac
 
 from fastapi import FastAPI, HTTPException, WebSocket
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints
 from typing import Annotated
@@ -47,7 +47,8 @@ async def require_bridge_token(request, call_next):
         supplied = request.headers.get("authorization", "")
         token = supplied[7:] if supplied.lower().startswith("bearer ") else ""
         if not token or not token_matches(token):
-            return Response(status_code=401, content="Bridge token required", headers={"WWW-Authenticate": "Bearer"})
+            return JSONResponse(status_code=401, content={"detail": "Bridge token required"},
+                                headers={"WWW-Authenticate": "Bearer"})
     return await call_next(request)
 
 
