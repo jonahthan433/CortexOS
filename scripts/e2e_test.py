@@ -86,12 +86,27 @@ def test_gate():
     print('PASS: approval gate holds on send/spend')
 
 
+def test_tier3_execution():
+    """Hermes executes tier-3 work end to end (route -> execute -> receipt)."""
+    from cortexos.service import CortexService
+    import uuid
+    svc = CortexService(settings)
+    async def run():
+        r = await svc.submit("say exactly: HERMES_EXEC_OK", request_id=f"e2e-tier3-{uuid.uuid4().hex[:8]}")
+        assert r["status"] == "completed", f"tier3 failed: {r}"
+        assert r.get("tier") == 3 and r.get("backend") == "hermes", r
+        assert "HERMES_EXEC_OK" in str(r.get("result", "")), r
+    asyncio.run(run())
+    print("PASS: tier-3 executes via hermes end to end")
+
+
 if __name__ == '__main__':
     test_agent_count()
     test_coordinator()
     test_health()
     test_backup()
     test_gate()
+    test_tier3_execution()
     try:
         test_jev_routing()
     except AssertionError as exc:
