@@ -27,13 +27,16 @@
     <section class="hero panel" data-panel="agent">
       <div class="hero-head"><span class="eyebrow">CORTEXOS / PERSONAL AGENT SYSTEM</span><span class="auto-chip" id="auto-chip">AUTO ROUTING</span></div>
       <canvas id="network-canvas" aria-hidden="true"></canvas>
-      <div class="agent-core"><div class="core-kicker">ACTIVE AGENT</div><h1 id="agent-name">Codex</h1><div class="state-line"><span class="state-dot"></span><strong id="center-state">IDLE</strong><span id="state">IDLE</span></div><p class="agent-caption" id="agent-caption">One front door to your agents, skills, and memory.</p>
+      <div class="agent-core"><div class="core-kicker">ACTIVE AGENT</div><h1 id="agent-name">Codex</h1>
+        <div class="agent-sub" id="agent-sub">Tier routing · default agent</div><div class="state-pills" id="state-pills" role="group" aria-label="Agent state"><button class="state-pill" data-state="idle">Idle</button><button class="state-pill" data-state="listening">Listening</button><button class="state-pill" data-state="working">Working</button><button class="state-pill" data-state="speaking">Speaking</button><button class="state-pill" data-state="error">Error</button><button class="state-pill auto active" data-state="auto">Auto</button></div>
+<div class="state-line"><span class="state-dot"></span><strong id="center-state">IDLE</strong><span id="state">IDLE</span></div><p class="agent-caption" id="agent-caption">One front door to your agents, skills, and memory.</p>
         <div class="prompt-row"><input id="prompt" placeholder="Give your system a direction…" autocomplete="off"><button class="run" id="run">Run <span>↗</span></button></div>
         <div class="voice-footnote" id="voice-label">Local Whisper + Kokoro · checking voice services…</div>
       </div>
     </section>
 
-    <section class="panel skills-panel" data-panel="skills"><div class="section-head"><div><div class="eyebrow">SKILL BACKBONE</div><h3>Quick access</h3></div><span class="hint" id="skill-hint">Vault skills</span></div><section class="skills" id="skills"><p class="dim">Loading skills…</p></section><button class="talk-button" id="mic" title="Tap to talk. Audio is transcribed locally with Whisper."><span class="mic-icon">◉</span><span><strong>Tap to talk</strong><small>Local Whisper · Kokoro voice reply</small></span><kbd>MIC</kbd></button></section>
+    <section class="panel skills-panel" data-panel="skills"><div class="section-head"><div><div class="eyebrow">SKILL BACKBONE</div><h3>Quick access</h3></div><span class="hint" id="skill-hint">Vault skills</span></div><div id="skill-grid"></div>
+      <section class="skills" id="skills"><p class="dim">Loading skills…</p></section><button class="talk-button" id="mic" title="Tap to talk. Audio is transcribed locally with Whisper."><span class="mic-icon">◉</span><span><strong>Tap to talk</strong><small>Local Whisper · Kokoro voice reply</small></span><kbd>MIC</kbd></button></section>
 
     <section class="panel terminal-panel" data-panel="terminal">
       <div class="section-head terminal-heading"><div class="terminal-title"><span class="terminal-lights"><i></i><i></i><i></i></span><div><div class="eyebrow">LIVE CONSOLE</div><h3>Terminal &amp; transcript</h3></div></div>
@@ -45,8 +48,22 @@
     <section class="panel output-panel" data-panel="output"><div class="section-head"><div><div class="eyebrow">LATEST DELIVERABLE</div><h3>Response</h3></div></div><section class="result card" id="result"><p class="dim">Ask by text, voice, or skill. Responses will appear here.</p></section></section>
     <section class="panel approvals-panel" data-panel="approvals"><div class="section-head"><div><div class="eyebrow">HUMAN REVIEW</div><h3>Pending approvals</h3></div></div><section class="approvals-list" id="pending-approvals"><article class="card"><p class="dim">No pending approvals.</p></article></section></section>
   </main>
+  <footer class="dock-bar" id="terminal-dock"><span class="dock-item">⌘ Terminals <b id="dock-count">0</b> open</span><span class="dock-item dock-sep">Shared with Obsidian</span><button class="ghost dock-btn" id="dock-new-terminal">+ New terminal</button></footer>
   <script src="/terminal.bundle.js"></script><script src="/hud.js"></script>
   <style>
+#skill-grid{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
+.skill-chip{border:1px solid #263744;background:#0a121a;color:#aebdc5;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:10px;white-space:nowrap;font-family:var(--display)}
+.skill-chip:hover{border-color:#4ed1a9;color:var(--mint);background:#0e1d24}
+.skill-grid-count{font:8px var(--mono);color:#5d7079;letter-spacing:.8px;align-self:center;margin-left:4px}
+.dock-bar{position:sticky;bottom:0;z-index:14;display:flex;align-items:center;gap:14px;padding:8px 18px;margin:13px -24px -18px;background:linear-gradient(180deg,#070d13f2,#05080d);border-top:1px solid #1b2934;font:9px var(--mono);color:#758b94;letter-spacing:.8px}
+.dock-item b{color:var(--mint);font-weight:400}
+.dock-sep{border-left:1px solid #1e303a;padding-left:14px}
+.dock-btn{margin-left:auto}
+#state-pills{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin:0 0 12px}
+.state-pill{border:1px solid #263744;background:#0a121a;color:#8fa4ad;padding:5px 11px;border-radius:20px;font:9px 'DM Mono',monospace;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
+.state-pill:hover{border-color:#4aa993;color:var(--mint)}
+.state-pill.active{background:#103a32;border-color:#4ed1a9;color:var(--mint);box-shadow:0 0 12px #54edc22a}
+.agent-sub{font:9px var(--mono);letter-spacing:1.2px;color:#6f8890;margin:-8px 0 14px;text-transform:uppercase}
 #clock-wrap{margin-left:auto;margin-right:14px;display:flex;align-items:center;font:600 15px 'DM Mono',ui-monospace,monospace;color:#7df0cb;letter-spacing:.5px;text-shadow:0 0 12px rgba(125,240,203,.35)}
     #xterm-container{height:250px;display:none;padding:8px}#terminal-fallback{display:none}#fallback-output{margin:0;padding:10px;max-height:155px;overflow:auto;white-space:pre-wrap;word-break:break-word;color:#c3d0d8;font:10px 'DM Mono',monospace}#fallback-output .muted-line{color:#71838b}.fallback-entry{height:34px;display:flex;gap:8px;align-items:center;padding:0 10px;border-top:1px solid #17232c;color:#7df0cb}.fallback-entry input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#d9e6e7;font:10px 'DM Mono',monospace}.fallback-entry input::placeholder{color:#53656e}#term-body{min-height:82px}#task-stream{display:none;border-bottom:1px solid #1b2732}#task-stream .task-stream-title{padding:8px 12px;color:#83f0ce;font:10px 'DM Mono',monospace;display:flex;justify-content:space-between}#task-output{margin:0;padding:8px 12px;height:125px;overflow:auto;white-space:pre-wrap;word-break:break-word;color:#c3d0d8;font:11px 'DM Mono',monospace}#layout-editor{position:fixed;z-index:30;right:20px;top:74px;width:min(380px,calc(100vw - 40px));padding:18px;background:#0b121b;border:1px solid #293b4b;border-radius:12px;box-shadow:0 18px 60px #000c}#layout-editor .layout-row{display:flex;align-items:center;gap:8px;padding:8px 0}#layout-editor .layout-row span{flex:1}
   </style>
