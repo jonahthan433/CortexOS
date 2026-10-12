@@ -59,6 +59,34 @@ The Bridge defaults to `http://127.0.0.1:8765`. Use `cortexos service status|sta
 
 See [docs/setup.md](docs/setup.md), [docs/smoke-test.md](docs/smoke-test.md), [docs/architecture.md](docs/architecture.md), and [docs/skills.md](docs/skills.md).
 
+## Agents
+
+CortexOS runs 12 specialized agents behind one jev-routed coordinator. Each agent is a skill with a declared role, model lane, and autonomy level:
+
+| Agent | Role | Lane | Autonomous |
+|---|---|---|---|
+| research-morning-intel | research | cloud | yes |
+| research-decision-brief | research | cloud | yes |
+| content-editorial-outline | content | cloud | yes |
+| memory-organize-capture | memory | local | yes |
+| productivity-weekly-review | productivity | local | yes |
+| community-pulse | community | cloud | yes |
+| client-meeting-brief | clients | cloud | no |
+| sales-opportunity-brief | sales | cloud | no |
+| finance-monthly-review | finance | local | no |
+| automation-readiness | automation | local | yes |
+| system-health | ops | local | yes |
+| backup-restore | ops | local | no (approval-gated) |
+
+The coordinator (`/api/agents/route?prompt=...`) classifies the request's role with jev and dispatches to the matching agent. `lane` is the preferred model class; autonomous agents may run without a per-run approval gate, everything else still passes the risk gate.
+
+## Operations
+
+- `GET /api/health` — bridge uptime, vault pending approvals, skill count, voice readiness
+- `POST /api/backups` — timestamped vault backup (state.json, automations, receipts, requests, metrics)
+- `GET /api/backups` — list backups; the 10 most recent are kept, older pruned automatically
+- Backups run hourly in the background while the Bridge is up
+
 ## Status
 
 Implemented locally (not yet release-certified): skill catalog with explicit risk metadata, structured risk classification and fail-closed fallback, persistent approval/scheduler state, token-protected Bridge APIs, request/receipt logging, local HUD and Obsidian clients, Whisper/Kokoro voice adapters, interactive/re-attachable PTY sessions with summary receipts, five-confirmation skill promotion review, approved-skill scheduling, human-editable TOML metrics, and panel layout controls. The small noninteractive smoke runner is provided but has not been run as part of this change.
