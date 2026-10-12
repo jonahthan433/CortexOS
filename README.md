@@ -13,9 +13,10 @@ Web HUD ─────────┘        │                               
 ```
 
 - **Two front doors:** the web HUD and Obsidian plugin are clients of one Bridge API. They do not each implement their own agent logic.
-- **Bridge:** owns skill discovery, request receipts, routing, approval state, and backend selection. It binds to loopback and protects `/api` with a local shared token.
+- **Bridge:** owns skill discovery, request receipts, routing, approval state, agent selection, and local voice endpoints. It binds to loopback and is designed for one personal user.
 - **Skill backbone:** skills are portable Markdown instructions plus a small `skill.json` manifest. `done by hand twice → capture a skill`; after five successful runs, review the skill for automation. Automation never bypasses the approval policy.
-- **Router:** tier 1 handles explicit saved-data/rule lookups; tier 2 is an optional OpenAI-compatible fast model; tier 3 runs an installed Claude Code or Codex CLI. Skill manifests declare structured risk. Unscoped Tier 3 work uses a structured classifier when available and fails closed when classification is unavailable or uncertain.
+- **Agent front door:** Codex is the default Tier 3 agent, Claude Code is available, and any compatible local CLI can be registered in `config/cortexos.toml`. The HUD, Obsidian plugin, voice, and PTY terminals share that registry. Auto mode preserves Tier 1/2/3 routing; choosing an agent sends work directly to it.
+- **Router:** tier 1 handles explicit saved-data/rule lookups; tier 2 is an optional OpenAI-compatible fast model; tier 3 invokes the selected/default agent. Skill manifests declare structured risk. Unscoped Tier 3 work uses a structured classifier when available and fails closed when classification is unavailable or uncertain.
 - **Memory:** all durable data is plain Markdown under the selected vault. `raw/` is the user capture area, `wiki/` contains organized notes and `_master-index.md`, and `output/` holds generated deliverables. Request logs and skill receipts are kept separately for predictable indexing.
 - **Safety:** every skill declares `risk_level` and `approval_required`. External, financial, unknown, or explicitly gated risks require fresh approval for every run, including promoted and scheduled runs. The scaffold does not ship connectors that could perform these actions.
 - **Local-first voice:** faster-whisper STT and Kokoro TTS run behind replaceable local adapters. Both interfaces record and speak through the Bridge, with browser/OS speech offered only as a labeled fallback.
@@ -51,10 +52,10 @@ cd ../obsidian-plugin && npm install && npm run build
 cd ../..
 python -m cortexos init-vault ./vault
 python -m cortexos token
-python -m cortexos serve
+python -m cortexos service install
 ```
 
-The Bridge defaults to `http://127.0.0.1:8765`. Paste the printed token into the HUD when prompted, or into the Obsidian plugin settings. This is a single-user local access barrier, not multi-user authentication; do not expose the Bridge beyond loopback. Configure your vault path and provider in `config/cortexos.toml`. To run Tier 3, install and authenticate `claude` or `codex`.
+The Bridge defaults to `http://127.0.0.1:8765`. Use `cortexos service status|start|stop|restart` to manage the per-user systemd service. Paste the printed token into the HUD when prompted or into Obsidian plugin settings. Install and authenticate Codex for the default Tier 3 path. See [docs/setup.md](docs/setup.md) to register other agents and point Obsidian and Codex at the same vault.
 
 See [docs/setup.md](docs/setup.md), [docs/smoke-test.md](docs/smoke-test.md), [docs/architecture.md](docs/architecture.md), and [docs/skills.md](docs/skills.md).
 

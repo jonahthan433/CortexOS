@@ -11,6 +11,8 @@
 7. **Metrics are user-supplied.** `metrics/` is prepared for social, usage, finance, and other metrics. No sample number is represented as a real user value.
 8. **Promotion and automation are explicit.** Only one user confirmation per verified completed run is accepted; five successes make a skill eligible for a distinct promotion review. The scheduler runs only enabled jobs for approved skills and still submits through the same approval policy.
 9. **HUD customization is local and reversible.** Panel order and visibility are stored in the browser's local storage and do not alter vault content or product code.
+10. **Agents are configured, not hard-coded.** `[providers.<id>]` entries declare each CLI invocation and terminal command. The Bridge publishes that registry to both front doors. Auto routing uses Tier 1/2 and the configured Tier 3 default; selecting an agent explicitly bypasses Tier 2 for non-Tier-1 work.
+11. **The Bridge is an always-on personal process.** A per-user systemd unit starts it with the local user session and restarts it if it exits. User lingering enables startup before login; systemd journals hold service logs.
 
 ## Request lifecycle
 
@@ -24,4 +26,4 @@
 - `cortexos/scheduler.py`: lightweight local scheduler; no jobs run unless added and enabled in the vault, and each skill must have an approved promotion ledger.
 - Future extension point (not implemented): `cortexos/connectors` for opt-in data sources. A write-capable connector must expose a preview and enforceable approval action before it ships.
 
-These modules can be added without moving the skill catalog or vault contract. Interactive CLI sessions use a local POSIX PTY and WebSocket; background Tier 3 requests stream process output over a separate request WebSocket and accept an interrupt signal. Terminal commands are fixed by local config to the selected Claude/Codex executable; web clients cannot choose arbitrary commands or working directories.
+These modules can be added without moving the skill catalog or vault contract. Interactive CLI sessions use a local POSIX PTY and WebSocket; background Tier 3 requests stream process output over a separate request WebSocket and accept an interrupt signal. Terminal commands are selected by registered agent ID and resolved from local config; web clients cannot choose arbitrary commands or working directories.

@@ -62,7 +62,7 @@ class TerminalSession:
 
 
 class TerminalManager:
-    """PTY-backed, interactive Claude Code and Codex sessions for a local Bridge."""
+    """PTY-backed interactive sessions for locally configured agents."""
 
     def __init__(self, settings: Settings, vault: Vault | None = None):
         self.settings = settings
@@ -71,8 +71,8 @@ class TerminalManager:
         self.reader_tasks: set[asyncio.Task] = set()
 
     async def spawn(self, backend: str, cols: int = 100, rows: int = 28) -> TerminalSession:
-        if backend not in {"claude", "codex"}:
-            raise ValueError("backend must be 'claude' or 'codex'")
+        if backend not in self.settings.agent_ids:
+            raise ValueError(f"Unknown agent '{backend}'. Configure it under [providers.{backend}].")
         if len(self.sessions) >= 12:
             ended = [key for key, item in self.sessions.items() if item.exit_code is not None]
             for key in ended:

@@ -20,6 +20,10 @@ class Settings:
     fast_model_base_url: str = "http://127.0.0.1:11434/v1"
     fast_model_name: str = "qwen2.5:3b"
     fast_model_api_key: str = "local"
+    jev_enabled: bool = False
+    jev_base_url: str = "https://openrouter.ai/api/v1"
+    jev_api_key: str = ""
+    jev_model: str = "typesafe/jev-1.13"
     providers: dict[str, dict[str, Any]] | None = None
     voice_enabled: bool = True
     voice_stt_model: str = "base.en"
@@ -29,6 +33,20 @@ class Settings:
     voice_tts_name: str = "af_heart"
     voice_browser_fallback: bool = True
     bridge_token: str = ""
+
+    @property
+    def agent_ids(self) -> list[str]:
+        configured = list((self.providers or {}).keys())
+        return list(dict.fromkeys(["codex", "claude", *configured]))
+
+    @property
+    def agents(self) -> list[dict[str, str]]:
+        labels = {"codex": "Codex", "claude": "Claude Code"}
+        result = []
+        for agent_id in self.agent_ids:
+            config = (self.providers or {}).get(agent_id, {})
+            result.append({"id": agent_id, "name": str(config.get("name") or labels.get(agent_id) or agent_id.replace("-", " ").title())})
+        return result
 
     @classmethod
     def load(cls, path: str | Path | None = None) -> "Settings":
@@ -72,6 +90,10 @@ class Settings:
             fast_model_base_url=router.get("fast_model_base_url", "http://127.0.0.1:11434/v1"),
             fast_model_name=router.get("fast_model_name", "qwen2.5:3b"),
             fast_model_api_key=router.get("fast_model_api_key", "local"),
+            jev_enabled=bool(router.get("jev_enabled", False)),
+            jev_base_url=router.get("jev_base_url", "https://openrouter.ai/api/v1"),
+            jev_api_key=router.get("jev_api_key", ""),
+            jev_model=router.get("jev_model", "typesafe/jev-1.13"),
             providers=data.get("providers", {}),
             voice_enabled=bool(voice.get("enabled", True)),
             voice_stt_model=voice.get("stt_model", "base.en"),

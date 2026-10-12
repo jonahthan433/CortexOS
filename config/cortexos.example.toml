@@ -12,16 +12,24 @@ fast_model_name = "qwen2.5:3b"
 fast_model_api_key = "local"
 
 [providers.codex]
+name = "Codex"
 command = "codex"
-args = ["exec", "--full-auto", "-"]
+args = ["exec", "--sandbox", "workspace-write", "--skip-git-repo-check", "-"]
+input_mode = "stdin"
 terminal_command = "codex"
 terminal_args = []
 
 [providers.claude]
+name = "Claude Code"
 command = "claude"
 args = ["-p", "--output-format", "text"]
+input_mode = "stdin"
 terminal_command = "claude"
 terminal_args = []
+
+# Register another installed CLI by adding [providers.<id>] with a display name,
+# command, args, and terminal_command/terminal_args. Agent prompts use stdin by
+# default; set input_mode = "argument" or place {prompt} in args when needed.
 
 [voice]
 enabled = true

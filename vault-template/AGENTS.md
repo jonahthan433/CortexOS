@@ -7,5 +7,6 @@
 - `receipts/YYYY/MM/`: skill execution, approval decision, and confirmation records; `receipts/promotions/` holds automation review history.
 - `metrics/`: user-supplied metrics and dated snapshots.
 - `automations.toml`: explicit schedules; only skills with approved promotion records may run.
+- CortexOS skill definitions live in the configured CortexOS repository under `skills/`; Bridge skill runs receive their instructions automatically.
 
-Use plain Markdown and descriptive filenames. Do not create a graph database or invent user facts. Sending, spending, publishing, and other external side effects require fresh human approval for every run, even after promotion.
+Use plain Markdown and descriptive filenames. Codex should use this vault as its working directory and follow this file. Do not create a graph database or invent user facts. Sending, spending, publishing, and other external side effects require fresh human approval for every run, even after promotion.

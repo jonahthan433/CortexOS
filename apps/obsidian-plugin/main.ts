@@ -4,12 +4,15 @@ import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 
 interface CortexSettings { bridgeUrl: string; backend: string; token: string }
+interface CortexAgent { id: string; name: string }
 async function bridgeRequest(plugin: CortexPlugin, options: any) { return requestUrl({ ...options, headers: { ...(options.headers || {}), Authorization: `Bearer ${plugin.settings.token}` } }); }
-const DEFAULTS: CortexSettings = { bridgeUrl: 'http://127.0.0.1:8765', backend: 'codex', token: '' };
+const DEFAULTS: CortexSettings = { bridgeUrl: 'http://127.0.0.1:8765', backend: 'auto', token: '' };
 
 class CortexPromptModal extends Modal {
   plugin: CortexPlugin;
   input!: HTMLTextAreaElement;
+  skillSelect!: HTMLSelectElement;
+  agentSelect!: HTMLSelectElement;
   recordButton!: HTMLButtonElement;
   resultEl!: HTMLElement;
   recorder: MediaRecorder | null = null;
@@ -24,6 +27,19 @@ class CortexPromptModal extends Modal {
   onOpen() {
     const { contentEl } = this; contentEl.createEl('h2', { text: 'CortexOS' });
     this.input = contentEl.createEl('textarea', { attr: { rows: '5', placeholder: 'What would you like CortexOS to do?' } });
+    this.skillSelect = contentEl.createEl('select', { attr: { 'aria-label': 'Optional CortexOS skill' } });
+    const askOption = this.skillSelect.createEl('option', { text: 'Ask CortexOS (automatic routing)' });
+    askOption.value = '';
+    this.agentSelect = contentEl.createEl('select', { attr: { 'aria-label': 'Agent for this request' } });
+    const autoAgent = this.agentSelect.createEl('option', { text: 'Auto (Tier routing)' });
+    autoAgent.value = 'auto';
+    if (this.plugin.settings.backend !== 'auto') {
+      const preferredName = this.plugin.settings.backend === 'claude' ? 'Claude Code' : this.plugin.settings.backend === 'codex' ? 'Codex' : this.plugin.settings.backend;
+      const preferredAgent = this.agentSelect.createEl('option', { text: preferredName });
+      preferredAgent.value = this.plugin.settings.backend;
+    }
+    this.agentSelect.value = this.plugin.settings.backend;
+    void this.loadSkills();
     this.recordButton = contentEl.createEl('button', { text: 'Record voice command (local Whisper)' });
     this.recordButton.onclick = () => this.toggleRecording();
     const button = contentEl.createEl('button', { text: 'Run request' });
@@ -34,11 +50,39 @@ class CortexPromptModal extends Modal {
     terminalButton.onclick = () => this.openTerminal(terminalBox, terminalButton);
     this.resultEl = contentEl.createDiv({ cls: 'cortex-response' });
   }
+  async loadSkills() {
+    try {
+      const agents = await this.plugin.refreshAgents();
+      const selectedAgent = this.agentSelect.value;
+      this.agentSelect.replaceChildren();
+      const auto = this.agentSelect.createEl('option', { text: `Auto (Tier routing · ${this.plugin.defaultAgent} default)` });
+      auto.value = 'auto';
+      for (const agent of agents) {
+        const option = this.agentSelect.createEl('option', { text: agent.name });
+        option.value = agent.id;
+      }
+      this.agentSelect.value = agents.some(agent => agent.id === selectedAgent) ? selectedAgent : 'auto';
+      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/skills` });
+      const selected = this.skillSelect.value;
+      this.skillSelect.replaceChildren();
+      const askOption = this.skillSelect.createEl('option', { text: 'Ask CortexOS (automatic routing)' });
+      askOption.value = '';
+      for (const skill of response.json as any[]) {
+        const option = this.skillSelect.createEl('option', { text: `${skill.domain} · ${skill.name}` });
+        option.value = skill.id;
+      }
+      this.skillSelect.value = selected;
+    } catch (err) {
+      this.showError(`Could not load skills from the Bridge: ${String(err)}`);
+    }
+  }
   async openTerminal(container: HTMLElement, button: HTMLButtonElement) {
     if (this.terminalSocket) { this.terminal?.focus(); return; }
     button.disabled = true;
     try {
-      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/sessions`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ backend: this.plugin.settings.backend, cols: 100, rows: 24 }) });
+      await this.plugin.refreshAgents();
+      const backend = this.agentSelect.value === 'auto' ? this.plugin.defaultAgent : this.agentSelect.value;
+      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/sessions`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ backend, cols: 100, rows: 24 }) });
       const data = response.json; this.terminalSessionId = data.id; container.style.display = 'block';
       this.terminal = new Terminal({ cursorBlink: true, scrollback: 3000, fontSize: 12, theme: { background: '#090d12', foreground: '#d6e1e8', cursor: '#88f0cc' } });
       this.terminalFit = new FitAddon(); this.terminal.loadAddon(this.terminalFit); this.terminal.open(container); this.terminalFit.fit();
@@ -72,7 +116,7 @@ class CortexPromptModal extends Modal {
     try {
       const bytes = new Uint8Array(await blob.arrayBuffer()); let binary = '';
       for (let offset = 0; offset < bytes.length; offset += 0x8000) binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
-      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/voice/turn`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio_base64: btoa(binary), content_type: blob.type || 'audio/webm', backend: this.plugin.settings.backend, background: true, request_id: crypto.randomUUID() }) });
+      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/voice/turn`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio_base64: btoa(binary), content_type: blob.type || 'audio/webm', backend: this.agentSelect.value === 'auto' ? null : this.agentSelect.value, skill_id: this.skillSelect.value || null, background: true, request_id: crypto.randomUUID() }) });
       this.recordButton.setText('Record voice command (local Whisper)');
       const data = response.json;
       this.input.value = data.transcript || '';
@@ -97,10 +141,13 @@ class CortexPromptModal extends Modal {
     };
   }
   async runText(button?: HTMLButtonElement, speakOutLoud = false) {
-    const prompt = this.input.value.trim(); if (!prompt) return;
+    const skillId = this.skillSelect.value || null;
+    const enteredPrompt = this.input.value.trim();
+    if (!enteredPrompt && !skillId) return;
+    const prompt = enteredPrompt || `Run skill ${skillId}`;
     if (button) { button.disabled = true; button.setText('Working…'); }
     try {
-      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/requests`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt, backend: this.plugin.settings.backend, background: true, request_id: crypto.randomUUID() }) });
+      const response = await bridgeRequest(this.plugin, { url: `${this.plugin.settings.bridgeUrl}/api/requests`, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt, backend: this.agentSelect.value === 'auto' ? null : this.agentSelect.value, skill_id: skillId, background: true, request_id: crypto.randomUUID() }) });
       const data = response.json;
       if (data.status === 'running') { this.watchRequest(data.id, speakOutLoud); return; }
       if (data.status === 'awaiting_approval') { this.speakAfterApproval = speakOutLoud; this.showApproval(data); return; }
@@ -206,12 +253,20 @@ class CortexAutomationModal extends Modal {
 
 class CortexPlugin extends Plugin {
   settings: CortexSettings = DEFAULTS;
+  agents: CortexAgent[] = [];
+  defaultAgent = 'codex';
   async onload() {
     this.settings = Object.assign({}, DEFAULTS, await this.loadData());
     this.addCommand({ id: 'open-command', name: 'Open CortexOS command', callback: () => new CortexPromptModal(this.app, this).open() });
     this.addCommand({ id: 'automation-review', name: 'Review skill automation promotions', callback: () => new CortexAutomationModal(this.app, this).open() });
     this.addRibbonIcon('brain', 'CortexOS', () => new CortexPromptModal(this.app, this).open());
     this.addSettingTab(new CortexSettingsTab(this.app, this));
+  }
+  async refreshAgents() {
+    const response = await bridgeRequest(this, { url: `${this.settings.bridgeUrl}/api/agents` });
+    this.agents = response.json.agents as CortexAgent[];
+    this.defaultAgent = response.json.default || 'codex';
+    return this.agents;
   }
   async saveSettings() { await this.saveData(this.settings); }
 }
@@ -223,7 +278,23 @@ class CortexSettingsTab extends PluginSettingTab {
     const { containerEl } = this; containerEl.empty(); containerEl.createEl('h2', { text: 'CortexOS Bridge' });
     new Setting(containerEl).setName('Bridge URL').setDesc('Keep the Bridge bound to localhost.').addText(text => text.setValue(this.plugin.settings.bridgeUrl).onChange(async value => { this.plugin.settings.bridgeUrl = value; await this.plugin.saveSettings(); }));
     new Setting(containerEl).setName('Bridge token').setDesc('Get it with `python -m cortexos token` on the Bridge machine.').addText(text => text.setPlaceholder('Paste local token').setValue(this.plugin.settings.token).onChange(async value => { this.plugin.settings.token = value.trim(); await this.plugin.saveSettings(); }));
-    new Setting(containerEl).setName('Backend').addDropdown(drop => drop.addOption('codex', 'Codex').addOption('claude', 'Claude Code').setValue(this.plugin.settings.backend).onChange(async value => { this.plugin.settings.backend = value; await this.plugin.saveSettings(); }));
+    let backendDropdown: any;
+    new Setting(containerEl).setName('Agent').setDesc('Auto uses Tier 1/2 routing and the configured Codex default for Tier 3. Choose an agent to route work directly.').addDropdown(drop => {
+      backendDropdown = drop;
+      drop.addOption('auto', 'Auto (Tier routing)');
+      drop.addOption('codex', 'Codex');
+      drop.addOption('claude', 'Claude Code');
+      drop.setValue(this.plugin.settings.backend);
+      drop.onChange(async value => { this.plugin.settings.backend = value; await this.plugin.saveSettings(); });
+      return drop;
+    });
+    void this.plugin.refreshAgents().then(agents => {
+      for (const agent of agents) {
+        if (!Array.from(backendDropdown.selectEl.options).some((option: HTMLOptionElement) => option.value === agent.id)) backendDropdown.addOption(agent.id, agent.name);
+      }
+      const savedAgent = this.plugin.settings.backend;
+      backendDropdown.setValue(Array.from(backendDropdown.selectEl.options).some((option: HTMLOptionElement) => option.value === savedAgent) ? savedAgent : 'auto');
+    }).catch(() => {});
   }
 }
 

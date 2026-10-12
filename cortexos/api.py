@@ -15,7 +15,7 @@ from typing import Annotated
 from .config import Settings
 from .service import CortexService
 from .sessions import TerminalManager, terminal_websocket
-from .streaming import RequestStreams
+from .streaming import RequestStreams, MetricsBroadcaster
 from .scheduler import run_scheduler
 from .voice import LocalVoice, VoiceUnavailable
 
@@ -24,6 +24,7 @@ service = CortexService(settings)
 voice = LocalVoice(settings)
 terminals = TerminalManager(settings, service.vault)
 request_streams = RequestStreams()
+metrics_bus = MetricsBroadcaster()
 background_tasks: dict[str, asyncio.Task] = {}
 scheduler_task: asyncio.Task | None = None
 app = FastAPI(title="CortexOS Bridge", version="0.1.0")
@@ -146,6 +147,11 @@ def status():
     return {**service.status(), "voice": voice.status()}
 
 
+@app.get("/api/agents")
+def agents():
+    return {"default": settings.backend, "agents": settings.agents}
+
+
 @app.get("/api/voice/status")
 def voice_status():
     return voice.status()
@@ -256,6 +262,27 @@ def metrics():
     return service.vault.metrics()
 
 
+@app.get("/api/metrics/history")
+def metrics_history(limit: int = 60):
+    return service.vault.metrics_history(limit)
+
+
+@app.websocket("/api/metrics/stream")
+async def metrics_stream_socket(websocket: WebSocket):
+    if not await check_websocket_origin(websocket):
+        return
+    if not await authenticate_websocket(websocket):
+        return
+    metrics_bus.subscribe(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except Exception:
+        pass
+    finally:
+        metrics_bus.unsubscribe(websocket)
+
+
 @app.get("/api/approvals")
 def pending_approvals():
     return [{"id": request_id, "skill": item.get("skill_id"), "prompt": item.get("prompt"),
@@ -333,8 +360,12 @@ def reject(request_id: str):
 
 
 @app.post("/api/requests/{request_id}/feedback")
-def feedback(request_id: str, body: FeedbackBody):
-    return service.feedback(request_id, body.skill_id, body.useful)
+async def feedback(request_id: str, body: FeedbackBody):
+    result = service.feedback(request_id, body.skill_id, body.useful)
+    service.vault.record_metrics_snapshot()
+    await metrics_bus.broadcast({"type": "metrics", "metrics": service.vault.metrics(),
+                                 "history": service.vault.metrics_history()})
+    return result
 
 
 if hud_dir.is_dir():

@@ -1,0 +1,1 @@
+{"id":"research-morning-intel","name":"Morning intel brief","domain":"Research","description":"Produce a dated morning brief of AI and tech headlines from configured sources.","trigger_phrases":["morning brief","morning intel","ai news today","what happened in ai"],"tier":3,"approval_required":false,"automation_ready":false,"instructions":"SKILL.md","risk_level":"read_only"}

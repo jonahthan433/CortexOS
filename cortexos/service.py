@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 import uuid
 
 from .config import Settings
@@ -29,6 +30,8 @@ class CortexService:
         if self.vault.request_exists(request_id):
             return {"id": request_id, "status": "error", "error": "Request ID has already been used; submit a new request instead."}
         route = self.router.route(prompt)
+        if backend and backend not in self.settings.agent_ids:
+            return {"id": request_id, "status": "error", "error": f"Unknown agent: {backend}"}
         if skill_id:
             skill = self.registry.get(skill_id)
             if not skill:
@@ -36,6 +39,10 @@ class CortexService:
             route = type(route)(skill.tier, skill, f"explicit skill: {skill.id}")
         else:
             skill = route.skill
+        # Explicit agent selection overrides model routing for work, but local
+        # Tier 1 commands remain instant and deterministic.
+        if backend and route.tier != 1:
+            route = type(route)(3, skill, f"explicit agent: {backend}")
         self.vault.log_request(request_id, prompt, "received", route.tier, backend or self.settings.backend)
 
         # Enforce the action gate before every tier, including local rule lookups.
@@ -45,7 +52,8 @@ class CortexService:
             decision = await self.fast_model.classify_action(prompt)
         if decision and decision["requires_approval"]:
             pending = {"prompt": prompt, "backend": backend, "skill_id": skill.id if skill else None,
-                       "risk_level": decision["risk_level"], "reason": decision["reason"]}
+                       "risk_level": decision["risk_level"], "reason": decision["reason"],
+                       "created_at": time.time()}
             self.pending[request_id] = pending
             self.vault.save_pending(request_id, pending)
             self.vault.log_request(request_id, prompt, "awaiting_approval", route.tier, backend or self.settings.backend)
@@ -82,7 +90,7 @@ class CortexService:
                 # Fallback is visible and uses the selected agent backend.
                 route = type(route)(3, skill, f"tier 2 unavailable: {exc}")
 
-        if route.tier == 3 and not skill and self.settings.fast_model_enabled:
+        if route.tier == 3 and not skill and backend is None and self.settings.fast_model_enabled:
             try:
                 if await self.fast_model.classify(prompt) == "QUICK":
                     result = await self.fast_model.answer(prompt)

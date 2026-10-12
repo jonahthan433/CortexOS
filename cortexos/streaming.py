@@ -31,6 +31,26 @@ class RequestStream:
             self.condition.notify_all()
 
 
+class MetricsBroadcaster:
+    """Fans metric snapshots out to connected HUD clients."""
+
+    def __init__(self):
+        self.clients: set = set()
+
+    def subscribe(self, websocket) -> None:
+        self.clients.add(websocket)
+
+    def unsubscribe(self, websocket) -> None:
+        self.clients.discard(websocket)
+
+    async def broadcast(self, event: dict) -> None:
+        for websocket in list(self.clients):
+            try:
+                await websocket.send_json(event)
+            except Exception:
+                self.clients.discard(websocket)
+
+
 class RequestStreams:
     def __init__(self):
         self.streams: dict[str, RequestStream] = {}

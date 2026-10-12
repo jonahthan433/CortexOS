@@ -39,7 +39,11 @@ async def scheduler_tick(service, dry_run: bool = False, now_epoch: float | None
         last[job["id"]] = current
         service.vault.write_state(state)
         request_id = f"scheduled-{job['id']}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:6]}"
-        await service.submit(job["prompt"], skill_id=job["skill_id"], request_id=request_id)
+        try:
+            await service.submit(job["prompt"], skill_id=job["skill_id"], request_id=request_id)
+        except Exception as exc:
+            service.vault.receipt(request_id, {"event": "scheduled_run", "request_id": request_id,
+                                               "skill": job["skill_id"], "status": "error", "error": str(exc)})
     return due
 
 
@@ -47,6 +51,7 @@ async def run_scheduler(service, interval_seconds: int = 30) -> None:
     while True:
         try:
             await scheduler_tick(service)
+            service.vault.record_metrics_snapshot()
         except asyncio.CancelledError:
             raise
         except Exception:

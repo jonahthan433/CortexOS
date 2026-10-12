@@ -4,7 +4,7 @@ import json
 import os
 import re
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -39,6 +39,8 @@ class Vault:
                 "- `output/` contains generated deliverables.\n"
                 "- `requests/` contains request records; `receipts/` contains run, feedback, and promotion history.\n"
                 "- `metrics/` contains only real user-provided or measured data; never invent values.\n"
+                "- CortexOS skill definitions live in the configured CortexOS repository under `skills/`; Bridge skill runs receive their instructions automatically.\n"
+                "- Codex should use this vault as its working directory and follow this file; Claude Code should also follow `CLAUDE.md`.\n"
                 "- `automations.toml` contains explicit schedules; only approved skills may be scheduled.\n"
                 "- Sending, spending, publishing, or other external side effects require fresh human approval for each run, even after promotion.\n",
                 encoding="utf-8",
@@ -65,6 +67,8 @@ class Vault:
     def state_path(self) -> Path:
         return self.root / "state.json"
 
+    PENDING_TTL_SECONDS = 7 * 24 * 3600  # ponytail: flat 7-day TTL, per-item expiry if needed
+
     def load_state(self) -> dict:
         self.bootstrap()
         try:
@@ -72,10 +76,21 @@ class Vault:
             if value.get("version") == 1:
                 value.setdefault("pending_approvals", {})
                 value.setdefault("scheduler_last_run", {})
+                self._expire_pending(value)
                 return value
         except (OSError, ValueError, AttributeError):
             pass
         return {"version": 1, "pending_approvals": {}, "scheduler_last_run": {}}
+
+    def _expire_pending(self, state: dict) -> None:
+        """Drop pending approvals older than the TTL; they can never be approved again."""
+        cutoff = datetime.now(timezone.utc).timestamp() - self.PENDING_TTL_SECONDS
+        stale = [key for key, item in state["pending_approvals"].items()
+                 if float(item.get("created_at", 0) or 0) < cutoff]
+        for key in stale:
+            state["pending_approvals"].pop(key, None)
+        if stale:
+            self.write_state(state)
 
     def write_state(self, state: dict) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
@@ -139,16 +154,15 @@ class Vault:
         return path
 
     def skill_feedback(self, request_id: str, skill_id: str, useful: bool) -> Path:
-        # A success vote must refer to a completed run of this exact skill.
-        if not any(self._receipt_data(path).get("status") == "completed" and
-                   self._receipt_data(path).get("skill") == skill_id
-                   for path in (self.root / "receipts").glob("**/*.md")
-                   if self._receipt_data(path).get("event") != "feedback" and
-                   self._receipt_data(path).get("request_id") == request_id):
+        # One pass over receipts; each file parsed once.
+        receipts = [(path, data) for path in (self.root / "receipts").glob("**/*.md")
+                    if (data := self._receipt_data(path))]
+        if not any(data.get("status") == "completed" and data.get("skill") == skill_id
+                   and data.get("request_id") == request_id and data.get("event") != "feedback"
+                   for _, data in receipts):
             raise ValueError("No completed receipt for this skill and request ID")
-        if any(self._receipt_data(path).get("event") == "feedback" and
-               self._receipt_data(path).get("request_id") == request_id
-               for path in (self.root / "receipts").glob("**/*.md")):
+        if any(data.get("event") == "feedback" and data.get("request_id") == request_id
+               for _, data in receipts):
             raise ValueError("Feedback has already been recorded for this run")
         return self.receipt(f"{request_id}-feedback", {"event": "feedback", "request_id": request_id,
                                                          "skill": skill_id, "status": "successful" if useful else "unsuccessful"})
@@ -201,6 +215,28 @@ class Vault:
         path = self.root / "receipts" / "promotions" / f"{safe_name(skill_id)}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(f"# Automation promotion ledger\n\n```json\n{json.dumps(data, indent=2, ensure_ascii=False)}\n```\n", encoding="utf-8")
+
+    METRICS_HISTORY_LIMIT = 60
+
+    def record_metrics_snapshot(self) -> None:
+        """Append a timestamped snapshot of current metrics for sparklines."""
+        state = self.load_state()
+        history = state.setdefault("metrics_history", [])
+        snapshot = {"at": now().isoformat(), "values": {}}
+        for entry in self.metrics():
+            for metric in entry["metrics"]:
+                try:
+                    snapshot["values"][f"{entry['name']}:{metric['key']}"] = float(str(metric["value"]).replace(",", ""))
+                except (TypeError, ValueError):
+                    continue
+        if not snapshot["values"]:
+            return
+        history.append(snapshot)
+        del history[:-self.METRICS_HISTORY_LIMIT]
+        self.write_state(state)
+
+    def metrics_history(self, limit: int = 60) -> list[dict]:
+        return self.load_state().get("metrics_history", [])[-limit:]
 
     def metrics(self) -> list[dict]:
         folder = self.root / "metrics"

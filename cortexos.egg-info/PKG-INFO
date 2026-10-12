@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: cortexos
+Version: 0.1.0
+Summary: Local-first personal AI operating system skill backbone
+Requires-Python: >=3.11
+License-File: LICENSE
+Requires-Dist: fastapi>=0.110
+Requires-Dist: uvicorn[standard]>=0.27
+Requires-Dist: httpx>=0.27
+Provides-Extra: voice
+Requires-Dist: faster-whisper>=1.1.0; extra == "voice"
+Requires-Dist: kokoro>=0.9.4; extra == "voice"
+Requires-Dist: soundfile>=0.12; extra == "voice"
+Dynamic: license-file

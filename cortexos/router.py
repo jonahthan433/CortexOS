@@ -21,7 +21,7 @@ class Router:
     def route(self, prompt: str) -> Route:
         lowered = prompt.strip().lower()
         skill = self.registry.match(prompt)
-        if lowered in {"help", "status", "list skills", "show skills", "show metrics", "list metrics"} or lowered.startswith(("list skills", "metric ")):
+        if lowered in {"help", "status", "list skills", "show skills", "show metrics", "list metrics"} or lowered.startswith(("list skills", "metric ", "show my ", "list my ")):
             return Route(1, skill, "explicit local command")
         if skill:
             return Route(skill.tier, skill, f"matched skill: {skill.id}")
