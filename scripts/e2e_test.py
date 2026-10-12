@@ -78,7 +78,8 @@ def test_gate():
     from cortexos.service import CortexService
     svc = CortexService(settings)
     async def run():
-        r = await svc.submit('send my client an invoice', request_id='e2e-gate')
+        import uuid
+        r = await svc.submit('send my client an invoice', request_id=f'e2e-gate-{uuid.uuid4().hex[:8]}')
         assert r['status'] == 'awaiting_approval', f'gate did not hold: {r}'
         assert r.get('risk_level') in ('external_action', 'financial', 'unknown')
     asyncio.run(run())
