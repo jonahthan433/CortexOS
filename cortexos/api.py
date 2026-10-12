@@ -141,11 +141,23 @@ async def check_websocket_origin(websocket: WebSocket) -> bool:
     if not origin:
         return True
     allowed = {f"http://127.0.0.1:{settings.port}", f"http://localhost:{settings.port}",
+               f"https://127.0.0.1:{settings.port}", f"https://localhost:{settings.port}",
+               f"https://{settings.host}:{settings.port}",
                "app://obsidian.md", "capacitor://localhost"}
-    if origin not in allowed:
-        await websocket.close(code=4403, reason="WebSocket origin is not allowed")
-        return False
-    return True
+    # Any LAN origin is allowed when serving over TLS with the shared bridge token;
+    # the token is the access control, not the origin. ponytail: fixed LAN trust, per-origin pins if paranoid.
+    if origin in allowed:
+        return True
+    # Trust any http(s) origin whose host is a LAN address; TLS + token is the gate.
+    import ipaddress, urllib.parse
+    try:
+        host = urllib.parse.urlparse(origin).hostname or ""
+        if ipaddress.ip_address(host).is_private and urllib.parse.urlparse(origin).scheme in ("http", "https"):
+            return True
+    except ValueError:
+        pass
+    await websocket.close(code=4403, reason="WebSocket origin is not allowed")
+    return False
 
 
 @app.get("/api/status")

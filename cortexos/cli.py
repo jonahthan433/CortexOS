@@ -39,7 +39,12 @@ def main() -> None:
     elif args.command == "serve":
         import uvicorn
         settings = Settings.load()
-        uvicorn.run("cortexos.api:app", host=settings.host, port=settings.port, reload=False)
+        cert = settings.root / "config" / "server.crt"
+        key = settings.root / "config" / "server.key"
+        ssl_kwargs = {"ssl_certfile": str(cert), "ssl_keyfile": str(key)} if cert.exists() and key.exists() else {}
+        # Bind LAN-wide when TLS is on (loopback clients still reach it); loopback otherwise.
+        host = "0.0.0.0" if ssl_kwargs else settings.host
+        uvicorn.run("cortexos.api:app", host=host, port=settings.port, reload=False, **ssl_kwargs)
     elif args.command == "token":
         print(Settings.load().bridge_token)
     elif args.command == "service":
