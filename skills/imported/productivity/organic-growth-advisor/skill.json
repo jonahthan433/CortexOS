@@ -1,0 +1,20 @@
+{
+  "id": "organic-growth-advisor",
+  "name": "organic-growth-advisor",
+  "domain": "Productivity",
+  "description": "Identify which organic growth path to pursue \u2014 new segments, geographies, channels, or products. Use when diagnosing where a growth constraint lives and which McKinsey growth level to act on next.",
+  "trigger_phrases": [
+    "\"Choosing which organic growth motion to pursue when multiple seem viable\"",
+    "\"Diagnosing whether the constraint is in reach, access, market context, or product value\"",
+    "\"Setting up an AI-assisted growth experiment with the right starting hypothesis\"",
+    "\"We need to grow but aren't sure if we should go after new customer segments or new geographies\"",
+    "\"Help me figure out which McKinsey growth level we should focus on\"",
+    "\"We have strong product-market fit but growth is stalling. Where should we look?\"",
+    "\"Which organic growth path fits our current situation?\""
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

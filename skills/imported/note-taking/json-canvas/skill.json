@@ -1,0 +1,14 @@
+{
+  "id": "json-canvas",
+  "name": "json-canvas",
+  "domain": "Note Taking",
+  "description": "Create and edit JSON Canvas files (.canvas) with nodes, edges, groups, and connections. Use when working with .canvas files, creating visual canvases, mind maps, flowcharts, or when the user mentions Canvas files in Obsidian.",
+  "trigger_phrases": [
+    "json-canvas"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "affinity-diagram",
+  "name": "affinity-diagram",
+  "domain": "Productivity",
+  "description": "Organize qualitative research data into an affinity diagram with themes, clusters, and insight statements. Use when synthesizing large amounts of qualitative data from interviews, observations, or surveys.",
+  "trigger_phrases": [
+    "affinity-diagram"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

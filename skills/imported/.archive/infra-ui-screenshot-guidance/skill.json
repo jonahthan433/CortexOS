@@ -1,0 +1,14 @@
+{
+  "id": "infra-ui-screenshot-guidance",
+  "name": "infra-ui-screenshot-guidance",
+  "domain": ".Archive",
+  "description": "Guide the user through configuring infrastructure they control via a GUI (domain registrar DNS, router port-forwarding, dashboard settings) when they send a mobile screenshot and ask \"how do I do X\". Read the screenshot, identify the exact panel/control, and give concrete tap-by-tap steps. Covers Na",
+  "trigger_phrases": [
+    "hermes"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

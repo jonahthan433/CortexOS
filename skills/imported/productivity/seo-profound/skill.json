@@ -1,0 +1,14 @@
+{
+  "id": "seo-profound",
+  "name": "seo-profound",
+  "domain": "Productivity",
+  "description": "Profound LLM citation tracker (extension). Time-series brand citation rates across ChatGPT, Perplexity, and other LLMs. Pairs with seo-seranking for triangulated AI visibility coverage.",
+  "trigger_phrases": [
+    "seo-profound"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

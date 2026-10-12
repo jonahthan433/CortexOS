@@ -1,0 +1,14 @@
+{
+  "id": "seo-local",
+  "name": "seo-local",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "seo-local"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

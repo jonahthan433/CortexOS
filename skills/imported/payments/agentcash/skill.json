@@ -1,0 +1,14 @@
+{
+  "id": "agentcash",
+  "name": "agentcash",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "agentcash"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "evaluating-llms-harness",
+  "name": "evaluating-llms-harness",
+  "domain": "Mlops",
+  "description": "lm-eval-harness: benchmark LLMs (MMLU, GSM8K, etc.).",
+  "trigger_phrases": [
+    "evaluating-llms-harness"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

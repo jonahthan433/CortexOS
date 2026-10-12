@@ -1,0 +1,14 @@
+{
+  "id": "keyword-clustering",
+  "name": "keyword-clustering",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "keyword-clustering"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

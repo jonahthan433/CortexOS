@@ -1,0 +1,14 @@
+{
+  "id": "gesture-patterns",
+  "name": "gesture-patterns",
+  "domain": "Productivity",
+  "description": "Design gesture-based interactions for touch and pointer devices.",
+  "trigger_phrases": [
+    "gesture-patterns"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

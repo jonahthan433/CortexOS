@@ -1,0 +1,14 @@
+{
+  "id": "resume-section-builder",
+  "name": "resume-section-builder",
+  "domain": "Productivity",
+  "description": "Create targeted resume sections optimized for different experience levels and roles",
+  "trigger_phrases": [
+    "resume-section-builder"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

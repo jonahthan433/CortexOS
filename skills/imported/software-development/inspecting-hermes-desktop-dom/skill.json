@@ -1,0 +1,14 @@
+{
+  "id": "inspecting-hermes-desktop-dom",
+  "name": "inspecting-hermes-desktop-dom",
+  "domain": "Software Development",
+  "description": "Read the live Hermes desktop DOM/CSS over CDP.",
+  "trigger_phrases": [
+    "inspecting-hermes-desktop-dom"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

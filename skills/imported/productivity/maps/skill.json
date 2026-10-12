@@ -1,0 +1,14 @@
+{
+  "id": "maps",
+  "name": "maps",
+  "domain": "Productivity",
+  "description": "Geocode, POIs, routes, timezones via OpenStreetMap/OSRM.",
+  "trigger_phrases": [
+    "maps"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

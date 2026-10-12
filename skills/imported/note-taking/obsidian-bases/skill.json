@@ -1,0 +1,14 @@
+{
+  "id": "obsidian-bases",
+  "name": "obsidian-bases",
+  "domain": "Note Taking",
+  "description": "Create and edit Obsidian Bases (.base files) with views, filters, formulas, and summaries. Use when working with .base files, creating database-like views of notes, or when the user mentions Bases, table views, card views, filters, or formulas in Obsidian.",
+  "trigger_phrases": [
+    "obsidian-bases"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

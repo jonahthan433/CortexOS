@@ -1,0 +1,14 @@
+{
+  "id": "touchdesigner-mcp",
+  "name": "touchdesigner-mcp",
+  "domain": "Creative",
+  "description": "Control TouchDesigner via twozero MCP.",
+  "trigger_phrases": [
+    "touchdesigner-mcp"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

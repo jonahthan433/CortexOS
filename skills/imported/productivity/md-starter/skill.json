@@ -1,0 +1,14 @@
+{
+  "id": "md-starter",
+  "name": "md-starter",
+  "domain": "Productivity",
+  "description": "Generates a fully structured, project-specific CLAUDE.md by scanning the repo for signal files (package.json, Makefile, .github/workflows/, .env.example, etc.), inferring stack, commands, architecture, and conventions, then asking at most 3 targeted questions for what cannot be inferred. Use wheneve",
+  "trigger_phrases": [
+    "md-starter"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

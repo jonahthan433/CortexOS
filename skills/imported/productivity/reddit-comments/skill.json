@@ -1,0 +1,14 @@
+{
+  "id": "reddit-comments",
+  "name": "reddit-comments",
+  "domain": "Productivity",
+  "description": "Draft, review, and refactor Reddit comments for any company by providing a domain URL and a Reddit thread. Dynamically extracts product knowledge, approved terminology, voice and tone, and positioning guidelines from the domain before writing. Use this skill whenever the user provides a domain and a",
+  "trigger_phrases": [
+    "reddit-comments"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "dispatching-parallel-agents",
+  "name": "dispatching-parallel-agents",
+  "domain": "Superpowers",
+  "description": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
+  "trigger_phrases": [
+    "dispatching-parallel-agents"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

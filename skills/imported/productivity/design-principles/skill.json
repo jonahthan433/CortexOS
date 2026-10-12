@@ -1,0 +1,14 @@
+{
+  "id": "design-principles",
+  "name": "design-principles",
+  "domain": "Productivity",
+  "description": "Define a set of actionable design principles that guide decision-making and resolve trade-offs.",
+  "trigger_phrases": [
+    "design-principles"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

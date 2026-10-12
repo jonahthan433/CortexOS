@@ -1,0 +1,14 @@
+{
+  "id": "competitor-profiling",
+  "name": "competitor-profiling",
+  "domain": "Productivity",
+  "description": "When the user wants to research, profile, or analyze competitors from their URLs. Also use when the user mentions 'competitor profile,' 'competitor research,' 'competitor analysis,' 'profile this competitor,' 'analyze competitor,' 'competitive intelligence,' 'competitor deep dive,' 'who are my compe",
+  "trigger_phrases": [
+    "competitor-profiling"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

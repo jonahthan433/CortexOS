@@ -1,0 +1,14 @@
+{
+  "id": "serving-llms-vllm",
+  "name": "serving-llms-vllm",
+  "domain": "Mlops",
+  "description": "vLLM: high-throughput LLM serving, OpenAI API, quantization.",
+  "trigger_phrases": [
+    "serving-llms-vllm"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

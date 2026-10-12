@@ -1,0 +1,14 @@
+{
+  "id": "nextjs-landing-page",
+  "name": "nextjs-landing-page",
+  "domain": ".Archive",
+  "description": "Build a premium, production-grade marketing/landing page with Next.js 15 + TypeScript + Tailwind CSS v4 + Motion (Framer Motion), then statically export it to drop behind an existing web server (e.g. FastAPI, nginx, S3). Use when the user wants a polished, animated, conversion-optimized website for ",
+  "trigger_phrases": [
+    "nextjs-landing-page"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

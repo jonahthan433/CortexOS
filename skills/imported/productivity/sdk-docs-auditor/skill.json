@@ -1,0 +1,14 @@
+{
+  "id": "sdk-docs-auditor",
+  "name": "sdk-docs-auditor",
+  "domain": "Productivity",
+  "description": "Audits any SDK documentation site and produces a fully scored, downloadable HTML report. Use this skill whenever a user provides a documentation URL and asks to audit, review, analyse, score, or check the quality of SDK docs. Also trigger for phrases like \"audit the SDK docs at X\", \"check if the doc",
+  "trigger_phrases": [
+    "sdk-docs-auditor"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

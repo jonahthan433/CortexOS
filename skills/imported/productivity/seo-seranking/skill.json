@@ -1,0 +1,14 @@
+{
+  "id": "seo-seranking",
+  "name": "seo-seranking",
+  "domain": "Productivity",
+  "description": "SE Ranking AI visibility analyst (extension). Tracks AI Share-of-Voice across ChatGPT, Gemini, Perplexity, AI Overviews, and AI Mode in a single query. Highest-impact new extension per the v2 gap analysis \u2014 no other vendor covers all 5 AI platforms in one API.",
+  "trigger_phrases": [
+    "seo-seranking"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

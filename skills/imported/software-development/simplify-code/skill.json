@@ -1,0 +1,14 @@
+{
+  "id": "simplify-code",
+  "name": "simplify-code",
+  "domain": "Software Development",
+  "description": "Parallel 4-agent cleanup of recent code changes.",
+  "trigger_phrases": [
+    "simplify-code"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

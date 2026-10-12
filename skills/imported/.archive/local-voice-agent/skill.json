@@ -1,0 +1,14 @@
+{
+  "id": "local-voice-agent",
+  "name": "local-voice-agent",
+  "domain": ".Archive",
+  "description": "Build a local voice conversation system that talks to an AI agent out loud (push-to-talk or open-mic \u2192 local STT \u2192 agent brain \u2192 local TTS \u2192 speakers). Half-duplex, private, no cloud lock-in. Covers whisper.cpp + Kokoro local serving, the proven \"Hermes brain = hermes chat --resume\" local interface,",
+  "trigger_phrases": [
+    "local-voice-agent"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

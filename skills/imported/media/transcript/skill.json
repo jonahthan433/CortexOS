@@ -1,0 +1,14 @@
+{
+  "id": "transcript",
+  "name": "transcript",
+  "domain": "Media",
+  "description": "Use when the spoken content of a YouTube video is needed \u2014 even if not explicitly requested: pasted video links or IDs, requests to summarize, quote, transcribe, translate, fact-check, or extract anything from a video. Also use for research or learning when a video is the source. Not for uploads or ",
+  "trigger_phrases": [
+    "name: TRANSCRIPT_API_KEY"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

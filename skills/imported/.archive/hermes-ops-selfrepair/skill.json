@@ -1,0 +1,14 @@
+{
+  "id": "hermes-ops-selfrepair",
+  "name": "hermes-ops-selfrepair",
+  "domain": ".Archive",
+  "description": "Fix Hermes vision provider or desktop chrome-sandbox launch.",
+  "trigger_phrases": [
+    "hermes-ops-selfrepair"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

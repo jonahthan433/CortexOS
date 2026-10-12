@@ -1,0 +1,14 @@
+{
+  "id": "excalidraw",
+  "name": "excalidraw",
+  "domain": "Creative",
+  "description": "Hand-drawn Excalidraw JSON diagrams (arch, flow, seq).",
+  "trigger_phrases": [
+    "excalidraw"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

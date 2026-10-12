@@ -1,0 +1,21 @@
+{
+  "id": "local-search",
+  "name": "local-search",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Finding businesses by name or type",
+    "Searching nearby places",
+    "Getting detailed place information (address, hours, reviews)",
+    "Finding restaurants, stores, services in an area",
+    "Getting business ratings and reviews",
+    "\"find\", \"search for\", \"locate\", \"nearby\"",
+    "\"restaurants near\", \"hotels in\", \"stores around\"",
+    "\"business details\", \"opening hours\", \"reviews for\""
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

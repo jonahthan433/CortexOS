@@ -1,0 +1,21 @@
+{
+  "id": "upload-and-share",
+  "name": "upload-and-share",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Uploading files to get public URLs",
+    "Sharing files via download links",
+    "Hosting images, documents, or any file type",
+    "Making files publicly accessible for 6 months",
+    "Hosting static websites with custom domains",
+    "\"upload this\", \"share this file\", \"get me a link\"",
+    "\"host this file\", \"make this downloadable\"",
+    "\"public URL\", \"download link\", \"put online\""
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

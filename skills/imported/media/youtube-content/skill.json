@@ -1,0 +1,14 @@
+{
+  "id": "youtube-content",
+  "name": "youtube-content",
+  "domain": "Media",
+  "description": "YouTube transcripts to summaries, threads, blogs.",
+  "trigger_phrases": [
+    "youtube-content"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

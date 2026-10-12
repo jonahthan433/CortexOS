@@ -1,0 +1,14 @@
+{
+  "id": "geo-seo",
+  "name": "geo-seo",
+  "domain": "Productivity",
+  "description": "Audit and optimize content for SEO, GEO (generative engine optimization), and AEO (answer engine optimization). Use when user asks to \"audit SEO\", \"check search visibility\", \"optimize for AI search\", \"generate schema markup\", \"validate metadata\", \"extract keywords\", \"optimize for Perplexity/ChatGPT/",
+  "trigger_phrases": [
+    "geo-seo"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

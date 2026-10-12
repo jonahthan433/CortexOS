@@ -1,0 +1,14 @@
+{
+  "id": "quant-trading-experiment",
+  "name": "quant-trading-experiment",
+  "domain": "Quant Trading Experiment",
+  "description": "Multi-agent quantitative research with demo trading.",
+  "trigger_phrases": [
+    "quant"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

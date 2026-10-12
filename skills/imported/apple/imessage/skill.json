@@ -1,0 +1,14 @@
+{
+  "id": "imessage",
+  "name": "imessage",
+  "domain": "Apple",
+  "description": "Send and receive iMessages/SMS via the imsg CLI on macOS.",
+  "trigger_phrases": [
+    "imessage"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

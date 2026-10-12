@@ -1,0 +1,14 @@
+{
+  "id": "hermes-gateway-troubleshooting",
+  "name": "hermes-gateway-troubleshooting",
+  "domain": "Hermes Gateway Troubleshooting",
+  "description": "Use when a Hermes messaging gateway is down or flapping.",
+  "trigger_phrases": [
+    "hermes-gateway-troubleshooting"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

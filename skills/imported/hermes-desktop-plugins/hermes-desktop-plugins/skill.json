@@ -1,0 +1,14 @@
+{
+  "id": "hermes-desktop-plugins",
+  "name": "hermes-desktop-plugins",
+  "domain": "Hermes Desktop Plugins",
+  "description": "Write desktop app plugins that add UI panes and commands.",
+  "trigger_phrases": [
+    "hermes-desktop-plugins"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

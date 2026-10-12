@@ -1,0 +1,14 @@
+{
+  "id": "competitive-analysis",
+  "name": "competitive-analysis",
+  "domain": "Productivity",
+  "description": "Conduct a structured competitive analysis comparing UX patterns, features, strengths, and gaps across rival products.",
+  "trigger_phrases": [
+    "competitive-analysis"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

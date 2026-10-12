@@ -1,0 +1,14 @@
+{
+  "id": "law-of-proximity",
+  "name": "law-of-proximity",
+  "domain": "Productivity",
+  "description": "Apply the Law of Proximity to group related elements through spatial relationships.",
+  "trigger_phrases": [
+    "law-of-proximity"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

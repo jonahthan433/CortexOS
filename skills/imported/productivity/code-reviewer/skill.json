@@ -1,0 +1,14 @@
+{
+  "id": "code-reviewer",
+  "name": "code-reviewer",
+  "domain": "Productivity",
+  "description": "Code review automation for TypeScript, JavaScript, Python, Go, Swift, Kotlin, C#, .NET, Java, C, C++, Rust, Ruby, PHP, and Dart/Flutter. Analyzes PRs for complexity and risk, checks code quality for SOLID violations and code smells, generates review reports. Use when reviewing pull requests, analyzi",
+  "trigger_phrases": [
+    "code-reviewer"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

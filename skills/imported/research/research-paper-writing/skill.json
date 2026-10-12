@@ -1,0 +1,14 @@
+{
+  "id": "research-paper-writing",
+  "name": "research-paper-writing",
+  "domain": "Research",
+  "description": "Write ML papers for NeurIPS/ICML/ICLR: design\u2192submit.",
+  "trigger_phrases": [
+    "research-paper-writing"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

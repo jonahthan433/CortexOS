@@ -1,0 +1,14 @@
+{
+  "id": "llm-wiki",
+  "name": "llm-wiki",
+  "domain": "Research",
+  "description": "Karpathy's LLM Wiki: build/query interlinked markdown KB.",
+  "trigger_phrases": [
+    "llm-wiki"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

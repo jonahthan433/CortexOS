@@ -1,0 +1,14 @@
+{
+  "id": "openhue",
+  "name": "openhue",
+  "domain": "Smart Home",
+  "description": "Control Philips Hue lights, scenes, rooms via OpenHue CLI.",
+  "trigger_phrases": [
+    "openhue"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

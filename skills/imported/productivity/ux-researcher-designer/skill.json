@@ -1,0 +1,14 @@
+{
+  "id": "ux-researcher-designer",
+  "name": "ux-researcher-designer",
+  "domain": "Productivity",
+  "description": "UX research and design toolkit for Senior UX Designer/Researcher including data-driven persona generation, journey mapping, usability testing frameworks, and research synthesis. Use when conducting user research, creating personas, mapping user journeys, planning usability tests, or validating desig",
+  "trigger_phrases": [
+    "ux-researcher-designer"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

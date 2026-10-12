@@ -1,0 +1,14 @@
+{
+  "id": "seo-sxo",
+  "name": "seo-sxo",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "seo-sxo"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

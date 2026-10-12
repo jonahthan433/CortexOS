@@ -1,0 +1,14 @@
+{
+  "id": "local-agent-bridge-safety",
+  "name": "local-agent-bridge-safety",
+  "domain": "Mlops",
+  "description": "Audit and harden local agent bridges dispatching LLM CLIs.",
+  "trigger_phrases": [
+    "local-agent-bridge-safety"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "docx",
+  "name": "docx",
+  "domain": "Productivity",
+  "description": "Create, read, edit, template, and review Word .docx files.",
+  "trigger_phrases": [
+    "docx"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

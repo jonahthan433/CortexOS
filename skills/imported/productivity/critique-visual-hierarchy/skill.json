@@ -1,0 +1,14 @@
+{
+  "id": "critique-visual-hierarchy",
+  "name": "critique-visual-hierarchy",
+  "domain": "Productivity",
+  "description": "Critique a screen's visual hierarchy \u2014 entry point, eye flow, weight distribution, and emphasis.",
+  "trigger_phrases": [
+    "critique-visual-hierarchy"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

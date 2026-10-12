@@ -1,0 +1,14 @@
+{
+  "id": "github-issue-to-pr",
+  "name": "github-issue-to-pr",
+  "domain": "Github",
+  "description": "Carry a GitHub issue to a verified PR with honest CI state.",
+  "trigger_phrases": [
+    "github-issue-to-pr"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "seo-unlighthouse",
+  "name": "seo-unlighthouse",
+  "domain": "Productivity",
+  "description": "Multi-page Lighthouse audit via the MIT-licensed Unlighthouse CLI. Free-tier alternative to running PageSpeed against every URL on a site \u2014 no API quota burn, runs locally.",
+  "trigger_phrases": [
+    "seo-unlighthouse"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

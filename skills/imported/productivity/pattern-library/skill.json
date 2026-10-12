@@ -1,0 +1,14 @@
+{
+  "id": "pattern-library",
+  "name": "pattern-library",
+  "domain": "Productivity",
+  "description": "Structure a pattern library entry with problem context, solution pattern, usage examples, and related patterns.",
+  "trigger_phrases": [
+    "pattern-library"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

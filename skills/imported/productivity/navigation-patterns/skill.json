@@ -1,0 +1,14 @@
+{
+  "id": "navigation-patterns",
+  "name": "navigation-patterns",
+  "domain": "Productivity",
+  "description": "Select and design navigation patterns that match product structure, user tasks, and platform conventions.",
+  "trigger_phrases": [
+    "navigation-patterns"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

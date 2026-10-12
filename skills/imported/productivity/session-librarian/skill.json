@@ -1,0 +1,14 @@
+{
+  "id": "session-librarian",
+  "name": "session-librarian",
+  "domain": "Productivity",
+  "description": "Organize sessions by prompt: find, rename, archive, prune.",
+  "trigger_phrases": [
+    "session-librarian"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

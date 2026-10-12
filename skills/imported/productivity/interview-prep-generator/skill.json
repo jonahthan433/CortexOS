@@ -1,0 +1,14 @@
+{
+  "id": "interview-prep-generator",
+  "name": "interview-prep-generator",
+  "domain": "Productivity",
+  "description": "Generate STAR stories, practice questions, and talking points from resume",
+  "trigger_phrases": [
+    "interview-prep-generator"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

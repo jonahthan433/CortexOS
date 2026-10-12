@@ -1,0 +1,14 @@
+{
+  "id": "seo-backlinks",
+  "name": "seo-backlinks",
+  "domain": "Productivity",
+  "description": "Backlink profile analysis: referring domains, anchor text distribution, toxic link detection, competitor gap analysis. Works with free APIs (Moz, Bing Webmaster, Common Crawl) and DataForSEO extension. Use when user says backlinks, link profile, referring domains, anchor text, toxic links, link gap,",
+  "trigger_phrases": [
+    "seo-backlinks"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

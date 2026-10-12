@@ -1,0 +1,14 @@
+{
+  "id": "findmy",
+  "name": "findmy",
+  "domain": "Apple",
+  "description": "Track Apple devices/AirTags via FindMy.app on macOS.",
+  "trigger_phrases": [
+    "findmy"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

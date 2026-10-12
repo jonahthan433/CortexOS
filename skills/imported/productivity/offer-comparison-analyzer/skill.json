@@ -1,0 +1,14 @@
+{
+  "id": "offer-comparison-analyzer",
+  "name": "offer-comparison-analyzer",
+  "domain": "Productivity",
+  "description": "Compare multiple job offers side-by-side with total compensation analysis",
+  "trigger_phrases": [
+    "offer-comparison-analyzer"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

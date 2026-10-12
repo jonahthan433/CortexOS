@@ -1,0 +1,14 @@
+{
+  "id": "dev-marketing-prospector",
+  "name": "dev-marketing-prospector",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "dev-marketing-prospector"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

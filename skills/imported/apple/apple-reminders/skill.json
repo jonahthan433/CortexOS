@@ -1,0 +1,14 @@
+{
+  "id": "apple-reminders",
+  "name": "apple-reminders",
+  "domain": "Apple",
+  "description": "Apple Reminders via remindctl: add, list, complete.",
+  "trigger_phrases": [
+    "apple-reminders"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

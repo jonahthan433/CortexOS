@@ -1,0 +1,14 @@
+{
+  "id": "nextcloud-server-ops",
+  "name": "nextcloud-server-ops",
+  "domain": "Homelab",
+  "description": "Nextcloud server: occ, video previews, regen, diagnostics",
+  "trigger_phrases": [
+    "nextcloud-server-ops"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "loading-states",
+  "name": "loading-states",
+  "domain": "Productivity",
+  "description": "Design loading, skeleton, and progressive content reveal patterns.",
+  "trigger_phrases": [
+    "loading-states"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

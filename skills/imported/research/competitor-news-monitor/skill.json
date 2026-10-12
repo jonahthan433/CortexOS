@@ -1,0 +1,14 @@
+{
+  "id": "competitor-news-monitor",
+  "name": "competitor-news-monitor",
+  "domain": "Research",
+  "description": "Watch named companies for material news; cited digests.",
+  "trigger_phrases": [
+    "competitor-news-monitor"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

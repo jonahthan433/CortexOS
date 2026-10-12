@@ -1,0 +1,14 @@
+{
+  "id": "cover-letter-generator",
+  "name": "cover-letter-generator",
+  "domain": "Productivity",
+  "description": "Create personalized, compelling cover letters from resume and job description",
+  "trigger_phrases": [
+    "cover-letter-generator"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "social-intelligence",
+  "name": "social-intelligence",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Searching Reddit posts and discussions",
+    "Getting comments from Reddit threads",
+    "Social media monitoring and research",
+    "\"reddit\", \"subreddit\", \"reddit discussion\"",
+    "\"what are people saying\", \"social media\", \"sentiment\"",
+    "\"trending\", \"viral\", \"popular posts\""
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

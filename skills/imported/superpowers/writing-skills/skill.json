@@ -1,0 +1,14 @@
+{
+  "id": "writing-skills",
+  "name": "writing-skills",
+  "domain": "Superpowers",
+  "description": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
+  "trigger_phrases": [
+    "writing-skills"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

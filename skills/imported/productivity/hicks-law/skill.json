@@ -1,0 +1,14 @@
+{
+  "id": "hicks-law",
+  "name": "hicks-law",
+  "domain": "Productivity",
+  "description": "Apply Hick's Law to reduce decision time by limiting the number of simultaneous choices presented to users.",
+  "trigger_phrases": [
+    "hicks-law"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

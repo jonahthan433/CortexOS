@@ -1,0 +1,14 @@
+{
+  "id": "cover-letter",
+  "name": "cover-letter",
+  "domain": "Productivity",
+  "description": "Write a tailored cover letter for a specific job posting",
+  "trigger_phrases": [
+    "cover-letter"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

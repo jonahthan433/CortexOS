@@ -1,0 +1,14 @@
+{
+  "id": "merge-reconciler",
+  "name": "merge-reconciler",
+  "domain": "Autonomous Ai Agents",
+  "description": "Neutral third-party resolution of agent merge conflicts.",
+  "trigger_phrases": [
+    "merge-reconciler"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "llama-cpp",
+  "name": "llama-cpp",
+  "domain": "Mlops",
+  "description": "llama.cpp local GGUF inference + HF Hub model discovery.",
+  "trigger_phrases": [
+    "llama-cpp"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

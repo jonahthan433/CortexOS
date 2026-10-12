@@ -1,0 +1,14 @@
+{
+  "id": "information-architecture",
+  "name": "information-architecture",
+  "domain": "Productivity",
+  "description": "Design the structure, hierarchy, and navigation model for a product's content and features.",
+  "trigger_phrases": [
+    "information-architecture"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

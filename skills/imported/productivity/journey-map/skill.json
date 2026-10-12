@@ -1,0 +1,14 @@
+{
+  "id": "journey-map",
+  "name": "journey-map",
+  "domain": "Productivity",
+  "description": "Create an end-to-end user journey map with stages, touchpoints, emotions, pain points, and opportunity areas. Use when mapping the full user experience for a product, feature, or service.",
+  "trigger_phrases": [
+    "journey-map"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

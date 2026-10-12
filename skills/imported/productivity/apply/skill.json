@@ -1,0 +1,14 @@
+{
+  "id": "apply",
+  "name": "apply",
+  "domain": "Productivity",
+  "description": "Fill out a job application on Greenhouse, Lever, or Workday",
+  "trigger_phrases": [
+    "apply"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

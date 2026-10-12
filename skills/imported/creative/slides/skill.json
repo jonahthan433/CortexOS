@@ -1,0 +1,14 @@
+{
+  "id": "slides",
+  "name": "slides",
+  "domain": "Creative",
+  "description": "Create strategic HTML presentations with Chart.js, design tokens, responsive layouts, copywriting formulas, and contextual slide strategies.",
+  "trigger_phrases": [
+    "slides"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "spacing-system",
+  "name": "spacing-system",
+  "domain": "Productivity",
+  "description": "Create a consistent spacing system based on a base unit with contextual application rules.",
+  "trigger_phrases": [
+    "spacing-system"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

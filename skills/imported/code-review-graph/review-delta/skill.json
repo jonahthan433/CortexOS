@@ -1,0 +1,14 @@
+{
+  "id": "review-delta",
+  "name": "review-delta",
+  "domain": "Code Review Graph",
+  "description": "Review only changes since last commit using impact analysis. Token-efficient delta review with automatic blast-radius detection.",
+  "trigger_phrases": [
+    "review-delta"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

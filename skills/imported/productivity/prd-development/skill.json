@@ -1,0 +1,18 @@
+{
+  "id": "prd-development",
+  "name": "prd-development",
+  "domain": "Productivity",
+  "description": "Build a structured PRD that connects problem, users, solution, and success criteria. Use when turning discovery notes into an engineering-ready document for a major initiative.",
+  "trigger_phrases": [
+    "\"Writing a complete PRD from scratch\"",
+    "\"Structuring product requirements for an engineering handoff\"",
+    "\"Documenting a major new feature before development begins\"",
+    "\"I need a PRD for a new AI-powered recommendation feature in our e-commerce platform\"",
+    "\"I've completed a discovery sprint and need to turn the findings into a PRD my engineers can act on\""
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

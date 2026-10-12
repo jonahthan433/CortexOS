@@ -1,0 +1,14 @@
+{
+  "id": "micro-interaction-spec",
+  "name": "micro-interaction-spec",
+  "domain": "Productivity",
+  "description": "Specify micro-interactions with trigger, rules, feedback, and loop/mode definitions.",
+  "trigger_phrases": [
+    "micro-interaction-spec"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

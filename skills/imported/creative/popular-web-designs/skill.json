@@ -1,0 +1,21 @@
+{
+  "id": "popular-web-designs",
+  "name": "popular-web-designs",
+  "domain": "Creative",
+  "description": "54 real design systems (Stripe, Linear, Vercel) as HTML/CSS.",
+  "trigger_phrases": [
+    "[design, css, html, ui, web-development, design-systems, templates]",
+    "build a page that looks like",
+    "make it look like stripe",
+    "design like linear",
+    "vercel style",
+    "create a UI",
+    "web design",
+    "landing page"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

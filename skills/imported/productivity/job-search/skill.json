@@ -1,0 +1,14 @@
+{
+  "id": "job-search",
+  "name": "job-search",
+  "domain": "Productivity",
+  "description": "Search for jobs matching my resume and preferences",
+  "trigger_phrases": [
+    "job-search"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

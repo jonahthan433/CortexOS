@@ -1,0 +1,14 @@
+{
+  "id": "resume-ats-optimizer",
+  "name": "resume-ats-optimizer",
+  "domain": "Productivity",
+  "description": "Optimize resumes for Applicant Tracking Systems, check ATS compatibility, and analyze keyword match",
+  "trigger_phrases": [
+    "resume-ats-optimizer"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

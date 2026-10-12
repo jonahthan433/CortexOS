@@ -1,0 +1,14 @@
+{
+  "id": "github-pr-workflow",
+  "name": "github-pr-workflow",
+  "domain": "Github",
+  "description": "GitHub PR lifecycle: branch, commit, open, CI, merge.",
+  "trigger_phrases": [
+    "github-pr-workflow"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

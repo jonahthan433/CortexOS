@@ -1,0 +1,14 @@
+{
+  "id": "subagent-driven-development",
+  "name": "subagent-driven-development",
+  "domain": "Superpowers",
+  "description": "Use when executing implementation plans with independent tasks in the current session",
+  "trigger_phrases": [
+    "subagent-driven-development"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

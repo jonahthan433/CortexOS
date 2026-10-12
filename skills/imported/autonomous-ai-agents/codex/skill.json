@@ -1,0 +1,14 @@
+{
+  "id": "codex",
+  "name": "codex",
+  "domain": "Autonomous Ai Agents",
+  "description": "Delegate coding to OpenAI Codex CLI (features, PRs).",
+  "trigger_phrases": [
+    "codex"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

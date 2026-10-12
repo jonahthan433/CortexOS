@@ -1,0 +1,14 @@
+{
+  "id": "vetting-third-party-skills",
+  "name": "vetting-third-party-skills",
+  "domain": "Autonomous Ai Agents",
+  "description": "Vet skills before install: verify source, tier risk.",
+  "trigger_phrases": [
+    "vetting-third-party-skills"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "scheduled-content-publisher",
+  "name": "scheduled-content-publisher",
+  "domain": ".Archive",
+  "description": "Build recurring cron-driven agents that autonomously publish original posts to a channel/feed (Telegram channel, social) on a schedule \u2014 with category rotation, anti-repeat logging, fact-checking, and clean human-voice output.",
+  "trigger_phrases": [
+    "hermes"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "web-page-rebuild",
+  "name": "web-page-rebuild",
+  "domain": "Web Page Rebuild",
+  "description": "Use when the user wants to rebuild, clone, restyle, or faithfully reproduce a web page / landing page / web UI from a live reference site. Covers extracting exact design tokens (colors, fonts, spacing, layout) from the live CSS, rebuilding a minimal single-file HTML that keeps the token system but k",
+  "trigger_phrases": [
+    "web-page-rebuild"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

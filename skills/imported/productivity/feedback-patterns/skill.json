@@ -1,0 +1,14 @@
+{
+  "id": "feedback-patterns",
+  "name": "feedback-patterns",
+  "domain": "Productivity",
+  "description": "Design system feedback for user actions including confirmations, status updates, and notifications.",
+  "trigger_phrases": [
+    "feedback-patterns"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

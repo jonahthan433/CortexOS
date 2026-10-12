@@ -1,0 +1,14 @@
+{
+  "id": "nextcloud-administration",
+  "name": "nextcloud-administration",
+  "domain": "Homelab",
+  "description": "Homelab Nextcloud CT 101 previews, occ upgrade, pct quirks.",
+  "trigger_phrases": [
+    "nextcloud-administration"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

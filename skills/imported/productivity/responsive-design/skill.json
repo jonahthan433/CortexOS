@@ -1,0 +1,14 @@
+{
+  "id": "responsive-design",
+  "name": "responsive-design",
+  "domain": "Productivity",
+  "description": "Design adaptive layouts and interactions that work across all screen sizes and input methods.",
+  "trigger_phrases": [
+    "responsive-design"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

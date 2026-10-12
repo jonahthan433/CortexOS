@@ -1,0 +1,14 @@
+{
+  "id": "transcriptapi",
+  "name": "transcriptapi",
+  "domain": "Media",
+  "description": "Use when YouTube is or could be relevant \u2014 even if not mentioned: pasted video/channel/playlist links, video IDs, @handles, creator lookups, video summaries, quotes, translations, topic research, tutorials, talks, lectures, expert discussions, product reviews, how-to guides, new product announcement",
+  "trigger_phrases": [
+    "name: TRANSCRIPT_API_KEY"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "seo-bing",
+  "name": "seo-bing",
+  "domain": "Productivity",
+  "description": "Bing Webmaster Tools + IndexNow extension. Microsoft Copilot citations are fed by the Bing index; this skill makes Bing visibility, link data, and IndexNow URL submission first-class.",
+  "trigger_phrases": [
+    "seo-bing"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

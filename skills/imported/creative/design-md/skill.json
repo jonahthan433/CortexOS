@@ -1,0 +1,14 @@
+{
+  "id": "design-md",
+  "name": "design-md",
+  "domain": "Creative",
+  "description": "Author/validate/export Google's DESIGN.md token spec files.",
+  "trigger_phrases": [
+    "design-md"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

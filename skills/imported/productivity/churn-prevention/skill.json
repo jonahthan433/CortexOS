@@ -1,0 +1,14 @@
+{
+  "id": "churn-prevention",
+  "name": "churn-prevention",
+  "domain": "Productivity",
+  "description": "When the user wants to reduce churn, build cancellation flows, set up save offers, recover failed payments, or implement retention strategies. Also use when the user mentions 'churn,' 'cancel flow,' 'offboarding,' 'save offer,' 'dunning,' 'failed payment recovery,' 'win-back,' 'retention,' 'exit sur",
+  "trigger_phrases": [
+    "churn-prevention"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "service-blueprint",
+  "name": "service-blueprint",
+  "domain": "Productivity",
+  "description": "Map the end-to-end service delivery system including frontstage actions, backstage processes, and supporting infrastructure.",
+  "trigger_phrases": [
+    "service-blueprint"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

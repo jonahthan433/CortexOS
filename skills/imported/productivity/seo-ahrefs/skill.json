@@ -1,0 +1,14 @@
+{
+  "id": "seo-ahrefs",
+  "name": "seo-ahrefs",
+  "domain": "Productivity",
+  "description": "Ahrefs API analyst (extension). Reads referring domains, backlinks, organic keywords, and content explorer data via the official @ahrefs/mcp server. Pairs with seo-backlinks for multi-source confidence weighting.",
+  "trigger_phrases": [
+    "seo-ahrefs"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

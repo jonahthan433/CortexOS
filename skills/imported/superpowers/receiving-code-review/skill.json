@@ -1,0 +1,14 @@
+{
+  "id": "receiving-code-review",
+  "name": "receiving-code-review",
+  "domain": "Superpowers",
+  "description": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
+  "trigger_phrases": [
+    "receiving-code-review"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

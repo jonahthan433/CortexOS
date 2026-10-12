@@ -1,0 +1,14 @@
+{
+  "id": "illustration-style",
+  "name": "illustration-style",
+  "domain": "Productivity",
+  "description": "Define an illustration style guide with visual language, color usage, and application rules.",
+  "trigger_phrases": [
+    "illustration-style"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

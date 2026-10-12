@@ -1,0 +1,14 @@
+{
+  "id": "layout-grid",
+  "name": "layout-grid",
+  "domain": "Productivity",
+  "description": "Define responsive layout grid systems with columns, gutters, margins, and breakpoint behavior.",
+  "trigger_phrases": [
+    "layout-grid"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

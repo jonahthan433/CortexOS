@@ -1,0 +1,14 @@
+{
+  "id": "inbox",
+  "name": "inbox",
+  "domain": "Productivity",
+  "description": "Email triage system that handles both one-time setup and recurring triage in a single skill. Auto-detects state: if no knowledge base exists at ${WORKSPACE}/Email/, runs an 8-section onboarding interview (grill-me discipline, one question at a time) to build a 7-file personalized KB, then offers to ",
+  "trigger_phrases": [
+    "inbox"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

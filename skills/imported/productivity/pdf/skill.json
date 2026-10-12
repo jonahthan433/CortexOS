@@ -1,0 +1,14 @@
+{
+  "id": "pdf",
+  "name": "pdf",
+  "domain": "Productivity",
+  "description": "PDF files: create, read, merge, fill, OCR, edit text.",
+  "trigger_phrases": [
+    "pdf"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

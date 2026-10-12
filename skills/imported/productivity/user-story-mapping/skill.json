@@ -1,0 +1,14 @@
+{
+  "id": "user-story-mapping",
+  "name": "user-story-mapping",
+  "domain": "Productivity",
+  "description": "Create a user story map that lays out activities, steps, tasks, and release slices. Use when planning a workflow, backlog, or MVP around the user journey.",
+  "trigger_phrases": [
+    "user-story-mapping"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

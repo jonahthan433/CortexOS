@@ -1,0 +1,14 @@
+{
+  "id": "x402-pay-per-call",
+  "name": "x402-pay-per-call",
+  "domain": "Mlops",
+  "description": "Build, verify, and list x402 pay-per-call AI gateways (USDC on Base via the x402 protocol). Use when working on CortexCloud's payment-gated API, CDP facilitator settlement, x402scan discovery/registration, or any \"make money via API\" / \"prove settlement actually works\" task. Covers the auth-liveness",
+  "trigger_phrases": [
+    "x402-pay-per-call"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

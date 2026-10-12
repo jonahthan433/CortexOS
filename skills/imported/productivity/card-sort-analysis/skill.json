@@ -1,0 +1,14 @@
+{
+  "id": "card-sort-analysis",
+  "name": "card-sort-analysis",
+  "domain": "Productivity",
+  "description": "Analyze card sorting results to inform information architecture and navigation structure. Use after conducting open or closed card sort studies.",
+  "trigger_phrases": [
+    "card-sort-analysis"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

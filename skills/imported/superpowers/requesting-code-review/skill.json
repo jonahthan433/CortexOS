@@ -1,0 +1,14 @@
+{
+  "id": "requesting-code-review",
+  "name": "requesting-code-review",
+  "domain": "Superpowers",
+  "description": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
+  "trigger_phrases": [
+    "requesting-code-review"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

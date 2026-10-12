@@ -1,0 +1,14 @@
+{
+  "id": "nextcloud",
+  "name": "nextcloud",
+  "domain": "Productivity",
+  "description": "Full-featured Nextcloud integration for Hermes \u2014 manage files, notes, tasks, calendar events, and contacts via WebDAV, Nextcloud Notes API, and CalDAV/CardDAV. Works with self-hosted Nextcloud instances.",
+  "trigger_phrases": [
+    "nextcloud"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

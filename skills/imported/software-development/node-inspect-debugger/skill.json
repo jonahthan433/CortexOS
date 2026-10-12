@@ -1,0 +1,14 @@
+{
+  "id": "node-inspect-debugger",
+  "name": "node-inspect-debugger",
+  "domain": "Software Development",
+  "description": "Debug Node.js via --inspect + Chrome DevTools Protocol CLI.",
+  "trigger_phrases": [
+    "node-inspect-debugger"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

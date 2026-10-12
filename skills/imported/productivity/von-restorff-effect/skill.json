@@ -1,0 +1,14 @@
+{
+  "id": "von-restorff-effect",
+  "name": "von-restorff-effect",
+  "domain": "Productivity",
+  "description": "Apply the Von Restorff Effect to make the most important element distinctly different from its surroundings.",
+  "trigger_phrases": [
+    "von-restorff-effect"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

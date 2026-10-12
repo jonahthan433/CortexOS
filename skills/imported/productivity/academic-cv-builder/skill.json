@@ -1,0 +1,14 @@
+{
+  "id": "academic-cv-builder",
+  "name": "academic-cv-builder",
+  "domain": "Productivity",
+  "description": "Format CVs for academic positions with publications, grants, and teaching",
+  "trigger_phrases": [
+    "academic-cv-builder"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

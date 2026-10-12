@@ -1,0 +1,14 @@
+{
+  "id": "tech-resume-optimizer",
+  "name": "tech-resume-optimizer",
+  "domain": "Productivity",
+  "description": "Optimize resumes for software engineering, PM, and technical roles",
+  "trigger_phrases": [
+    "tech-resume-optimizer"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

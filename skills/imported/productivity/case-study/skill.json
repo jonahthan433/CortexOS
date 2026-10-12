@@ -1,0 +1,14 @@
+{
+  "id": "case-study",
+  "name": "case-study",
+  "domain": "Productivity",
+  "description": "Craft portfolio-ready case studies that tell the story of a design project.",
+  "trigger_phrases": [
+    "case-study"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

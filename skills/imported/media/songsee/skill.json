@@ -1,0 +1,14 @@
+{
+  "id": "songsee",
+  "name": "songsee",
+  "domain": "Media",
+  "description": "Audio spectrograms/features (mel, chroma, MFCC) via CLI.",
+  "trigger_phrases": [
+    "songsee"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

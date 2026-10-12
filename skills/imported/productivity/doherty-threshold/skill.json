@@ -1,0 +1,14 @@
+{
+  "id": "doherty-threshold",
+  "name": "doherty-threshold",
+  "domain": "Productivity",
+  "description": "Apply the Doherty Threshold \u2014 keep system response times under 400ms to maintain user flow and perceived performance.",
+  "trigger_phrases": [
+    "doherty-threshold"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

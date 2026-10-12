@@ -1,0 +1,14 @@
+{
+  "id": "community-marketing",
+  "name": "community-marketing",
+  "domain": "Productivity",
+  "description": "Build and leverage online communities to drive product growth and brand loyalty. Use when the user wants to create a community strategy, grow a Discord or Slack community, manage a forum or subreddit, build brand advocates, increase word-of-mouth, drive community-led growth, engage users post-signup",
+  "trigger_phrases": [
+    "community-marketing"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

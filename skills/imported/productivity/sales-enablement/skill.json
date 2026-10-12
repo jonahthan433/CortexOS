@@ -1,0 +1,14 @@
+{
+  "id": "sales-enablement",
+  "name": "sales-enablement",
+  "domain": "Productivity",
+  "description": "When the user wants to create sales collateral, pitch decks, one-pagers, objection handling docs, or demo scripts. Also use when the user mentions 'sales deck,' 'pitch deck,' 'one-pager,' 'leave-behind,' 'objection handling,' 'deal-specific ROI analysis,' 'demo script,' 'talk track,' 'sales playbook",
+  "trigger_phrases": [
+    "sales-enablement"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

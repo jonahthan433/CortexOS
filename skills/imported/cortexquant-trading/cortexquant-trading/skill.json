@@ -1,0 +1,14 @@
+{
+  "id": "cortexquant-trading",
+  "name": "cortexquant-trading",
+  "domain": "Cortexquant Trading",
+  "description": "Operate CortexQuant CT106, the BingX demo trading system.",
+  "trigger_phrases": [
+    "cortexquant-trading"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

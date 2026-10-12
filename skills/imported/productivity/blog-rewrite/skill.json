@@ -1,0 +1,14 @@
+{
+  "id": "blog-rewrite",
+  "name": "blog-rewrite",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "blog-rewrite"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

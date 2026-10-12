@@ -1,0 +1,14 @@
+{
+  "id": "meeting-action-items",
+  "name": "meeting-action-items",
+  "domain": "Productivity",
+  "description": "Turn meeting notes into cited decisions, owners, tickets.",
+  "trigger_phrases": [
+    "meeting-action-items"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

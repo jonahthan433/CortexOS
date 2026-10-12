@@ -1,0 +1,14 @@
+{
+  "id": "icon-system",
+  "name": "icon-system",
+  "domain": "Productivity",
+  "description": "Create an icon system specification covering grid, sizing, naming, categories, and implementation guidance.",
+  "trigger_phrases": [
+    "icon-system"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

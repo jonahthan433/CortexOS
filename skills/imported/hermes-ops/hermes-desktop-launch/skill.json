@@ -1,0 +1,14 @@
+{
+  "id": "hermes-desktop-launch",
+  "name": "hermes-desktop-launch",
+  "domain": "Hermes Ops",
+  "description": "Hermes desktop launch failures, and stopping `hermes update` from rebuilding the unused Electron app on a headless host.",
+  "trigger_phrases": [
+    "hermes-desktop-launch"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

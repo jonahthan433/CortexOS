@@ -1,0 +1,14 @@
+{
+  "id": "cortexcloud-gtm",
+  "name": "cortexcloud-gtm",
+  "domain": "Marketing",
+  "description": "CortexCloud GTM: directory submissions, external tracking.",
+  "trigger_phrases": [
+    "cortexcloud-gtm"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

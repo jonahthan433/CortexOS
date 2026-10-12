@@ -1,0 +1,14 @@
+{
+  "id": "seo-schema",
+  "name": "seo-schema",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "seo-schema"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

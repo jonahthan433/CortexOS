@@ -1,0 +1,14 @@
+{
+  "id": "email-inbox-triage",
+  "name": "email-inbox-triage",
+  "domain": "Email",
+  "description": "Triage an inbox: prioritize threads, draft replies safely.",
+  "trigger_phrases": [
+    "email-inbox-triage"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

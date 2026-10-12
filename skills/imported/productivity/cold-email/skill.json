@@ -1,0 +1,14 @@
+{
+  "id": "cold-email",
+  "name": "cold-email",
+  "domain": "Productivity",
+  "description": "Write B2B cold emails and follow-up sequences that get replies. Use when the user wants to write cold outreach emails, prospecting emails, cold email campaigns, sales development emails, or SDR emails. Also use when the user mentions \"cold outreach,\" \"prospecting email,\" \"outbound email,\" \"email to ",
+  "trigger_phrases": [
+    "cold-email"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

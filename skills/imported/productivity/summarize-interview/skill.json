@@ -1,0 +1,14 @@
+{
+  "id": "summarize-interview",
+  "name": "summarize-interview",
+  "domain": "Productivity",
+  "description": "Summarize a user interview transcript into structured insights with key themes, quotes, and action items. Use after conducting user interviews to extract and share findings efficiently.",
+  "trigger_phrases": [
+    "summarize-interview"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

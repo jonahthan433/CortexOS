@@ -1,0 +1,14 @@
+{
+  "id": "grounded-citations",
+  "name": "grounded-citations",
+  "domain": "Research",
+  "description": "Ground answers and documents in cited, verifiable sources.",
+  "trigger_phrases": [
+    "grounded-citations"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "search-ux",
+  "name": "search-ux",
+  "domain": "Productivity",
+  "description": "Design search experiences that help users find what they need, recover from failure, and refine results.",
+  "trigger_phrases": [
+    "search-ux"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

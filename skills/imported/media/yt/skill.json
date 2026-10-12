@@ -1,0 +1,14 @@
+{
+  "id": "yt",
+  "name": "yt",
+  "domain": "Media",
+  "description": "Use when YouTube is relevant: pasted video links or IDs, @handles, quick video lookups, summaries, channel latest uploads, topic search, or any request involving YouTube content \u2014 even if YouTube is not mentioned explicitly. Covers transcripts, search, and channel latest. Not for uploads or account ",
+  "trigger_phrases": [
+    "name: TRANSCRIPT_API_KEY"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

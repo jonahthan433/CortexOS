@@ -1,0 +1,14 @@
+{
+  "id": "a-b-test-design",
+  "name": "a-b-test-design",
+  "domain": "Productivity",
+  "description": "Design rigorous A/B tests with hypotheses, variants, metrics, and sample size calculations.",
+  "trigger_phrases": [
+    "a-b-test-design"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

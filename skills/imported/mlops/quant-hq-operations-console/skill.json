@@ -1,0 +1,14 @@
+{
+  "id": "quant-hq-operations-console",
+  "name": "quant-hq-operations-console",
+  "domain": "Mlops",
+  "description": "Build the Quant Lab HQ cinematic ops console on CT106.",
+  "trigger_phrases": [
+    "quant-hq-operations-console"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

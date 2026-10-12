@@ -1,0 +1,14 @@
+{
+  "id": "cortexcloud-formulate",
+  "name": "cortexcloud-formulate",
+  "domain": ".Archive",
+  "description": "Formulate real-world problems as QUBO for CortexCloud API.",
+  "trigger_phrases": [
+    "cortexcloud-formulate"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

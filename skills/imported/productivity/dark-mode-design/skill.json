@@ -1,0 +1,14 @@
+{
+  "id": "dark-mode-design",
+  "name": "dark-mode-design",
+  "domain": "Productivity",
+  "description": "Design effective dark mode interfaces with proper color adaptation, contrast, and elevation.",
+  "trigger_phrases": [
+    "dark-mode-design"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "telegram-channel-ingestion",
+  "name": "telegram-channel-ingestion",
+  "domain": "Software Development",
+  "description": "Ingest Telegram channel messages via Telethon MTProto.",
+  "trigger_phrases": [
+    "hermes"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

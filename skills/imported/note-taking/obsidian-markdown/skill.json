@@ -1,0 +1,14 @@
+{
+  "id": "obsidian-markdown",
+  "name": "obsidian-markdown",
+  "domain": "Note Taking",
+  "description": "Create and edit Obsidian Flavored Markdown with wikilinks, embeds, callouts, properties, and other Obsidian-specific syntax. Use when working with .md files in Obsidian, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.",
+  "trigger_phrases": [
+    "obsidian-markdown"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

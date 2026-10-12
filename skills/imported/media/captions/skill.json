@@ -1,0 +1,14 @@
+{
+  "id": "captions",
+  "name": "captions",
+  "domain": "Media",
+  "description": "Use when captions, subtitles, or the spoken text of a YouTube video is needed \u2014 even if not explicitly requested: pasted video links or IDs, requests to read, quote, or translate a video, accessibility needs, deaf/HoH use cases, content review, or language learning. Fetches timestamped caption data ",
+  "trigger_phrases": [
+    "name: TRANSCRIPT_API_KEY"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

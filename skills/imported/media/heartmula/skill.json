@@ -1,0 +1,14 @@
+{
+  "id": "heartmula",
+  "name": "heartmula",
+  "domain": "Media",
+  "description": "HeartMuLa: Suno-like song generation from lyrics + tags.",
+  "trigger_phrases": [
+    "heartmula"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "data-enrichment",
+  "name": "data-enrichment",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Enriching person profiles by email, LinkedIn URL, or name",
+    "Enriching companies by domain",
+    "Finding contact details (email, phone) with confidence scores",
+    "Resolving person identity and enriching consumer profiles (Minerva)",
+    "Searching for people or companies by criteria",
+    "Verifying email deliverability before outreach",
+    "\"enrich\", \"lookup\", \"find info about\", \"research\"",
+    "\"who is [person]\", \"company profile for\", \"tell me about\""
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

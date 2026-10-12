@@ -1,0 +1,14 @@
+{
+  "id": "reddit-reading",
+  "name": "reddit-reading",
+  "domain": "Social Media",
+  "description": "Read Reddit: subreddits, search, threads, users. No browser.",
+  "trigger_phrases": [
+    "reddit-reading"
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

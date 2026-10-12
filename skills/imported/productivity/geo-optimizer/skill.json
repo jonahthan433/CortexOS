@@ -1,0 +1,14 @@
+{
+  "id": "geo-optimizer",
+  "name": "geo-optimizer",
+  "domain": "Productivity",
+  "description": "Optimize existing blog posts and web content for GEO (Generative Engine Optimization) \u2014 AI search visibility on ChatGPT, Perplexity, Claude, and Google AI Overviews. Use whenever a user provides a blog URL or pastes existing content and asks to optimize it for AI search, rewrite for LLM visibility, ",
+  "trigger_phrases": [
+    "geo-optimizer"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

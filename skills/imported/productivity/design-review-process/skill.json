@@ -1,0 +1,14 @@
+{
+  "id": "design-review-process",
+  "name": "design-review-process",
+  "domain": "Productivity",
+  "description": "Establish design review gates with criteria, checklists, and approval workflows.",
+  "trigger_phrases": [
+    "design-review-process"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "resume-quantifier",
+  "name": "resume-quantifier",
+  "domain": "Productivity",
+  "description": "Find opportunities to add metrics and estimate numbers when exact data unavailable",
+  "trigger_phrases": [
+    "resume-quantifier"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

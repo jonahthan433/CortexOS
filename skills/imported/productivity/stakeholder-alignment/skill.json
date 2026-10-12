@@ -1,0 +1,14 @@
+{
+  "id": "stakeholder-alignment",
+  "name": "stakeholder-alignment",
+  "domain": "Productivity",
+  "description": "Create stakeholder alignment artifacts including responsibility matrices, decision frameworks, and communication plans.",
+  "trigger_phrases": [
+    "stakeholder-alignment"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

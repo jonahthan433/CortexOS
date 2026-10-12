@@ -1,0 +1,14 @@
+{
+  "id": "blogwatcher",
+  "name": "blogwatcher",
+  "domain": "Research",
+  "description": "Monitor blogs and RSS/Atom feeds via blogwatcher-cli tool.",
+  "trigger_phrases": [
+    "blogwatcher"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

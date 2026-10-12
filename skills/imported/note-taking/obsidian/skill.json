@@ -1,0 +1,14 @@
+{
+  "id": "obsidian",
+  "name": "obsidian",
+  "domain": "Note Taking",
+  "description": "Read, search, create, and edit notes in the Obsidian vault.",
+  "trigger_phrases": [
+    "obsidian"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "people-property",
+  "name": "people-property",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Finding people by name and location",
+    "Address lookups and verification",
+    "Property owner information",
+    "Background research (with legitimate purpose)",
+    "\"find person\", \"lookup person\", \"who lives at\"",
+    "\"property owner\", \"property search\", \"address lookup\"",
+    "\"person at address\", \"contact info for\""
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

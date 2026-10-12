@@ -1,0 +1,14 @@
+{
+  "id": "hermes-cron-spend-control",
+  "name": "hermes-cron-spend-control",
+  "domain": "Devops",
+  "description": "Fix Hermes cron 402 credit errors and repin to free models.",
+  "trigger_phrases": [
+    "hermes-cron-spend-control"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "business-design",
+  "name": "business-design",
+  "domain": "Productivity",
+  "description": "A practitioner's toolkit for thinking and communicating as a designer in a business context \u2014 reading financials, mapping competitive landscapes, and defending design decisions in the language of value.",
+  "trigger_phrases": [
+    "business-design"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

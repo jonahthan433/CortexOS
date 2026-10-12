@@ -1,0 +1,14 @@
+{
+  "id": "sketch",
+  "name": "sketch",
+  "domain": "Creative",
+  "description": "Throwaway HTML mockups: 2-3 design variants to compare.",
+  "trigger_phrases": [
+    "sketch"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

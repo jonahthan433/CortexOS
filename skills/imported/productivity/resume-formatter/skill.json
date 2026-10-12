@@ -1,0 +1,14 @@
+{
+  "id": "resume-formatter",
+  "name": "resume-formatter",
+  "domain": "Productivity",
+  "description": "Ensure ATS-friendly formatting and create clean scannable layouts",
+  "trigger_phrases": [
+    "resume-formatter"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

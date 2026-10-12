@@ -1,0 +1,14 @@
+{
+  "id": "npm-publishing",
+  "name": "npm-publishing",
+  "domain": ".Archive",
+  "description": "Publish scoped npm packages (esp. @org/*) when the user has passkey-only 2FA and the agent runs headless. Covers granular-token scoping, the redacted-2FA-URL trap, the \"Do not challenge\" checkbox diagnostic, the npm org ls first-test, and the build-on-agent / publish-on-user-device workaround.",
+  "trigger_phrases": [
+    "npm-publishing"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "notion",
+  "name": "notion",
+  "domain": "Productivity",
+  "description": "Notion API + ntn CLI: pages, databases, markdown, Workers.",
+  "trigger_phrases": [
+    "notion"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

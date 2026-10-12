@@ -1,0 +1,14 @@
+{
+  "id": "systematic-debugging",
+  "name": "systematic-debugging",
+  "domain": "Superpowers",
+  "description": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
+  "trigger_phrases": [
+    "systematic-debugging"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

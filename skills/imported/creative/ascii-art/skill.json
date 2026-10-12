@@ -1,0 +1,14 @@
+{
+  "id": "ascii-art",
+  "name": "ascii-art",
+  "domain": "Creative",
+  "description": "ASCII art: pyfiglet, cowsay, boxes, image-to-ascii.",
+  "trigger_phrases": [
+    "ascii-art"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

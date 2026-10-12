@@ -1,0 +1,14 @@
+{
+  "id": "ab-testing",
+  "name": "ab-testing",
+  "domain": "Productivity",
+  "description": "When the user wants to plan, design, or implement an A/B test or experiment, or build a growth experimentation program. Also use when the user mentions \"A/B test,\" \"split test,\" \"experiment,\" \"test this change,\" \"variant copy,\" \"multivariate test,\" \"hypothesis,\" \"should I test this,\" \"which version ",
+  "trigger_phrases": [
+    "ab-testing"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

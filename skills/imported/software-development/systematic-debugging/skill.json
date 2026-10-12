@@ -1,0 +1,14 @@
+{
+  "id": "systematic-debugging",
+  "name": "systematic-debugging",
+  "domain": "Software Development",
+  "description": "4-phase root cause debugging: understand bugs before fixing.",
+  "trigger_phrases": [
+    "systematic-debugging"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

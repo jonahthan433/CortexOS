@@ -1,0 +1,14 @@
+{
+  "id": "typography-scale",
+  "name": "typography-scale",
+  "domain": "Productivity",
+  "description": "Create a modular typography scale with size, weight, and line-height relationships.",
+  "trigger_phrases": [
+    "typography-scale"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

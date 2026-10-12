@@ -1,0 +1,14 @@
+{
+  "id": "design-qa-checklist",
+  "name": "design-qa-checklist",
+  "domain": "Productivity",
+  "description": "Create QA checklists for verifying design implementation accuracy.",
+  "trigger_phrases": [
+    "design-qa-checklist"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

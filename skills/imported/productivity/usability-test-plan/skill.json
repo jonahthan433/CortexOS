@@ -1,0 +1,14 @@
+{
+  "id": "usability-test-plan",
+  "name": "usability-test-plan",
+  "domain": "Productivity",
+  "description": "Design a usability test plan with tasks, success metrics, participant criteria, and facilitation guide. Use when planning moderated or unmoderated usability testing sessions.",
+  "trigger_phrases": [
+    "usability-test-plan"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

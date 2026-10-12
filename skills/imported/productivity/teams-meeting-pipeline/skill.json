@@ -1,0 +1,14 @@
+{
+  "id": "teams-meeting-pipeline",
+  "name": "teams-meeting-pipeline",
+  "domain": "Productivity",
+  "description": "Teams meeting summaries, job replay, Graph subscriptions.",
+  "trigger_phrases": [
+    "teams-meeting-pipeline"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

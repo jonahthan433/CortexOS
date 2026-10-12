@@ -1,0 +1,14 @@
+{
+  "id": "review-changes",
+  "name": "Review Changes",
+  "domain": "Code Review Graph",
+  "description": "Perform a structured code review using change detection and impact",
+  "trigger_phrases": [
+    "review changes"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

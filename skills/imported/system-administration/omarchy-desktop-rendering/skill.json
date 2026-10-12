@@ -1,0 +1,21 @@
+{
+  "id": "omarchy-desktop-rendering",
+  "name": "omarchy-desktop-rendering",
+  "domain": "System Administration",
+  "description": "Fix Omarchy desktop rendering: shrunk screen, missing bar.",
+  "trigger_phrases": [
+    "omarchy",
+    "hyprland",
+    "wayland",
+    "xwayland",
+    "quickshell",
+    "display-scaling",
+    "layer-shell",
+    "rendering-troubleshooting"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

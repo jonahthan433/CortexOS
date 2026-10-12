@@ -1,0 +1,14 @@
+{
+  "id": "interview-script",
+  "name": "interview-script",
+  "domain": "Productivity",
+  "description": "Create a structured user interview script with warm-up, core exploration, and wrap-up sections. Use when preparing for user research interviews to ensure consistent, insightful conversations.",
+  "trigger_phrases": [
+    "interview-script"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

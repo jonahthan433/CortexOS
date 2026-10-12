@@ -1,0 +1,14 @@
+{
+  "id": "wireframe-spec",
+  "name": "wireframe-spec",
+  "domain": "Productivity",
+  "description": "Specify wireframe layouts with content priority, component placement, and annotation.",
+  "trigger_phrases": [
+    "wireframe-spec"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

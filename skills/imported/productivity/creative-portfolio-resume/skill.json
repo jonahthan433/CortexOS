@@ -1,0 +1,14 @@
+{
+  "id": "creative-portfolio-resume",
+  "name": "creative-portfolio-resume",
+  "domain": "Productivity",
+  "description": "Balance visual design with ATS compatibility for creative roles",
+  "trigger_phrases": [
+    "creative-portfolio-resume"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

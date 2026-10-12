@@ -1,0 +1,14 @@
+{
+  "id": "jobs-to-be-done",
+  "name": "jobs-to-be-done",
+  "domain": "Productivity",
+  "description": "Map user Jobs-to-Be-Done with functional, emotional, and social dimensions plus outcome expectations. Use when reframing product decisions around user motivations rather than features.",
+  "trigger_phrases": [
+    "jobs-to-be-done"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

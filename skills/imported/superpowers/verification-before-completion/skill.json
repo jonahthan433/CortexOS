@@ -1,0 +1,14 @@
+{
+  "id": "verification-before-completion",
+  "name": "verification-before-completion",
+  "domain": "Superpowers",
+  "description": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
+  "trigger_phrases": [
+    "verification-before-completion"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

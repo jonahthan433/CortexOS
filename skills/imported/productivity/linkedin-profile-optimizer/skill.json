@@ -1,0 +1,14 @@
+{
+  "id": "linkedin-profile-optimizer",
+  "name": "linkedin-profile-optimizer",
+  "domain": "Productivity",
+  "description": "Optimize LinkedIn profile for searchability, recruiter visibility, and engagement",
+  "trigger_phrases": [
+    "linkedin-profile-optimizer"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

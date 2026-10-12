@@ -1,0 +1,14 @@
+{
+  "id": "frontend-design",
+  "name": "frontend-design",
+  "domain": "Productivity",
+  "description": "Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.",
+  "trigger_phrases": [
+    "frontend-design"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

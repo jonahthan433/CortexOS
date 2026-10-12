@@ -1,0 +1,14 @@
+{
+  "id": "himalaya",
+  "name": "himalaya",
+  "domain": "Email",
+  "description": "Himalaya CLI: IMAP/SMTP email from terminal.",
+  "trigger_phrases": [
+    "himalaya"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "localization-design",
+  "name": "localization-design",
+  "domain": "Productivity",
+  "description": "Design interfaces that adapt gracefully to multiple languages, writing directions, and cultural contexts.",
+  "trigger_phrases": [
+    "localization-design"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

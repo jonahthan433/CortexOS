@@ -1,0 +1,14 @@
+{
+  "id": "seo-hreflang",
+  "name": "seo-hreflang",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "seo-hreflang"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

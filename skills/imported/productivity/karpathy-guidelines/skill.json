@@ -1,0 +1,14 @@
+{
+  "id": "karpathy-guidelines",
+  "name": "karpathy-guidelines",
+  "domain": "Productivity",
+  "description": "Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.",
+  "trigger_phrases": [
+    "karpathy-guidelines"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "proxmox-administration",
+  "name": "proxmox-administration",
+  "domain": "Proxmox Administration",
+  "description": "Check a Proxmox VE host over SSH: health, storage, VMs/LXC.",
+  "trigger_phrases": [
+    "proxmox",
+    "virtualization",
+    "lxc",
+    "kvm",
+    "homelab",
+    "remote-ssh"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

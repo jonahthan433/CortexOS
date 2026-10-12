@@ -1,0 +1,14 @@
+{
+  "id": "documentation-template",
+  "name": "documentation-template",
+  "domain": "Productivity",
+  "description": "Generate structured documentation templates for components, patterns, or guidelines within a design system.",
+  "trigger_phrases": [
+    "documentation-template"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

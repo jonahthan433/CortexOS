@@ -1,0 +1,14 @@
+{
+  "id": "product-price-monitor",
+  "name": "product-price-monitor",
+  "domain": "Productivity",
+  "description": "Watch product, flight, or listing prices; alert on target.",
+  "trigger_phrases": [
+    "product-price-monitor"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

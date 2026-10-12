@@ -1,0 +1,14 @@
+{
+  "id": "portfolio-case-study-writer",
+  "name": "portfolio-case-study-writer",
+  "domain": "Productivity",
+  "description": "Transform resume bullets into detailed portfolio case studies",
+  "trigger_phrases": [
+    "portfolio-case-study-writer"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "arxiv",
+  "name": "arxiv",
+  "domain": "Research",
+  "description": "Search arXiv papers by keyword, author, category, or ID.",
+  "trigger_phrases": [
+    "arxiv"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

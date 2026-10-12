@@ -1,0 +1,14 @@
+{
+  "id": "research-repository",
+  "name": "research-repository",
+  "domain": "Productivity",
+  "description": "Build and maintain a research repository that makes findings findable, reusable, and cumulative across the organization.",
+  "trigger_phrases": [
+    "research-repository"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

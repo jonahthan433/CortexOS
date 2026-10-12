@@ -1,0 +1,14 @@
+{
+  "id": "aws-cli-setup",
+  "name": "aws-cli-setup",
+  "domain": "Devops",
+  "description": "Use when installing AWS CLI or running aws login headless.",
+  "trigger_phrases": [
+    "aws-cli-setup"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

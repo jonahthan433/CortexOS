@@ -1,0 +1,14 @@
+{
+  "id": "proxmox-homelab-administration",
+  "name": "proxmox-homelab-administration",
+  "domain": "Homelab",
+  "description": "Administer a Proxmox VE host and its LXC containers / VMs over SSH \u2014 run commands inside containers, reach unprivileged CTs when SSH key-auth fails, start/stop guests, install packages when a vendor CDN is blocked. Use when the user asks to work on a service running in a Proxmox container/VM (e.g. \"",
+  "trigger_phrases": [
+    "hermes"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

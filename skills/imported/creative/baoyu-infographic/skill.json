@@ -1,0 +1,14 @@
+{
+  "id": "baoyu-infographic",
+  "name": "baoyu-infographic",
+  "domain": "Creative",
+  "description": "Infographics: 21 layouts x 21 styles (\u4fe1\u606f\u56fe, \u53ef\u89c6\u5316).",
+  "trigger_phrases": [
+    "baoyu-infographic"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

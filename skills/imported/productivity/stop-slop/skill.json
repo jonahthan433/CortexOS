@@ -1,0 +1,14 @@
+{
+  "id": "stop-slop",
+  "name": "stop-slop",
+  "domain": "Productivity",
+  "description": "Remove AI writing patterns from prose. Use when drafting, editing, or reviewing text to eliminate predictable AI tells and produce more human-like writing.",
+  "trigger_phrases": [
+    "stop-slop"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

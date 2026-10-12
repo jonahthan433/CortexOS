@@ -1,0 +1,14 @@
+{
+  "id": "opportunity-framework",
+  "name": "opportunity-framework",
+  "domain": "Productivity",
+  "description": "Identify, evaluate, and prioritize design opportunities using impact-effort frameworks and strategic criteria.",
+  "trigger_phrases": [
+    "opportunity-framework"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

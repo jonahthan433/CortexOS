@@ -1,0 +1,14 @@
+{
+  "id": "blog-post-counter",
+  "name": "blog-post-counter",
+  "domain": "Productivity",
+  "description": "Counts and compares blog posts across a target and competitors, audits content freshness via sitemap lastmod dates, and maps competitor organic keywords (US, non-branded, informational) against the target to surface ranking gaps. Use when asked to compare blog counts, content volume, publishing cade",
+  "trigger_phrases": [
+    "blog-post-counter"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

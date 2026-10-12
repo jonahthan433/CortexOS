@@ -1,0 +1,14 @@
+{
+  "id": "subtitles",
+  "name": "subtitles",
+  "domain": "Media",
+  "description": "Use when subtitles or the spoken text of a YouTube video is needed: pasted video links or IDs, requests to translate a video, read along, follow foreign-language content, or extract what was said. Also use for language learning or accessibility. Fetches timestamped subtitles from any YouTube video. ",
+  "trigger_phrases": [
+    "name: TRANSCRIPT_API_KEY"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

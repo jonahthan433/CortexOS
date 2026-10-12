@@ -1,0 +1,14 @@
+{
+  "id": "node-api-gateway",
+  "name": "node-api-gateway",
+  "domain": ".Archive",
+  "description": "Build and debug a TypeScript / Fastify / Prisma modular-monolith API gateway (AI gateway, x402, provider-routing, auth, rate-limit). Use when the user wants a Node API server, an OpenAI-compatible chat endpoint, smart provider routing, API-key auth, usage metering, or a CortexCloud-style gateway. Co",
+  "trigger_phrases": [
+    "node-api-gateway"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

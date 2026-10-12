@@ -1,0 +1,14 @@
+{
+  "id": "ux-writing",
+  "name": "ux-writing",
+  "domain": "Productivity",
+  "description": "Write effective UI copy including microcopy, error messages, empty states, and CTAs.",
+  "trigger_phrases": [
+    "ux-writing"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

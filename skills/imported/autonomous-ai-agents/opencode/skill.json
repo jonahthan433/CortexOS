@@ -1,0 +1,14 @@
+{
+  "id": "opencode",
+  "name": "opencode",
+  "domain": "Autonomous Ai Agents",
+  "description": "Delegate coding to OpenCode CLI (features, PR review).",
+  "trigger_phrases": [
+    "opencode"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

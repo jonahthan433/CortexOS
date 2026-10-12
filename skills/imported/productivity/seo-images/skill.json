@@ -1,0 +1,14 @@
+{
+  "id": "seo-images",
+  "name": "seo-images",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "seo-images"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

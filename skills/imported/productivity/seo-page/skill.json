@@ -1,0 +1,14 @@
+{
+  "id": "seo-page",
+  "name": "seo-page",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "seo-page"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

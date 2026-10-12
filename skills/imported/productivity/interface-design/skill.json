@@ -1,0 +1,14 @@
+{
+  "id": "interface-design",
+  "name": "interface-design",
+  "domain": "Productivity",
+  "description": "Craft-first interface design for dashboards, admin panels, SaaS apps, tools, settings pages, data interfaces, and interactive products. Use when designing, building, reviewing, auditing, or refining product UI where visual craft, layout hierarchy, tokens, states, visual direction, or design-system c",
+  "trigger_phrases": [
+    "interface-design"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

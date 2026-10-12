@@ -1,0 +1,14 @@
+{
+  "id": "design-critique",
+  "name": "design-critique",
+  "domain": "Productivity",
+  "description": "Facilitate structured design critiques with clear feedback frameworks and actionable outcomes.",
+  "trigger_phrases": [
+    "design-critique"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "news-shopping",
+  "name": "news-shopping",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Finding recent news articles on a topic",
+    "Current events and breaking news",
+    "Product searches and price comparisons",
+    "Shopping research and product discovery",
+    "Industry news monitoring",
+    "\"news about\", \"latest news\", \"recent articles\"",
+    "\"current events\", \"breaking\", \"headlines\"",
+    "\"shopping\", \"buy\", \"price\", \"product search\""
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

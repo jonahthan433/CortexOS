@@ -1,0 +1,20 @@
+{
+  "id": "troubleshooting",
+  "name": "troubleshooting",
+  "domain": "Troubleshooting",
+  "description": ">-",
+  "trigger_phrases": [
+    "systemd",
+    "audio",
+    "pipewire",
+    "browser",
+    "wifi",
+    "kdeconnect",
+    "troubleshooting"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

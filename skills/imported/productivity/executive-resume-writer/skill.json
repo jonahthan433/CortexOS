@@ -1,0 +1,14 @@
+{
+  "id": "executive-resume-writer",
+  "name": "executive-resume-writer",
+  "domain": "Productivity",
+  "description": "Create C-suite and VP level resumes emphasizing strategic leadership",
+  "trigger_phrases": [
+    "executive-resume-writer"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

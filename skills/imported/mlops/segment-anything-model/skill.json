@@ -1,0 +1,14 @@
+{
+  "id": "segment-anything-model",
+  "name": "segment-anything-model",
+  "domain": "Mlops",
+  "description": "SAM: zero-shot image segmentation via points, boxes, masks.",
+  "trigger_phrases": [
+    "segment-anything-model"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

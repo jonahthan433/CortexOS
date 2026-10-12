@@ -1,0 +1,14 @@
+{
+  "id": "readable-measure",
+  "name": "readable-measure",
+  "domain": "Productivity",
+  "description": "Set optimal line lengths for readability across typography scales and responsive layouts.",
+  "trigger_phrases": [
+    "readable-measure"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

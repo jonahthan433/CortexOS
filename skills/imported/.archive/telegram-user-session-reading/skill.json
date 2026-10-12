@@ -1,0 +1,14 @@
+{
+  "id": "telegram-user-session-reading",
+  "name": "telegram-user-session-reading",
+  "domain": ".Archive",
+  "description": "Read/monitor Telegram channels and chats as a DATA SOURCE using a telethon user session (not a bot). Use when the user wants to ingest, summarize, or build on the content of a channel they don't own \u2014 e.g. \"subscribe to / monitor / read channel X\", \"build a bot from channel X's signals\".",
+  "trigger_phrases": [
+    "hermes"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

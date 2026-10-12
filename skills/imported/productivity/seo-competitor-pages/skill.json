@@ -1,0 +1,14 @@
+{
+  "id": "seo-competitor-pages",
+  "name": "seo-competitor-pages",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "seo-competitor-pages"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

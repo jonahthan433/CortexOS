@@ -1,0 +1,14 @@
+{
+  "id": "hermes-agent",
+  "name": "hermes-agent",
+  "domain": "Autonomous Ai Agents",
+  "description": "Use, configure, theme, extend, and orchestrate Hermes Agent.",
+  "trigger_phrases": [
+    "hermes-agent"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

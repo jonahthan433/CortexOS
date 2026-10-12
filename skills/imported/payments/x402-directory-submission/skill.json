@@ -1,0 +1,14 @@
+{
+  "id": "x402-directory-submission",
+  "name": "x402-directory-submission",
+  "domain": "Payments",
+  "description": "Submit x402/agent-native APIs to free discovery directories.",
+  "trigger_phrases": [
+    "x402-directory-submission"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

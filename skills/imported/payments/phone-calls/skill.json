@@ -1,0 +1,21 @@
+{
+  "id": "phone-calls",
+  "name": "phone-calls",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Making AI-powered outbound phone calls",
+    "Scheduling calls and getting transcripts",
+    "Buying and managing phone numbers",
+    "Leaving voicemails",
+    "Transferring calls to humans",
+    "Checking if a number has iMessage/FaceTime",
+    "\"call\", \"phone call\", \"make a call\", \"dial\"",
+    "\"buy number\", \"phone number\", \"get a number\""
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "cortexcloud-platform",
+  "name": "cortexcloud-platform",
+  "domain": "Mlops",
+  "description": "Build, deploy, and operate the CortexCloud AI gateway/platform (TypeScript Fastify + Prisma + Postgres + Redis + x402). Covers the deploy topology (Proxmox LXC 105, NOT the host), agent-discovery-first SEO, and the recurring Fastify/Prisma/x402 gotchas. Use whenever the user asks to build/deploy the",
+  "trigger_phrases": [
+    "cortexcloud-platform"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "cold-email-writer",
+  "name": "cold-email-writer",
+  "domain": "Productivity",
+  "description": "Write personalized cold outreach emails to hiring managers and founders \u2014 specific, human, not a pitch deck",
+  "trigger_phrases": [
+    "cold-email-writer"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

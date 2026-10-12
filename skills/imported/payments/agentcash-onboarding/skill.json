@@ -1,0 +1,14 @@
+{
+  "id": "agentcash-onboarding",
+  "name": "agentcash-onboarding",
+  "domain": "Payments",
+  "description": "Set up AgentCash for your AI agent \u2014 wallet, core skill, and optional invite credits",
+  "trigger_phrases": [
+    "agentcash-onboarding"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "ui-styling",
+  "name": "ui-styling",
+  "domain": "Creative",
+  "description": "Create beautiful, accessible user interfaces with shadcn/ui components (built on Radix UI + Tailwind), Tailwind CSS utility-first styling, and canvas-based visual designs. Use when building user interfaces, implementing design systems, creating responsive layouts, adding accessible components (dialo",
+  "trigger_phrases": [
+    "ui-styling"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

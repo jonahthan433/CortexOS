@@ -1,0 +1,14 @@
+{
+  "id": "ascii-video",
+  "name": "ascii-video",
+  "domain": "Creative",
+  "description": "ASCII video: convert video/audio to colored ASCII MP4/GIF.",
+  "trigger_phrases": [
+    "ascii-video"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

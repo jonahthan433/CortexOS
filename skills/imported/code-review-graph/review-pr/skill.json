@@ -1,0 +1,14 @@
+{
+  "id": "review-pr",
+  "name": "review-pr",
+  "domain": "Code Review Graph",
+  "description": "Review a PR or branch diff using the knowledge graph for full structural context. Outputs a structured review with blast-radius analysis.",
+  "trigger_phrases": [
+    "review-pr"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "obsidian-cli",
+  "name": "obsidian-cli",
+  "domain": "Note Taking",
+  "description": "Interact with Obsidian vaults using the Obsidian CLI to read, create, search, and manage notes, tasks, properties, and more. Also supports plugin and theme development with commands to reload plugins, run JavaScript, capture errors, take screenshots, and inspect the DOM. Use when the user asks to in",
+  "trigger_phrases": [
+    "obsidian-cli"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

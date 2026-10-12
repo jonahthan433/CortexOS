@@ -1,0 +1,14 @@
+{
+  "id": "team-workflow",
+  "name": "team-workflow",
+  "domain": "Productivity",
+  "description": "Design team workflows covering task management, collaboration rituals, and tooling.",
+  "trigger_phrases": [
+    "team-workflow"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

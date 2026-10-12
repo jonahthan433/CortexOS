@@ -1,0 +1,14 @@
+{
+  "id": "pr-review-expert",
+  "name": "pr-review-expert",
+  "domain": "Productivity",
+  "description": "Use when the user asks to review pull requests, analyze code changes, check for security issues in PRs, or assess code quality of diffs.",
+  "trigger_phrases": [
+    "pr-review-expert"
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

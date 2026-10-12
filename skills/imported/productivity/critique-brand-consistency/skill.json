@@ -1,0 +1,14 @@
+{
+  "id": "critique-brand-consistency",
+  "name": "critique-brand-consistency",
+  "domain": "Productivity",
+  "description": "Critique a screen's brand consistency against mood.md, voice.md, and tokens.md.",
+  "trigger_phrases": [
+    "critique-brand-consistency"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "accessibility-test-plan",
+  "name": "accessibility-test-plan",
+  "domain": "Productivity",
+  "description": "Create accessibility testing plans covering assistive technologies and WCAG criteria.",
+  "trigger_phrases": [
+    "accessibility-test-plan"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "audiocraft-audio-generation",
+  "name": "audiocraft-audio-generation",
+  "domain": "Mlops",
+  "description": "AudioCraft: MusicGen text-to-music, AudioGen text-to-sound.",
+  "trigger_phrases": [
+    "audiocraft-audio-generation"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

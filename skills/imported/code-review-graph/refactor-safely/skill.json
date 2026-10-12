@@ -1,0 +1,14 @@
+{
+  "id": "refactor-safely",
+  "name": "Refactor Safely",
+  "domain": "Code Review Graph",
+  "description": "Plan and execute safe refactoring using dependency analysis",
+  "trigger_phrases": [
+    "refactor safely"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

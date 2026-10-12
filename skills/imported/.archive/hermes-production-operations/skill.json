@@ -1,0 +1,14 @@
+{
+  "id": "hermes-production-operations",
+  "name": "hermes-production-operations",
+  "domain": ".Archive",
+  "description": "Harden 24/7 Hermes: db integrity, backups, restarts.",
+  "trigger_phrases": [
+    "hermes-production-operations"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

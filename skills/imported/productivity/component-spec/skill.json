@@ -1,0 +1,14 @@
+{
+  "id": "component-spec",
+  "name": "component-spec",
+  "domain": "Productivity",
+  "description": "Write a detailed component specification including props, states, variants, accessibility requirements, and usage guidelines.",
+  "trigger_phrases": [
+    "component-spec"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

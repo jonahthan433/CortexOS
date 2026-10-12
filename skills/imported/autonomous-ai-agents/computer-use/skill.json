@@ -1,0 +1,14 @@
+{
+  "id": "computer-use",
+  "name": "computer-use",
+  "domain": "Autonomous Ai Agents",
+  "description": "Drive the desktop background-first; escalate on signal.",
+  "trigger_phrases": [
+    "computer-use"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

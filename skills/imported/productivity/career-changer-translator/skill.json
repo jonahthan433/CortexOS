@@ -1,0 +1,14 @@
+{
+  "id": "career-changer-translator",
+  "name": "career-changer-translator",
+  "domain": "Productivity",
+  "description": "Translate skills from one industry to another, identify transferable skills",
+  "trigger_phrases": [
+    "career-changer-translator"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

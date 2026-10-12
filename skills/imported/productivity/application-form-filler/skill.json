@@ -1,0 +1,14 @@
+{
+  "id": "application-form-filler",
+  "name": "application-form-filler",
+  "domain": "Productivity",
+  "description": "Fill out job application form fields with context-aware, tailored answers drawn from the candidate's CV and the job description",
+  "trigger_phrases": [
+    "application-form-filler"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

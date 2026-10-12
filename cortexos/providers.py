@@ -156,7 +156,7 @@ class JevRouter:
             },
             "risk": {
                 "read_only": "analysis or drafting with no side effects",
-                "local_write": "writes only inside the vault",
+                "local_write": "creates or edits files inside the vault; destructive ops (delete, remove, overwrite, wipe, purge) are NOT local_write",
                 "external_action": "sends, publishes, or changes an account",
                 "financial": "moves money or makes purchases",
                 "unknown": "ambiguous; treat as requiring approval",

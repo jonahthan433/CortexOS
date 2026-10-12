@@ -1,0 +1,14 @@
+{
+  "id": "hermes-ecosystem-installation",
+  "name": "hermes-ecosystem-installation",
+  "domain": ".Archive",
+  "description": "Install community skills/plugins into Hermes from GitHub.",
+  "trigger_phrases": [
+    "hermes-ecosystem-installation"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "seo-audit",
+  "name": "seo-audit",
+  "domain": "Productivity",
+  "description": "Full website SEO audit with parallel subagent delegation. Crawls up to 500 pages, detects business type, delegates to up to 15 specialists (8 always + 7 conditional), generates health score. Use when user says audit, full SEO check, analyze my site, or website health check.",
+  "trigger_phrases": [
+    "seo-audit"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

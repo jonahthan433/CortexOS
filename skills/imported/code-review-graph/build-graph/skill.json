@@ -1,0 +1,14 @@
+{
+  "id": "build-graph",
+  "name": "build-graph",
+  "domain": "Code Review Graph",
+  "description": "Build or update the code review knowledge graph. Run this first to initialize, or let hooks keep it updated automatically.",
+  "trigger_phrases": [
+    "build-graph"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

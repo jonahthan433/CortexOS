@@ -1,0 +1,14 @@
+{
+  "id": "no-outlinks-audit",
+  "name": "no-outlinks-audit",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "no-outlinks-audit"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

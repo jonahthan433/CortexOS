@@ -1,0 +1,14 @@
+{
+  "id": "codebase-inspection",
+  "name": "codebase-inspection",
+  "domain": "Software Development",
+  "description": "Inspect codebases w/ pygount: LOC, languages, ratios.",
+  "trigger_phrases": [
+    "codebase-inspection"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "email",
+  "name": "email",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Sending emails (one-off or from custom addresses)",
+    "Buying a forwarding inbox (username@stableemail.dev)",
+    "Purchasing custom email subdomains (you@yourname.stableemail.dev)",
+    "Reading and managing inbox messages programmatically",
+    "Setting up catch-all forwarding for subdomains",
+    "Managing authorized signers for shared subdomains",
+    "\"send email\", \"email this to\", \"notify by email\"",
+    "\"buy inbox\", \"forwarding address\", \"email inbox\""
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

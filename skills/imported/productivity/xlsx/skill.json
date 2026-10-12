@@ -1,0 +1,14 @@
+{
+  "id": "xlsx",
+  "name": "xlsx",
+  "domain": "Productivity",
+  "description": "Create, read, edit Excel .xlsx workbooks and CSVs.",
+  "trigger_phrases": [
+    "xlsx"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

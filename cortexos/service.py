@@ -46,8 +46,10 @@ class CortexService:
         self.vault.log_request(request_id, prompt, "received", route.tier, backend or self.settings.backend)
 
         # Enforce the action gate before every tier, including local rule lookups.
-        decision = {"risk_level": skill.risk_level, "requires_approval": skill.approval_required or skill.risk_level in {"external_action", "financial", "unknown"},
-                    "reason": "Declared in skill manifest"} if skill else None
+        decision = {"risk_level": skill.risk_level, "requires_approval": True,
+                    "reason": "Declared in skill manifest"} if skill and skill.risk_level in {"external_action", "financial", "unknown"} else (
+                  {"risk_level": skill.risk_level, "requires_approval": skill.approval_required,
+                   "reason": "Declared in skill manifest"} if skill else None)
         tier_decision = None
         if decision is None and route.tier != 1:
             # Tier 1/2 are local reads and read-only answers; only agent work

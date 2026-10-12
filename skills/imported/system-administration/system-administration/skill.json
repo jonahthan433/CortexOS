@@ -1,0 +1,19 @@
+{
+  "id": "system-administration",
+  "name": "system-administration",
+  "domain": "System Administration",
+  "description": ">-",
+  "trigger_phrases": [
+    "disk-management",
+    "partitioning",
+    "lvm",
+    "encryption",
+    "filesystems",
+    "system-inspection"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

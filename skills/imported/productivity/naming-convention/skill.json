@@ -1,0 +1,14 @@
+{
+  "id": "naming-convention",
+  "name": "naming-convention",
+  "domain": "Productivity",
+  "description": "Establish a naming convention system for design elements, components, and tokens with clear rules and examples.",
+  "trigger_phrases": [
+    "naming-convention"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

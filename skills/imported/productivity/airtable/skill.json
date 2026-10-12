@@ -1,0 +1,14 @@
+{
+  "id": "airtable",
+  "name": "airtable",
+  "domain": "Productivity",
+  "description": "Airtable REST API via curl. Records CRUD, filters, upserts.",
+  "trigger_phrases": [
+    "airtable"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

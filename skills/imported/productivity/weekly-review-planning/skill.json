@@ -1,0 +1,14 @@
+{
+  "id": "weekly-review-planning",
+  "name": "weekly-review-planning",
+  "domain": "Productivity",
+  "description": "Weekly reset: commitments, stalled work, next-week plan.",
+  "trigger_phrases": [
+    "weekly-review-planning"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

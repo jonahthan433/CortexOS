@@ -1,0 +1,14 @@
+{
+  "id": "quantum-provider-integration",
+  "name": "quantum-provider-integration",
+  "domain": ".Archive",
+  "description": "Quantum backend adapters: Braket + IBM discovery quirks.",
+  "trigger_phrases": [
+    "quantum-provider-integration"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

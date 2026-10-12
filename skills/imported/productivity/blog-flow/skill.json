@@ -1,0 +1,14 @@
+{
+  "id": "blog-flow",
+  "name": "blog-flow",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "blog-flow"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

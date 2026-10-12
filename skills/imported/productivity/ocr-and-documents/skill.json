@@ -1,0 +1,14 @@
+{
+  "id": "ocr-and-documents",
+  "name": "ocr-and-documents",
+  "domain": "Productivity",
+  "description": "Extract text from PDFs/scans (pymupdf, marker-pdf).",
+  "trigger_phrases": [
+    "ocr-and-documents"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "critique-color",
+  "name": "critique-color",
+  "domain": "Productivity",
+  "description": "Critique a screen's colour usage \u2014 contrast ratios, palette coherence, semantic meaning, and colour accessibility.",
+  "trigger_phrases": [
+    "critique-color"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

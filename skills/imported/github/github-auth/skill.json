@@ -1,0 +1,14 @@
+{
+  "id": "github-auth",
+  "name": "github-auth",
+  "domain": "Github",
+  "description": "GitHub auth setup: HTTPS tokens, SSH keys, gh CLI login.",
+  "trigger_phrases": [
+    "github-auth"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

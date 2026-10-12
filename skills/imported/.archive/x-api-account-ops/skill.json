@@ -1,0 +1,14 @@
+{
+  "id": "x-api-account-ops",
+  "name": "x-api-account-ops",
+  "domain": ".Archive",
+  "description": "Use when posting to X via API: auth bootstrap, 403 filters.",
+  "trigger_phrases": [
+    "x-api-account-ops"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "critique-composition",
+  "name": "critique-composition",
+  "domain": "Productivity",
+  "description": "Critique a screen's composition \u2014 balance, whitespace, rhythm, and gestalt principles.",
+  "trigger_phrases": [
+    "critique-composition"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "survey-design",
+  "name": "survey-design",
+  "domain": "Productivity",
+  "description": "Design surveys that collect reliable, unbiased quantitative data to validate hypotheses and measure user attitudes at scale.",
+  "trigger_phrases": [
+    "survey-design"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

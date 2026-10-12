@@ -1,0 +1,14 @@
+{
+  "id": "p5js",
+  "name": "p5js",
+  "domain": "Creative",
+  "description": "p5.js sketches: gen art, shaders, interactive, 3D.",
+  "trigger_phrases": [
+    "p5js"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "mcp-registry-publishing",
+  "name": "mcp-registry-publishing",
+  "domain": ".Archive",
+  "description": "Publish/register an MCP server in MCP registries.",
+  "trigger_phrases": [
+    "mcp-registry-publishing"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "error-handling-ux",
+  "name": "error-handling-ux",
+  "domain": "Productivity",
+  "description": "Design error prevention, detection, and recovery experiences.",
+  "trigger_phrases": [
+    "error-handling-ux"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

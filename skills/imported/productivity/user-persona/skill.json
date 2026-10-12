@@ -1,0 +1,14 @@
+{
+  "id": "user-persona",
+  "name": "user-persona",
+  "domain": "Productivity",
+  "description": "Create refined user personas from research data with demographics, goals, frustrations, and behavioral patterns. Use when synthesizing user research into actionable persona profiles for design decisions.",
+  "trigger_phrases": [
+    "user-persona"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

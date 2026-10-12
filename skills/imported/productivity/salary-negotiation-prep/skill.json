@@ -1,0 +1,14 @@
+{
+  "id": "salary-negotiation-prep",
+  "name": "salary-negotiation-prep",
+  "domain": "Productivity",
+  "description": "Research market rates, build negotiation strategy, and create counter-offer scripts",
+  "trigger_phrases": [
+    "salary-negotiation-prep"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "python-debugpy",
+  "name": "python-debugpy",
+  "domain": "Software Development",
+  "description": "Debug Python: pdb REPL + debugpy remote (DAP).",
+  "trigger_phrases": [
+    "python-debugpy"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "design-brief",
+  "name": "design-brief",
+  "domain": "Productivity",
+  "description": "Write a comprehensive design brief that defines the problem space, constraints, audience, and success criteria.",
+  "trigger_phrases": [
+    "design-brief"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

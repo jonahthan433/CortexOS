@@ -1,0 +1,14 @@
+{
+  "id": "github",
+  "name": "github",
+  "domain": "Software Development",
+  "description": "GitHub via gh CLI: PRs, issues, reviews, repos, auth.",
+  "trigger_phrases": [
+    "github"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

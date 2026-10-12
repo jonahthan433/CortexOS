@@ -1,0 +1,14 @@
+{
+  "id": "reddit-lead-generation",
+  "name": "reddit-lead-generation",
+  "domain": ".Archive",
+  "description": "Find buyers on Reddit via intent search and outreach.",
+  "trigger_phrases": [
+    "reddit-lead-generation"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

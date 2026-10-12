@@ -1,0 +1,14 @@
+{
+  "id": "cortexcloud-x-voice",
+  "name": "cortexcloud-x-voice",
+  "domain": "Cortexcloud X Voice",
+  "description": "Draft @cortexcloud1 X posts. Engineer voice, no marketing.",
+  "trigger_phrases": [
+    "cortexcloud-x-voice"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

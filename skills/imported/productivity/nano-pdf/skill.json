@@ -1,0 +1,14 @@
+{
+  "id": "nano-pdf",
+  "name": "nano-pdf",
+  "domain": "Productivity",
+  "description": "Edit text in existing PDFs via natural-language prompts.",
+  "trigger_phrases": [
+    "nano-pdf"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

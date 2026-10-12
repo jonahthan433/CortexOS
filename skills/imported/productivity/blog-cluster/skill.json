@@ -1,0 +1,14 @@
+{
+  "id": "blog-cluster",
+  "name": "blog-cluster",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "blog-cluster"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

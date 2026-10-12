@@ -23,8 +23,8 @@ settings = Settings.load()
 
 def test_agent_count():
     registry = SkillRegistry(settings.skills)
-    assert len(registry.list()) == 12, f'expected 12 skills, got {len(registry.list())}'
-    print('PASS: 12 agents registered')
+    assert len(registry.list()) == 480, f'expected 480 skills (12 native + 468 imported), got {len(registry.list())}'
+    print('PASS: 480 skills registered (12 native + 468 imported)')
 
 
 def test_coordinator():
@@ -59,8 +59,8 @@ def test_health():
     hc = HealthCheck(service=svc, vault=svc.vault, voice=LocalVoice(settings))
     snap = hc.snapshot()
     assert snap['status'] in ('ok', 'degraded'), snap
-    assert snap['checks']['skills']['count'] == 12
-    print('PASS: health snapshot reports 12 skills')
+    assert snap['checks']['skills']['count'] == 480
+    print('PASS: health snapshot reports 480 skills')
 
 
 def test_backup():

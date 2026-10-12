@@ -1,0 +1,14 @@
+{
+  "id": "antigravity-cli",
+  "name": "antigravity-cli",
+  "domain": "Autonomous Ai Agents",
+  "description": "Operate the Antigravity CLI (agy): plugins, auth, sandbox.",
+  "trigger_phrases": [
+    "antigravity-cli"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

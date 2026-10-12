@@ -1,0 +1,14 @@
+{
+  "id": "blog-factcheck",
+  "name": "blog-factcheck",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "blog-factcheck"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

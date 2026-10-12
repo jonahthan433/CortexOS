@@ -1,0 +1,14 @@
+{
+  "id": "resume-tailor",
+  "name": "resume-tailor",
+  "domain": "Productivity",
+  "description": "Customize resume for specific job postings while maintaining truthfulness",
+  "trigger_phrases": [
+    "resume-tailor"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

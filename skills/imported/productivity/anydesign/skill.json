@@ -1,0 +1,14 @@
+{
+  "id": "anydesign",
+  "name": "anydesign",
+  "domain": "Productivity",
+  "description": "Analyze images, websites, and Figma files to extract their design and generate a `design.md` with token system, component inventory, and reconstruction notes. Use this skill whenever the user wants to understand, document, replicate, or audit the design of something visual: a screenshot, a URL, a Fi",
+  "trigger_phrases": [
+    "anydesign"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

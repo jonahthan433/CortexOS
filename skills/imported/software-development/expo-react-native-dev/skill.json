@@ -1,0 +1,14 @@
+{
+  "id": "expo-react-native-dev",
+  "name": "expo-react-native-dev",
+  "domain": "Software Development",
+  "description": "Verify Expo RN apps headless. Use on expo web-export errors.",
+  "trigger_phrases": [
+    "expo"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

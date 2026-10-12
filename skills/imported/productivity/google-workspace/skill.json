@@ -1,0 +1,15 @@
+{
+  "id": "google-workspace",
+  "name": "google-workspace",
+  "domain": "Productivity",
+  "description": "Gmail, Calendar, Drive, Docs, Sheets via gws CLI or Python.",
+  "trigger_phrases": [
+    "path: google_token.json",
+    "path: google_client_secret.json"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

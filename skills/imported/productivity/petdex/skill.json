@@ -1,0 +1,14 @@
+{
+  "id": "petdex",
+  "name": "petdex",
+  "domain": "Productivity",
+  "description": "Install and select animated petdex mascots for Hermes.",
+  "trigger_phrases": [
+    "petdex"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

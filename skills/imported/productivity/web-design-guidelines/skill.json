@@ -1,0 +1,14 @@
+{
+  "id": "web-design-guidelines",
+  "name": "web-design-guidelines",
+  "domain": "Productivity",
+  "description": "Review UI code for Web Interface Guidelines compliance. Use when asked to \"review my UI\", \"check accessibility\", \"audit design\", \"review UX\", or \"check my site against best practices\".",
+  "trigger_phrases": [
+    "web-design-guidelines"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

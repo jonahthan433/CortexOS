@@ -1,0 +1,14 @@
+{
+  "id": "seo-image-gen",
+  "name": "seo-image-gen",
+  "domain": "Productivity",
+  "description": "AI image generation for SEO assets: OG/social preview images, blog hero images, schema images, product photography, infographics. Powered by Gemini via nanobanana-mcp. Requires banana extension installed. Use when user says \\\"generate image\\\", \\\"OG image\\\", \\\"social preview\\\", \\\"hero image\\\", \\\"blog",
+  "trigger_phrases": [
+    "seo-image-gen"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

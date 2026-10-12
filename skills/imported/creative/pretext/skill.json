@@ -1,0 +1,14 @@
+{
+  "id": "pretext",
+  "name": "pretext",
+  "domain": "Creative",
+  "description": "Build creative browser demos with DOM-free text layout.",
+  "trigger_phrases": [
+    "pretext"
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

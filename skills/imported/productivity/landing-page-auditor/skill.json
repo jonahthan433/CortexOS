@@ -1,0 +1,14 @@
+{
+  "id": "landing-page-auditor",
+  "name": "landing-page-auditor",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "landing-page-auditor"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

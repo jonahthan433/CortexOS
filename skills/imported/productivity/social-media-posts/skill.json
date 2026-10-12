@@ -1,0 +1,17 @@
+{
+  "id": "social-media-posts",
+  "name": "social-media-posts",
+  "domain": "Productivity",
+  "description": "Create platform-specific social media posts for LinkedIn, Facebook, Instagram, and Reddit. Handles character limits, hashtag strategies, hook placement, and image specs per platform. Works from scratch, from existing content (blog, newsletter, announcement), or as a multi-platform campaign. Produces",
+  "trigger_phrases": [
+    "Read",
+    "Write",
+    "Glob",
+    "Grep"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

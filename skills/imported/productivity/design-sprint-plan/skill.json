@@ -1,0 +1,14 @@
+{
+  "id": "design-sprint-plan",
+  "name": "design-sprint-plan",
+  "domain": "Productivity",
+  "description": "Plan and facilitate design sprints from challenge framing through prototype testing.",
+  "trigger_phrases": [
+    "design-sprint-plan"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "youtube-data",
+  "name": "youtube-data",
+  "domain": "Media",
+  "description": "Use when structured YouTube data is needed: pasted video/channel/playlist links, transcripts for analysis, video metadata, channel upload history, search results, or playlist contents \u2014 without Google API quotas or OAuth. Triggers on YouTube URLs, creator names, topic research, or any request needin",
+  "trigger_phrases": [
+    "name: TRANSCRIPT_API_KEY"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

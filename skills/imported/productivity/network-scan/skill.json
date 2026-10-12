@@ -1,0 +1,14 @@
+{
+  "id": "network-scan",
+  "name": "network-scan",
+  "domain": "Productivity",
+  "description": "Scan your LinkedIn contacts' companies for matching job openings",
+  "trigger_phrases": [
+    "network-scan"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

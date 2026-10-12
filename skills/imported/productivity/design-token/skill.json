@@ -1,0 +1,14 @@
+{
+  "id": "design-token",
+  "name": "design-token",
+  "domain": "Productivity",
+  "description": "Define and organize design tokens (color, spacing, typography, elevation) with naming conventions and usage guidance.",
+  "trigger_phrases": [
+    "design-token"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

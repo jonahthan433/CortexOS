@@ -1,0 +1,14 @@
+{
+  "id": "empathy-map",
+  "name": "empathy-map",
+  "domain": "Productivity",
+  "description": "Build a 4-quadrant empathy map (Says, Thinks, Does, Feels) to synthesize user research into actionable insights. Use when you need to quickly capture and share user understanding across the team.",
+  "trigger_phrases": [
+    "empathy-map"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

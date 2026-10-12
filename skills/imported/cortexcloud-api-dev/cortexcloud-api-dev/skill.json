@@ -1,0 +1,14 @@
+{
+  "id": "cortexcloud-api-dev",
+  "name": "cortexcloud-api-dev",
+  "domain": "Cortexcloud Api Dev",
+  "description": "Build, validate, and safely ship a new CortexCloud API category (ML/Data/AI/Research/Quantum-style). Covers feature-flag gating, provider abstraction with fallback, model-aware cost-plus pricing, x402/MPP real-USDC settlement, ledger margin tracking, and discovery/Bazaar/OpenAPI registration. Use wh",
+  "trigger_phrases": [
+    "cortexcloud-api-dev"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "hermes-doctor-triage",
+  "name": "hermes-doctor-triage",
+  "domain": "Hermes Doctor Triage",
+  "description": "Use when fixing hermes doctor findings at root cause.",
+  "trigger_phrases": [
+    "hermes-doctor-triage"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

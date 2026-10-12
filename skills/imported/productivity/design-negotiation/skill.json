@@ -1,0 +1,14 @@
+{
+  "id": "design-negotiation",
+  "name": "design-negotiation",
+  "domain": "Productivity",
+  "description": "Advocate for design quality, scope, and time with cross-functional partners and leadership using evidence and shared goals.",
+  "trigger_phrases": [
+    "design-negotiation"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

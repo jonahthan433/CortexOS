@@ -1,0 +1,14 @@
+{
+  "id": "critique-typography",
+  "name": "critique-typography",
+  "domain": "Productivity",
+  "description": "Critique a screen's typography \u2014 scale usage, readability, consistency, and token compliance.",
+  "trigger_phrases": [
+    "critique-typography"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

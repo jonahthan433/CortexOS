@@ -1,0 +1,14 @@
+{
+  "id": "workflow-builder",
+  "name": "workflow-builder",
+  "domain": "Productivity",
+  "description": "Design and write deterministic multi-agent workflow scripts (.js files in .claude/workflows/) for Claude Code's Workflow tool. Use when a user wants to build, create, author, scaffold, or run a custom Claude Code workflow, orchestrate sub-agents (fan-out, pipeline, loop, judge-panel), or automate a ",
+  "trigger_phrases": [
+    "workflow-builder"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

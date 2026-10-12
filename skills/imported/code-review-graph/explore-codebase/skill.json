@@ -1,0 +1,14 @@
+{
+  "id": "explore-codebase",
+  "name": "Explore Codebase",
+  "domain": "Code Review Graph",
+  "description": "Navigate and understand codebase structure using the knowledge graph",
+  "trigger_phrases": [
+    "explore codebase"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

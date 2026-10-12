@@ -1,0 +1,14 @@
+{
+  "id": "ogilvy-copywriting",
+  "name": "ogilvy-copywriting",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "ogilvy-copywriting"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

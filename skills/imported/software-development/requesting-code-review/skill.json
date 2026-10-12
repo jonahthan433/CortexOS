@@ -1,0 +1,14 @@
+{
+  "id": "requesting-code-review",
+  "name": "requesting-code-review",
+  "domain": "Software Development",
+  "description": "Pre-commit review: security scan, quality gates, auto-fix.",
+  "trigger_phrases": [
+    "requesting-code-review"
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

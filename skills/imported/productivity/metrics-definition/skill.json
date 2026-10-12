@@ -1,0 +1,14 @@
+{
+  "id": "metrics-definition",
+  "name": "metrics-definition",
+  "domain": "Productivity",
+  "description": "Define UX metrics and KPIs that connect design decisions to measurable business and user outcomes.",
+  "trigger_phrases": [
+    "metrics-definition"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

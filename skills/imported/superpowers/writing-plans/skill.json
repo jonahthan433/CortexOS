@@ -1,0 +1,14 @@
+{
+  "id": "writing-plans",
+  "name": "writing-plans",
+  "domain": "Superpowers",
+  "description": "Use when you have a spec or requirements for a multi-step task, before touching code",
+  "trigger_phrases": [
+    "writing-plans"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

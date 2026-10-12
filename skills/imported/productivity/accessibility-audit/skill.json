@@ -1,0 +1,14 @@
+{
+  "id": "accessibility-audit",
+  "name": "accessibility-audit",
+  "domain": "Productivity",
+  "description": "Conduct a comprehensive accessibility audit against WCAG guidelines with severity ratings and remediation steps.",
+  "trigger_phrases": [
+    "accessibility-audit"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

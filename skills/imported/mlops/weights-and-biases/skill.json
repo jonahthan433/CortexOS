@@ -1,0 +1,14 @@
+{
+  "id": "weights-and-biases",
+  "name": "weights-and-biases",
+  "domain": "Mlops",
+  "description": "W&B: log ML experiments, sweeps, model registry, dashboards.",
+  "trigger_phrases": [
+    "weights-and-biases"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

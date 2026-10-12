@@ -1,0 +1,14 @@
+{
+  "id": "critique-information-density",
+  "name": "critique-information-density",
+  "domain": "Productivity",
+  "description": "Critique a screen's information density \u2014 cognitive load, content prioritisation, scanning patterns, and progressive disclosure.",
+  "trigger_phrases": [
+    "critique-information-density"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

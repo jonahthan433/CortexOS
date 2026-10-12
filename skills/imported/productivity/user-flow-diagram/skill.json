@@ -1,0 +1,14 @@
+{
+  "id": "user-flow-diagram",
+  "name": "user-flow-diagram",
+  "domain": "Productivity",
+  "description": "Create user flow diagrams showing paths, decisions, and branch logic.",
+  "trigger_phrases": [
+    "user-flow-diagram"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

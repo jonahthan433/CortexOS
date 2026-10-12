@@ -1,0 +1,14 @@
+{
+  "id": "dogfood",
+  "name": "dogfood",
+  "domain": "Software Development",
+  "description": "Exploratory QA of web apps: find bugs, evidence, reports.",
+  "trigger_phrases": [
+    "dogfood"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

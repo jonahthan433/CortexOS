@@ -1,0 +1,21 @@
+{
+  "id": "web-research",
+  "name": "web-research",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Deep web research and investigation",
+    "Finding similar pages to a reference URL",
+    "Extracting clean text from web pages",
+    "Scraping sites that block standard fetchers",
+    "Getting direct answers to factual questions",
+    "Research requiring multiple sources",
+    "Crawling multiple pages from a website",
+    "\"research\", \"investigate\", \"deep dive\", \"find sources\""
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

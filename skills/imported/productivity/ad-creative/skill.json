@@ -1,0 +1,14 @@
+{
+  "id": "ad-creative",
+  "name": "ad-creative",
+  "domain": "Productivity",
+  "description": "When the user wants to generate, iterate, or scale ad creative \u2014 headlines, descriptions, primary text, or full ad variations \u2014 for any paid advertising platform. Also use when the user mentions 'ad copy variations,' 'ad creative,' 'generate headlines,' 'RSA headlines,' 'bulk ad copy,' 'ad iteration",
+  "trigger_phrases": [
+    "ad-creative"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

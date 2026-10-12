@@ -1,0 +1,14 @@
+{
+  "id": "product-strategist",
+  "name": "product-strategist",
+  "domain": "Productivity",
+  "description": "Strategic product leadership toolkit for Head of Product covering OKR cascade generation, quarterly planning, competitive landscape analysis, product vision documents, and team scaling proposals. Use when creating quarterly OKR documents, defining product goals or KPIs, building product roadmaps, ru",
+  "trigger_phrases": [
+    "product-strategist"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

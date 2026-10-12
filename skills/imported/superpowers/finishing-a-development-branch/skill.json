@@ -1,0 +1,14 @@
+{
+  "id": "finishing-a-development-branch",
+  "name": "finishing-a-development-branch",
+  "domain": "Superpowers",
+  "description": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
+  "trigger_phrases": [
+    "finishing-a-development-branch"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

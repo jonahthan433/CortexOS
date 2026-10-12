@@ -1,0 +1,14 @@
+{
+  "id": "spike",
+  "name": "spike",
+  "domain": "Software Development",
+  "description": "Throwaway experiments to validate an idea before build.",
+  "trigger_phrases": [
+    "spike"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

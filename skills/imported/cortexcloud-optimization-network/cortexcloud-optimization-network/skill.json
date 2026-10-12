@@ -1,0 +1,14 @@
+{
+  "id": "cortexcloud-optimization-network",
+  "name": "cortexcloud-optimization-network",
+  "domain": "Cortexcloud Optimization Network",
+  "description": "Optimization infrastructure for AI agents \u2014 discover, pay for, and execute classical, hybrid, or quantum optimization through a single API.",
+  "trigger_phrases": [
+    "cortexcloud-optimization-network"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

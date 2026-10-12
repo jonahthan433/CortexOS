@@ -1,0 +1,14 @@
+{
+  "id": "blocked-page-recovery",
+  "name": "blocked-page-recovery",
+  "domain": "Web",
+  "description": "Use when a fetch fails: 403/429, paywall, WAF, bot wall.",
+  "trigger_phrases": [
+    "blocked-page-recovery"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

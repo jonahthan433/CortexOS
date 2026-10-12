@@ -1,0 +1,14 @@
+{
+  "id": "defuddle",
+  "name": "defuddle",
+  "domain": "Note Taking",
+  "description": "Extract clean markdown content from web pages using Defuddle CLI, removing clutter and navigation to save tokens. Use instead of WebFetch when the user provides a URL to read or analyze, for online documentation, articles, blog posts, or any standard web page. Do NOT use for URLs ending in .md \u2014 tho",
+  "trigger_phrases": [
+    "defuddle"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

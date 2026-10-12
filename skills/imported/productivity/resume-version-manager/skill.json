@@ -1,0 +1,14 @@
+{
+  "id": "resume-version-manager",
+  "name": "resume-version-manager",
+  "domain": "Productivity",
+  "description": "Track different resume versions, maintain master resume, manage tailored versions",
+  "trigger_phrases": [
+    "resume-version-manager"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

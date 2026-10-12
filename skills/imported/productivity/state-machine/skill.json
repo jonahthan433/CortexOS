@@ -1,0 +1,14 @@
+{
+  "id": "state-machine",
+  "name": "state-machine",
+  "domain": "Productivity",
+  "description": "Model complex UI behavior as finite state machines with states, events, and transitions.",
+  "trigger_phrases": [
+    "state-machine"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

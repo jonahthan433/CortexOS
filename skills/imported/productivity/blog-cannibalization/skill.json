@@ -1,0 +1,14 @@
+{
+  "id": "blog-cannibalization",
+  "name": "blog-cannibalization",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "blog-cannibalization"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

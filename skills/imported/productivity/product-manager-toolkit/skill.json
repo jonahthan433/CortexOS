@@ -1,0 +1,14 @@
+{
+  "id": "product-manager-toolkit",
+  "name": "product-manager-toolkit",
+  "domain": "Productivity",
+  "description": "Comprehensive toolkit for product managers including RICE prioritization, customer interview analysis, PRD templates, discovery frameworks, and go-to-market strategies. Use when prioritizing features, synthesizing user research, writing requirement documentation, or developing product strategy.",
+  "trigger_phrases": [
+    "product-manager-toolkit"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

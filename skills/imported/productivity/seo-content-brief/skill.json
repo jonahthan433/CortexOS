@@ -1,0 +1,14 @@
+{
+  "id": "seo-content-brief",
+  "name": "seo-content-brief",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "seo-content-brief"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

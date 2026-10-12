@@ -1,0 +1,14 @@
+{
+  "id": "blog-outline",
+  "name": "blog-outline",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "blog-outline"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

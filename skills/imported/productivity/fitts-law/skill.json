@@ -1,0 +1,14 @@
+{
+  "id": "fitts-law",
+  "name": "fitts-law",
+  "domain": "Productivity",
+  "description": "Apply Fitts's Law to size and position interactive targets for fast, accurate interaction.",
+  "trigger_phrases": [
+    "fitts-law"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "social-scraping",
+  "name": "social-scraping",
+  "domain": "Payments",
+  "description": "|",
+  "trigger_phrases": [
+    "Getting TikTok, Instagram, Facebook, or Reddit profiles",
+    "Fetching a user's posts, stories, highlights, or videos",
+    "Getting comments, replies, and reactions on posts",
+    "Listing followers and following for any account",
+    "Searching posts, hashtags, and profiles across platforms",
+    "Cross-platform social media research and monitoring",
+    "\"tiktok\", \"instagram\", \"facebook\", \"reddit\"",
+    "\"get followers\", \"who follows\", \"following list\""
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

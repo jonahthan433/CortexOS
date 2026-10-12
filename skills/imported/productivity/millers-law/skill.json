@@ -1,0 +1,14 @@
+{
+  "id": "millers-law",
+  "name": "millers-law",
+  "domain": "Productivity",
+  "description": "Apply Miller's Law \u2014 chunk information into groups of ~4 to work within working memory limits.",
+  "trigger_phrases": [
+    "millers-law"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "law-of-common-region",
+  "name": "law-of-common-region",
+  "domain": "Productivity",
+  "description": "Apply the Law of Common Region to group elements using containers, backgrounds, and boundaries.",
+  "trigger_phrases": [
+    "law-of-common-region"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

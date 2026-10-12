@@ -1,0 +1,14 @@
+{
+  "id": "color-system",
+  "name": "color-system",
+  "domain": "Productivity",
+  "description": "Build a comprehensive color system with palette generation, semantic mapping, and accessibility compliance.",
+  "trigger_phrases": [
+    "color-system"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

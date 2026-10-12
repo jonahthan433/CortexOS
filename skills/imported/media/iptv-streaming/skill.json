@@ -1,0 +1,14 @@
+{
+  "id": "iptv-streaming",
+  "name": "iptv-streaming",
+  "domain": "Media",
+  "description": "Fix broken IPTV/HLS URLs and build live m3u playlists.",
+  "trigger_phrases": [
+    "iptv"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

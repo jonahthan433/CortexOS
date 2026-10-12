@@ -1,0 +1,14 @@
+{
+  "id": "test-scenario",
+  "name": "test-scenario",
+  "domain": "Productivity",
+  "description": "Generates structured usability test scenarios with realistic tasks, success criteria, and facilitation notes \u2014 ready to run with real participants or in a moderated session.",
+  "trigger_phrases": [
+    "test-scenario"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

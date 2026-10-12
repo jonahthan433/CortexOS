@@ -1,0 +1,14 @@
+{
+  "id": "using-superpowers",
+  "name": "using-superpowers",
+  "domain": "Superpowers",
+  "description": "Use when starting any conversation - establishes how to find and use skills, requiring skill invocation before ANY response including clarifying questions",
+  "trigger_phrases": [
+    "using-superpowers"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

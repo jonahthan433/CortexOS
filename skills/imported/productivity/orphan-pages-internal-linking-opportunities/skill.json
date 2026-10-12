@@ -1,0 +1,14 @@
+{
+  "id": "orphan-pages-internal-linking-opportunities",
+  "name": "orphan-pages-internal-linking-opportunities",
+  "domain": "Productivity",
+  "description": "Audit any domain for orphan blog pages, map internal links across all blog posts, generate keyword-backed interlinking briefs via DataForSEO, and produce a self-contained downloadable HTML report. Invoke with the target domain as the argument.",
+  "trigger_phrases": [
+    "name: domain"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

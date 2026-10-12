@@ -1,0 +1,14 @@
+{
+  "id": "npm-publish",
+  "name": "npm-publish",
+  "domain": ".Archive",
+  "description": "Publish npm packages (scoped orgs, public or private) and debug common failure modes. Use when an npm publish of a scoped package fails with E404 \"could not be found or you do not have permission\", when dealing with npm OTP or EOTP or auth-cli 2FA or passkey (FaceID / fingerprint) publishes, or when",
+  "trigger_phrases": [
+    "npm-publish"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

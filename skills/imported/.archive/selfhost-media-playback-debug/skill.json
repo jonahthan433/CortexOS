@@ -1,0 +1,14 @@
+{
+  "id": "selfhost-media-playback-debug",
+  "name": "selfhost-media-playback-debug",
+  "domain": ".Archive",
+  "description": "Browser ok, app fails. Use on NC, Immich, Jellyfin, Plex.",
+  "trigger_phrases": [
+    "hermes"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

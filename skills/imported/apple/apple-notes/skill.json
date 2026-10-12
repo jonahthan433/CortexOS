@@ -1,0 +1,14 @@
+{
+  "id": "apple-notes",
+  "name": "apple-notes",
+  "domain": "Apple",
+  "description": "Manage Apple Notes via memo CLI: create, search, edit.",
+  "trigger_phrases": [
+    "apple-notes"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

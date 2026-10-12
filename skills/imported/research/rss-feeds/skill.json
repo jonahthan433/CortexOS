@@ -1,0 +1,14 @@
+{
+  "id": "rss-feeds",
+  "name": "rss-feeds",
+  "domain": "Research",
+  "description": "Read RSS, Atom, JSON feeds; discover feeds behind a page.",
+  "trigger_phrases": [
+    "rss-feeds"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

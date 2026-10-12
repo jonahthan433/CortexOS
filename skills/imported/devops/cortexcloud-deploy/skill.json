@@ -1,0 +1,14 @@
+{
+  "id": "cortexcloud-deploy",
+  "name": "cortexcloud-deploy",
+  "domain": "Devops",
+  "description": "Deploy the CortexCloud platform into the homelab Proxmox LXC 105 and verify it \u2014 Node/Fastify/Prisma gateway (:8080) AND the Python FastAPI \"Optimization Network\" (/opt/CortexCloudAPI, :8000, /v1/optimize + x402). Use when standing up api.cortexcloud.org, pushing gateway code, running alembic/prisma",
+  "trigger_phrases": [
+    "cortexcloud-deploy"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

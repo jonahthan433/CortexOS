@@ -1,0 +1,14 @@
+{
+  "id": "content-strategy",
+  "name": "content-strategy",
+  "domain": "Productivity",
+  "description": "Define what content a product needs, how it should be structured, and who owns it.",
+  "trigger_phrases": [
+    "content-strategy"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

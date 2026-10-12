@@ -1,0 +1,14 @@
+{
+  "id": "x-account-automation",
+  "name": "x-account-automation",
+  "domain": ".Archive",
+  "description": "Operate X accounts: auth, posting, profile edits.",
+  "trigger_phrases": [
+    "x-account-automation"
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "marketing-ideas",
+  "name": "marketing-ideas",
+  "domain": "Productivity",
+  "description": "When the user needs marketing ideas, inspiration, or strategies for their SaaS or software product. Also use when the user asks for 'marketing ideas,' 'growth ideas,' 'how to market,' 'marketing strategies,' 'marketing tactics,' 'ways to promote,' 'ideas to grow,' 'what else can I try,' 'I don't kno",
+  "trigger_phrases": [
+    "marketing-ideas"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

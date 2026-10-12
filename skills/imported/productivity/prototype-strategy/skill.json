@@ -1,0 +1,14 @@
+{
+  "id": "prototype-strategy",
+  "name": "prototype-strategy",
+  "domain": "Productivity",
+  "description": "Choose the right prototyping fidelity and method for the design question.",
+  "trigger_phrases": [
+    "prototype-strategy"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

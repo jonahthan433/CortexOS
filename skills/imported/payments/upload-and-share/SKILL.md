@@ -1,0 +1,220 @@
+# upload-and-share
+
+# Upload and Share via StableUpload
+
+Upload any local file to S3-backed cloud storage via x402 micropayments. Returns a public URL. No API keys needed.
+
+## Setup
+
+See [rules/getting-started.md](rules/getting-started.md) for installation and wallet setup.
+
+## Quick Reference
+
+| Tier | Max Size | Cost |
+|------|----------|------|
+| `10mb` | 10 MB | $0.02 |
+| `100mb` | 100 MB | $0.20 |
+| `1gb` | 1 GB | $2.00 |
+
+All uploads expire after 6 months.
+
+| Task | Endpoint | Price |
+|------|----------|-------|
+| Buy upload slot | `https://stableupload.dev/api/upload` | Tier-based |
+| List uploads | `GET https://stableupload.dev/api/uploads` | Free (auth) |
+| Get upload details | `GET https://stableupload.dev/api/download/:uploadId` | Free (auth) |
+| Buy site slot | `https://stableupload.dev/api/site` | Tier-based |
+| Activate site | `POST https://stableupload.dev/api/site/activate` | Free (auth) |
+| Update site | `PUT https://stableupload.dev/api/site` | Free (auth) |
+| Renew site | `https://stableupload.dev/api/site/renew` | Tier-based |
+| Attach domain | `POST https://stableupload.dev/api/site/domain` | Free (auth) |
+| Detach domain | `DELETE https://stableupload.dev/api/site/domain` | Free (auth) |
+| Domain status | `GET https://stableupload.dev/api/site/domain/status?uploadId=...` | Free (auth) |
+
+## Workflow
+
+### 1. Check wallet balance
+
+```bash
+npx agentcash@latest balance
+```
+
+Ensure sufficient USDC balance for the chosen tier.
+If balance is low and the user needs funding details, run `npx agentcash@latest accounts` to get deposit links and wallet addresses.
+
+### 2. Determine the tier
+
+Pick the smallest tier that fits the file. Check file size first with `ls -la` or `wc -c`.
+
+| Tier | Max Size | Cost |
+|------|----------|------|
+| `10mb` | 10 MB | $0.02 |
+| `100mb` | 100 MB | $0.20 |
+| `1gb` | 1 GB | $2.00 |
+
+### 3. Buy the upload slot
+
+```bash
+npx agentcash@latest fetch https://stableupload.dev/api/upload -m POST -b '{"filename": "report.pdf", "contentType": "application/pdf", "tier": "10mb"}'
+```
+
+**Parameters:**
+- `filename` — name for the uploaded file (required)
+- `contentType` — MIME type (required, advisory for browser)
+- `tier` — `"10mb"`, `"100mb"`, or `"1gb"` (required)
+
+**Response:**
+```json
+{
+  "uploadId": "k7gm3nqp2",
+  "uploadUrl": "https://f.stableupload.dev/k7gm3nqp2/report.pdf?t=...",
+  "publicUrl": "https://f.stableupload.dev/k7gm3nqp2/report.pdf",
+  "expiresAt": "2026-08-19T00:00:00.000Z",
+  "maxSize": 10485760
+}
+```
+
+### 4. Upload the file via curl
+
+Use Bash to PUT the file to the returned `uploadUrl`:
+
+```bash
+curl -s -X PUT "<uploadUrl>" -H "Content-Type: <mime>" --data-binary @/absolute/path/to/file
+```
+
+**Critical:** Use `--data-binary` (not `-d`) to preserve binary content. Use the absolute path.
+
+### 5. Share the public URL
+
+Present the `publicUrl` to the user. This URL is publicly accessible immediately and remains live for 6 months.
+
+## Common MIME Types
+
+| File Type | Content Type |
+|-----------|-------------|
+| PDF | `application/pdf` |
+| PNG image | `image/png` |
+| JPEG image | `image/jpeg` |
+| CSV | `text/csv` |
+| JSON | `application/json` |
+| Plain text | `text/plain` |
+| ZIP archive | `application/zip` |
+| Excel | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
+| Unknown | `application/octet-stream` |
+
+## Listing Previous Uploads
+
+To list uploads for the current wallet:
+
+```bash
+npx agentcash@latest fetch https://stableupload.dev/api/uploads
+```
+
+## Get Upload Details
+
+```bash
+npx agentcash@latest fetch https://stableupload.dev/api/download/k7gm3nqp2
+```
+
+## Key Details
+
+- **No API keys required** — payment is the authentication
+- **Upload URLs expire in 1 hour** — upload promptly after buying the slot
+- **Public URLs last 6 months** from purchase date
+- **Any file type accepted** — contentType is advisory for the browser, not a restriction
+- **S3-backed** — files stored on AWS S3 with public read access
+- **Discovery endpoint**: `npx agentcash@latest discover https://stableupload.dev` if you need to verify endpoints
+
+## Common Patterns
+
+**Upload a file the user just created:**
+Skip discovery, go straight to wallet check + buy slot + upload.
+
+**Upload multiple files:**
+Buy separate slots for each file. Slots can be purchased in parallel but uploads must use the correct uploadUrl for each.
+
+**User asks to "share" or "send" a file:**
+Upload it and present the public URL. The URL can be shared anywhere.
+
+**Host images for emails:**
+Upload the image, then reference the `publicUrl` in email HTML:
+```html
+<img src="https://f.stableupload.dev/abc/photo.png" alt="Photo" />
+```
+
+## Static Site Hosting
+
+Host static sites (HTML/CSS/JS) with custom domains and automatic HTTPS.
+
+### Deploy a Site
+
+**1. Buy a site slot (paid, tier-based):**
+
+```bash
+npx agentcash@latest fetch https://stableupload.dev/api/site -m POST -b '{"filename": "my-site.zip", "tier": "100mb"}'
+```
+
+Returns `{uploadId, uploadUrl}`.
+
+**2. Upload the zip:**
+
+```bash
+curl -X PUT "$uploadUrl" -H "Content-Type: application/zip" --data-binary @site.zip
+```
+
+**3. Activate the site (SIWX, free):**
+
+```bash
+npx agentcash@latest fetch https://stableupload.dev/api/site/activate -m POST -b '{"uploadId": "..."}'
+```
+
+Returns `{siteUrl, fileCount, files}`. Site is live at `https://{uploadId}.s.stableupload.dev/`.
+
+### Update an Existing Site
+
+Update for free: PUT /api/site to get a new upload URL, upload the new zip, then activate.
+
+```bash
+npx agentcash@latest fetch https://stableupload.dev/api/site -m PUT -b '{"uploadId": "...", "filename": "my-site.zip"}'
+```
+
+Then upload the new zip and call activate again.
+
+### Custom Domain
+
+```bash
+npx agentcash@latest fetch https://stableupload.dev/api/site/domain -m POST -b '{"uploadId": "...", "hostname": "www.example.com"}'
+```
+
+Returns DNS records to configure. Check status:
+
+```bash
+npx agentcash@latest fetch "https://stableupload.dev/api/site/domain/status?uploadId=..."
+```
+
+Detach a domain:
+
+```bash
+npx agentcash@latest fetch https://stableupload.dev/api/site/domain -m DELETE -b '{"uploadId": "...", "hostname": "www.example.com"}'
+```
+
+### Renew a Site
+
+```bash
+npx agentcash@latest fetch https://stableupload.dev/api/site/renew -m POST -b '{"uploadId": "...", "count": 4}'
+```
+
+Extends 4 x 6 months.
+
+### Notes
+
+- Max 500 files per site
+- Tier limit applies to uncompressed size
+- Custom domains get automatic HTTPS via Cloudflare
+
+## Error Handling
+
+- **Insufficient balance**: Run `npx agentcash@latest accounts` to show deposit links and wallet addresses
+- **File too large for tier**: Suggest the next tier up
+- **Upload URL expired**: Buy a new slot (the previous payment is non-refundable)
+- **curl fails**: Verify the file path exists and the uploadUrl is correctly quoted

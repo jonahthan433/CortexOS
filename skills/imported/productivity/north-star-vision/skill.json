@@ -1,0 +1,14 @@
+{
+  "id": "north-star-vision",
+  "name": "north-star-vision",
+  "domain": "Productivity",
+  "description": "Articulate a compelling north-star product vision that aligns teams and inspires strategic design decisions.",
+  "trigger_phrases": [
+    "north-star-vision"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

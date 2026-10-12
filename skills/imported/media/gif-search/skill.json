@@ -1,0 +1,14 @@
+{
+  "id": "gif-search",
+  "name": "gif-search",
+  "domain": "Media",
+  "description": "Search/download GIFs from Tenor via curl + jq.",
+  "trigger_phrases": [
+    "gif-search"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

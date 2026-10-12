@@ -1,0 +1,14 @@
+{
+  "id": "design-system-adoption",
+  "name": "design-system-adoption",
+  "domain": "Productivity",
+  "description": "Create adoption strategies and materials to drive design system usage across teams.",
+  "trigger_phrases": [
+    "design-system-adoption"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

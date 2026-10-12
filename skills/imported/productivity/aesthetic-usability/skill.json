@@ -1,0 +1,14 @@
+{
+  "id": "aesthetic-usability",
+  "name": "aesthetic-usability",
+  "domain": "Productivity",
+  "description": "Apply the Aesthetic-Usability Effect \u2014 visually consistent, polished interfaces are perceived as more usable.",
+  "trigger_phrases": [
+    "aesthetic-usability"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

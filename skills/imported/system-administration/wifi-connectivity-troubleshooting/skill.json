@@ -1,0 +1,14 @@
+{
+  "id": "wifi-connectivity-troubleshooting",
+  "name": "wifi-connectivity-troubleshooting",
+  "domain": "System Administration",
+  "description": "Fix Linux WiFi drops and timeouts on Omarchy.",
+  "trigger_phrases": [
+    "wifi-connectivity-troubleshooting"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

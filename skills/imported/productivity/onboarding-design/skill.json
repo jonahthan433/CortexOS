@@ -1,0 +1,14 @@
+{
+  "id": "onboarding-design",
+  "name": "onboarding-design",
+  "domain": "Productivity",
+  "description": "Design first-run experiences that get users to value quickly without overwhelming them.",
+  "trigger_phrases": [
+    "onboarding-design"
+  ],
+  "tier": 3,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

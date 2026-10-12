@@ -1,0 +1,14 @@
+{
+  "id": "using-git-worktrees",
+  "name": "using-git-worktrees",
+  "domain": "Superpowers",
+  "description": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback",
+  "trigger_phrases": [
+    "using-git-worktrees"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

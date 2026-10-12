@@ -1,0 +1,14 @@
+{
+  "id": "diary-study-plan",
+  "name": "diary-study-plan",
+  "domain": "Productivity",
+  "description": "Design a diary study plan with prompts, duration, participant criteria, and analysis framework. Use when you need to understand user behavior over time in natural contexts.",
+  "trigger_phrases": [
+    "diary-study-plan"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

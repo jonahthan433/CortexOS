@@ -1,0 +1,14 @@
+{
+  "id": "polymarket",
+  "name": "polymarket",
+  "domain": "Research",
+  "description": "Query Polymarket: markets, prices, orderbooks, history.",
+  "trigger_phrases": [
+    "polymar"
+  ],
+  "tier": 1,
+  "approval_required": true,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "external_action"
+}

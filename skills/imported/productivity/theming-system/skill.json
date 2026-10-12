@@ -1,0 +1,14 @@
+{
+  "id": "theming-system",
+  "name": "theming-system",
+  "domain": "Productivity",
+  "description": "Design a theming architecture that supports brand variants, dark mode, and high-contrast modes with token mapping.",
+  "trigger_phrases": [
+    "theming-system"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

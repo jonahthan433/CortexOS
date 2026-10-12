@@ -1,0 +1,14 @@
+{
+  "id": "design-token-audit",
+  "name": "design-token-audit",
+  "domain": "Productivity",
+  "description": "Audit design token usage across a product for consistency and coverage.",
+  "trigger_phrases": [
+    "design-token-audit"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}

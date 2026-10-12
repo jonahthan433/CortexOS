@@ -1,0 +1,14 @@
+{
+  "id": "docs-auditor",
+  "name": "docs-auditor",
+  "domain": "Productivity",
+  "description": ">",
+  "trigger_phrases": [
+    "docs-auditor"
+  ],
+  "tier": 3,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "local_write"
+}

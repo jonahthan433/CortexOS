@@ -1,0 +1,14 @@
+{
+  "id": "interfaces-that-feel",
+  "name": "interfaces-that-feel",
+  "domain": "Productivity",
+  "description": "Apply an emotional resonance lens to any UI. Use when a design is technically correct but flat \u2014 to identify what's missing and prescribe specific changes at the copy, motion, and interaction layer.",
+  "trigger_phrases": [
+    "interfaces-that-feel"
+  ],
+  "tier": 1,
+  "approval_required": false,
+  "automation_ready": false,
+  "instructions": "SKILL.md",
+  "risk_level": "read_only"
+}
