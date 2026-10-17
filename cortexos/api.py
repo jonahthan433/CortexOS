@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import binascii
 import asyncio
+import time
 import uuid
 import hmac
 
@@ -15,6 +16,7 @@ from typing import Annotated
 from .config import Settings
 from .service import CortexService
 from .providers import ProviderError
+from .browse import VaultBrowser, BrowseError, agents_directory, search_activity
 from .sessions import TerminalManager, terminal_websocket
 from .streaming import RequestStreams, MetricsBroadcaster
 from .scheduler import run_scheduler
@@ -25,6 +27,7 @@ from .voice import LocalVoice, VoiceUnavailable
 
 settings = Settings.load()
 service = CortexService(settings)
+vault_browser = VaultBrowser(settings.vault)
 voice = LocalVoice(settings)
 terminals = TerminalManager(settings, service.vault)
 request_streams = RequestStreams()
@@ -256,6 +259,47 @@ def agents():
 class LlmTestBody(BaseModel):
     mode: str = "validate"
     model: str = ""
+
+
+def _browse_error(exc: BrowseError) -> HTTPException:
+    message = str(exc)
+    return HTTPException(status_code=404 if "not found" in message else 400, detail=message)
+
+
+@app.get("/api/vault/tree")
+def vault_tree(path: str = ""):
+    try:
+        return vault_browser.tree(path)
+    except BrowseError as exc:
+        raise _browse_error(exc) from exc
+
+
+@app.get("/api/vault/file")
+def vault_file(path: str):
+    try:
+        return vault_browser.file(path)
+    except BrowseError as exc:
+        raise _browse_error(exc) from exc
+
+
+@app.get("/api/vault/search")
+def vault_search(q: str, limit: int = 50):
+    try:
+        return vault_browser.search(q, limit)
+    except BrowseError as exc:
+        raise _browse_error(exc) from exc
+
+
+@app.get("/api/activity")
+def activity(q: str = "", kind: str = "all", status: str = "", limit: int = 20, before: float | None = None):
+    return search_activity(settings.queue_db, settings.vault, q=q, kind=kind, status=status,
+                           limit=limit, before=before)
+
+
+@app.get("/api/agents/directory")
+def agents_directory_endpoint():
+    return {"agents": agents_directory(settings, coordinator, service.gateway, settings.queue_db),
+            "generated_at": time.time()}
 
 
 @app.get("/api/llm/providers")
