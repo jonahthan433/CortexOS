@@ -445,10 +445,10 @@ class QueueStore:
             self._event(task_id, "manual_retry", f"cycle={int(row['cycle']) + 1}", now=now)
         return self.get(task_id), True
 
-    def recover(self, *, now: float | None = None) -> dict:
+    def recover(self, *, boot_token: str | None = None, now: float | None = None) -> dict:
         """Startup recovery: tasks left running by a dead process go back to the
         queue (attempt already counted) or fail when attempts are exhausted.
-        Stale worker rows are dropped."""
+        Stale worker rows and rows from previous boots are dropped."""
         now = now or time.time()
         recovered = failed = 0
         with self._tx():
@@ -474,6 +474,10 @@ class QueueStore:
                     recovered += 1
             removed = self._conn.execute(
                 "DELETE FROM queue_workers WHERE last_seen<?", (now - 120,)).rowcount
+            if boot_token is not None:
+                removed += self._conn.execute(
+                    "DELETE FROM queue_workers WHERE boot_token IS NULL OR boot_token<>?",
+                    (boot_token,)).rowcount
         if recovered or failed or removed:
             logger.info("queue recovery: %d requeued, %d failed, %d stale workers removed",
                         recovered, failed, removed)
@@ -575,7 +579,7 @@ class QueueManager:
     # ----------------------------------------------------------------- control
 
     async def start(self) -> None:
-        self.recovery_report = self.store.recover()
+        self.recovery_report = self.store.recover(boot_token=self._boot_token)
         reconciled = self.reconcile_awaiting()
         pruned = self.store.prune(self.retention_days)
         for index in range(self.workers):

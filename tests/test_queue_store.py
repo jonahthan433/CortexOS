@@ -146,6 +146,13 @@ def test_recover_requeues_or_fails(store):
     assert "attempts exhausted" in store.get("t-6")["error"]
 
 
+def test_recover_retires_previous_boot_workers(store):
+    store.worker_heartbeat("w1-old", boot_token="old", now=time.time())
+    report = store.recover(boot_token="new")
+    assert report["workers_removed"] >= 1
+    assert store.workers() == []
+
+
 def test_events_are_recorded_in_order_and_filterable(store):
     store.enqueue("event me", task_id="t-7")
     store.claim("w1")
