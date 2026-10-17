@@ -38,6 +38,8 @@ class Settings:
     queue_retention_days: float = 30.0
     queue_poll_interval_seconds: float = 0.5
     providers: dict[str, dict[str, Any]] | None = None
+    llm_providers: dict[str, dict[str, Any]] | None = None
+    llm_default_timeout_seconds: float = 60.0
     voice_enabled: bool = True
     voice_stt_model: str = "base.en"
     voice_stt_device: str = "cpu"
@@ -93,6 +95,7 @@ class Settings:
         router = data.get("router", {})
         voice = data.get("voice", {})
         queue = data.get("queue", {})
+        llm = data.get("llm", {})
         return cls(
             root=base,
             host=bridge.get("host", "127.0.0.1"),
@@ -122,6 +125,8 @@ class Settings:
             queue_retention_days=float(queue.get("retention_days", 30)),
             queue_poll_interval_seconds=float(queue.get("poll_interval_seconds", 0.5)),
             providers=data.get("providers", {}),
+            llm_providers=llm.get("providers", {}),
+            llm_default_timeout_seconds=float(llm.get("default_timeout_seconds", 60)),
             voice_enabled=bool(voice.get("enabled", True)),
             voice_stt_model=voice.get("stt_model", "base.en"),
             voice_stt_device=voice.get("stt_device", "cpu"),

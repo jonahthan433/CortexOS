@@ -4,6 +4,7 @@ import time
 import uuid
 
 from .config import Settings
+from .llm import ModelGateway
 from .providers import AgentProvider, FastModel
 from .router import Router
 from .skills import SkillRegistry
@@ -17,13 +18,15 @@ class CortexService:
         self.router = Router(self.registry)
         self.vault = Vault(settings.vault)
         self.agent = AgentProvider(settings)
-        self.fast_model = FastModel(settings)
+        self.gateway = ModelGateway(settings)
+        self.fast_model = FastModel(settings, gateway=self.gateway)
         self.pending: dict[str, dict] = self.vault.load_state().get("pending_approvals", {})
         self.queue = None  # attached by the Bridge once the durable queue starts
 
     def status(self) -> dict:
         return {"name": "CortexOS", "state": "Idle", "backend": self.settings.backend,
-                "vault": str(self.settings.vault), "skills": len(self.registry.list()), "voice": "disabled"}
+                "vault": str(self.settings.vault), "skills": len(self.registry.list()), "voice": "disabled",
+                "llm": {"providers": len(self.gateway.providers), "assigned_agents": len(self.gateway.agent_ids)}}
 
     async def submit(self, prompt: str, backend: str | None = None, skill_id: str | None = None,
                      request_id: str | None = None, on_output=None) -> dict:
@@ -31,7 +34,8 @@ class CortexService:
         if self.vault.request_exists(request_id):
             return {"id": request_id, "status": "error", "error": "Request ID has already been used; submit a new request instead."}
         route = self.router.route(prompt)
-        if backend and backend not in self.settings.agent_ids:
+        known_backends = list(self.settings.agent_ids) + self.gateway.agent_ids
+        if backend and backend not in known_backends:
             return {"id": request_id, "status": "error", "error": f"Unknown agent: {backend}"}
         if skill_id:
             skill = self.registry.get(skill_id)
@@ -142,10 +146,23 @@ class CortexService:
 
     async def _execute(self, request_id: str, prompt: str, backend: str | None, skill, approved: bool = False,
                        on_output=None, reason: str | None = None) -> dict:
+        agent_id = backend or self.settings.backend
+        assignment = self.gateway.resolve(agent_id)
         try:
-            result = await self.agent.run(prompt, skill.instructions if skill else "", backend, approved=approved,
-                                          request_id=request_id, on_output=on_output)
-            return self._finish(request_id, prompt, result, "completed", 3, backend, skill, reason=reason)
+            if assignment is not None:
+                # Universal provider path: same system prompt, same approval
+                # gate, different inference endpoint.
+                outcome = await self.gateway.generate(agent_id, prompt,
+                                                      skill_instructions=skill.instructions if skill else "",
+                                                      approved=approved, request_id=request_id,
+                                                      on_output=on_output)
+                result = outcome.text
+                extra = {"llm": outcome.meta()}
+            else:
+                result = await self.agent.run(prompt, skill.instructions if skill else "", backend, approved=approved,
+                                              request_id=request_id, on_output=on_output)
+                extra = None
+            return self._finish(request_id, prompt, result, "completed", 3, backend, skill, reason=reason, extra=extra)
         except Exception as exc:
             self.vault.log_request(request_id, prompt, "error", 3, backend or self.settings.backend)
             self.vault.receipt(request_id, {"status": "error", "error": str(exc), "skill": skill.id if skill else None})
@@ -153,14 +170,15 @@ class CortexService:
                     "retryable": bool(getattr(exc, "retryable", False))}
 
     def _finish(self, request_id: str, prompt: str, result: str, status: str, tier: int, backend: str | None, skill,
-                reason: str | None = None) -> dict:
+                reason: str | None = None, extra: dict | None = None) -> dict:
         output = self.vault.write_result(request_id, prompt, result, skill.id if skill else None)
         self.vault.log_request(request_id, prompt, status, tier, backend or self.settings.backend, str(output))
         receipt = self.vault.receipt(request_id, {"request_id": request_id, "status": status, "tier": tier, "backend": backend or self.settings.backend,
-                                                     "skill": skill.id if skill else None, "output": str(output)})
+                                                     "skill": skill.id if skill else None, "output": str(output),
+                                                     **({"llm": extra["llm"]} if extra else {})})
         return {"id": request_id, "status": status, "tier": tier, "backend": backend or self.settings.backend,
                 "skill": skill.id if skill else None, "result": result, "output": str(output), "receipt": str(receipt),
-                "route_reason": reason}
+                "route_reason": reason, **({"llm": extra["llm"]} if extra else {})}
 
     def feedback(self, request_id: str, skill_id: str, useful: bool) -> dict:
         if not self.registry.get(skill_id):

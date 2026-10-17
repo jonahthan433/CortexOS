@@ -14,6 +14,7 @@ from typing import Annotated
 
 from .config import Settings
 from .service import CortexService
+from .providers import ProviderError
 from .sessions import TerminalManager, terminal_websocket
 from .streaming import RequestStreams, MetricsBroadcaster
 from .scheduler import run_scheduler
@@ -149,11 +150,12 @@ async def replay_task_snapshot(stream, request_id: str) -> None:
 
 
 def request_interrupt(request_id: str) -> bool:
-    """Stop button: SIGINT the provider process and/or cooperatively cancel the
-    owning durable queue task. Returns True when a stop was actually sent."""
+    """Stop button: SIGINT the provider process, cancel an in-flight gateway
+    call, and/or cooperatively cancel the owning durable queue task."""
     stopped = service.agent.interrupt(request_id)
+    llm_stopped = service.gateway.interrupt(request_id)
     queued = queue_mgr is not None and queue_mgr.request_cancel_by_request_id(request_id)
-    return bool(stopped or queued)
+    return bool(stopped or llm_stopped or queued)
 
 
 async def start_background_request(prompt: str, backend: str | None, skill_id: str | None,
@@ -244,7 +246,64 @@ def status():
 
 @app.get("/api/agents")
 def agents():
-    return {"default": settings.backend, "agents": settings.agents, "coordinator": coordinator.status()}
+    llm_agents = [{"id": entry["agent_id"], "name": entry["name"], "kind": "llm",
+                   "provider": entry["provider"], "model": entry["model"], "issues": entry.get("issues", [])}
+                  for entry in service.gateway.agents_status()]
+    return {"default": settings.backend, "agents": [*settings.agents, *llm_agents],
+            "coordinator": coordinator.status(), "llm_agents": llm_agents}
+
+
+class LlmTestBody(BaseModel):
+    mode: str = "validate"
+    model: str = ""
+
+
+@app.get("/api/llm/providers")
+def llm_providers():
+    return {"providers": service.gateway.providers_status(),
+            "defaults": {"timeout_seconds": settings.llm_default_timeout_seconds},
+            "last_error": service.gateway.last_error}
+
+
+@app.post("/api/llm/providers/{provider_id}/test")
+async def llm_provider_test(provider_id: str, body: LlmTestBody):
+    if provider_id not in service.gateway.providers:
+        raise HTTPException(status_code=404, detail="Unknown provider")
+    if body.mode not in {"validate", "connectivity", "inference"}:
+        raise HTTPException(status_code=400, detail="mode must be validate, connectivity, or inference")
+    return await service.gateway.test_provider(provider_id, body.mode, body.model)
+
+
+@app.get("/api/llm/agents")
+def llm_agents():
+    return {"agents": service.gateway.agents_status(),
+            "provider_ids": [provider["id"] for provider in service.gateway.providers_status()]}
+
+
+class LlmAssignmentBody(BaseModel):
+    provider: str = Field(min_length=1, max_length=64)
+    model: str = Field(default="", max_length=120)
+    name: str = Field(default="", max_length=80)
+    fallback: list[dict] = []
+    allow_cloud_fallback: bool = False
+    requirements: list[str] = ["chat"]
+
+
+@app.put("/api/llm/agents/{agent_id}")
+def llm_agent_put(agent_id: str, body: LlmAssignmentBody):
+    if len(body.fallback) > 3:
+        raise HTTPException(status_code=400, detail="at most 3 fallback providers")
+    try:
+        return service.gateway.save_assignment(agent_id, body.model_dump())
+    except ProviderError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.delete("/api/llm/agents/{agent_id}")
+def llm_agent_delete(agent_id: str):
+    if not service.gateway.delete_assignment(agent_id):
+        raise HTTPException(status_code=404, detail="No assignment for this agent")
+    return {"status": "deleted", "agent_id": agent_id}
 
 
 @app.get("/api/voice/status")

@@ -30,6 +30,7 @@ class HealthCheck:
             "voice": self._check_voice(),
             "router": self._check_router(),
             "queue": self._check_queue(),
+            "llm": self._check_llm(),
         }
         overall = "ok" if all(c.get("status") == "ok" for c in checks.values()) else "degraded"
         return {"status": overall, "checked_at": datetime.now(timezone.utc).isoformat(), "checks": checks}
@@ -76,6 +77,26 @@ class HealthCheck:
                 detail.update({"status": "degraded", "last_error": last_error})
             else:
                 detail["status"] = "ok"
+            return detail
+        except Exception as exc:
+            return {"status": "error", "error": str(exc)}
+
+    def _check_llm(self) -> dict:
+        """Universal provider layer: registry, assignments, recent failures."""
+        if not self.service or not getattr(self.service, "gateway", None):
+            return {"status": "unknown"}
+        try:
+            gateway = self.service.gateway
+            providers = gateway.providers
+            enabled = [spec for spec in providers.values() if spec.enabled]
+            degraded = [spec.id for spec in enabled
+                        if (gateway.health.get(spec.id) or {}).get("status") == "error"]
+            detail: dict = {"status": "ok", "providers": len(providers), "enabled": len(enabled),
+                            "assigned_agents": len(gateway.agent_ids)}
+            if degraded:
+                detail.update({"status": "degraded", "degraded_providers": degraded})
+            if gateway.last_error:
+                detail["last_error"] = gateway.last_error
             return detail
         except Exception as exc:
             return {"status": "error", "error": str(exc)}

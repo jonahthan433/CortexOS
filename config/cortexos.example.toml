@@ -60,3 +60,47 @@ stt_compute_type = "int8"
 tts_language = "a" # Kokoro: a=American English, b=British English
 tts_voice = "af_heart"
 browser_fallback = true
+
+# ---------------------------------------------------------------------------
+# Universal LLM providers (optional). These are *inference endpoints* that
+# agents can be assigned to. CLI coding agents stay under [providers.*].
+# API keys can live here (keep this file 0600) or come from environment
+# variables via api_key_env. Keys are never returned by the API or logged.
+#
+# After registering a provider, assign it to an agent from the HUD Settings
+# panel or with:  PUT /api/llm/agents/<agent-id>
+# Assignments are stored in state/llm_assignments.json (never in this file).
+#
+# [llm]
+# default_timeout_seconds = 60
+#
+# [llm.providers.gemini]
+# kind = "gemini"                     # openai_compatible | anthropic | gemini | ollama
+# base_url = "https://generativelanguage.googleapis.com"
+# api_key_env = "GEMINI_API_KEY"
+# default_model = "gemini-2.0-flash"
+# models = ["gemini-2.0-flash", "gemini-2.5-pro"]
+#
+# [llm.providers.openrouter]
+# kind = "openai_compatible"
+# base_url = "https://openrouter.ai/api/v1"
+# api_key_env = "OPENROUTER_API_KEY"
+# models = []
+#
+# [llm.providers.anthropic]
+# kind = "anthropic"
+# base_url = "https://api.anthropic.com"
+# api_key_env = "ANTHROPIC_API_KEY"
+# default_model = "claude-sonnet-4-5"
+#
+# [llm.providers.ollama]
+# kind = "ollama"
+# base_url = "http://127.0.0.1:11434/v1"
+# default_model = "qwen2.5:3b"
+# local = true
+#
+# Capability notes: openai_compatible/ollama default to chat+streaming+json_mode;
+# anthropic/gemini default to non-streaming chat. Override per provider with
+# capabilities = { streaming = true } etc. Unsupported calls are rejected with
+# a clear error instead of failing obscurely. Local->cloud fallback requires
+# allow_cloud_fallback = true on the assignment.
