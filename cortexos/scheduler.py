@@ -34,11 +34,28 @@ async def scheduler_tick(service, dry_run: bool = False, now_epoch: float | None
         due.append({"id": key, "skill_id": skill_id, "prompt": str(job["prompt"]), "interval_seconds": interval})
     if dry_run:
         return due
+    queue = getattr(service, "queue", None)
     for job in due:
         # Claim before dispatch: a crash can skip one scheduled run, but cannot silently replay it.
         last[job["id"]] = current
         service.vault.write_state(state)
-        request_id = f"scheduled-{job['id']}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:6]}"
+        origin = f"job:{job['id']}"
+        if queue is not None:
+            # Durable dispatch: dedupe per interval bucket, and a still-active
+            # earlier run of the same job blocks a replay.
+            try:
+                if queue.store.has_active_origin(origin):
+                    continue
+                await queue.enqueue(job["prompt"], skill_id=job["skill_id"], origin=origin,
+                                    dedupe_key=f"{origin}:{int(current // max(60, job['interval_seconds']))}",
+                                    meta={"job_id": job["id"], "scheduled": True})
+            except Exception as exc:
+                service.vault.receipt(f"scheduled-{job['id']}", {"event": "scheduled_run",
+                                                                 "job": job["id"], "skill": job["skill_id"],
+                                                                 "status": "enqueue_error", "error": str(exc)})
+            continue
+        request_id = (f"scheduled-{job['id']}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+                      f"-{uuid.uuid4().hex[:6]}")
         try:
             await service.submit(job["prompt"], skill_id=job["skill_id"], request_id=request_id)
         except Exception as exc:

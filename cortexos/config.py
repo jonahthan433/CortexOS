@@ -27,6 +27,16 @@ class Settings:
     jev_min_confidence: float = 0.5
     jev_timeout_seconds: float = 10.0
     fast_model_timeout_seconds: float = 45.0
+    queue_enabled: bool = True
+    queue_db: Path = Path("state/queue.db")
+    queue_workers: int = 2
+    queue_max_attempts: int = 3
+    queue_backoff_base_seconds: float = 30.0
+    queue_backoff_cap_seconds: float = 900.0
+    queue_task_timeout_seconds: float = 900.0
+    queue_dedupe_window_seconds: float = 30.0
+    queue_retention_days: float = 30.0
+    queue_poll_interval_seconds: float = 0.5
     providers: dict[str, dict[str, Any]] | None = None
     voice_enabled: bool = True
     voice_stt_model: str = "base.en"
@@ -82,6 +92,7 @@ class Settings:
         bridge = data.get("bridge", {})
         router = data.get("router", {})
         voice = data.get("voice", {})
+        queue = data.get("queue", {})
         return cls(
             root=base,
             host=bridge.get("host", "127.0.0.1"),
@@ -100,6 +111,16 @@ class Settings:
             jev_min_confidence=float(router.get("jev_min_confidence", 0.5)),
             jev_timeout_seconds=float(router.get("jev_timeout_seconds", 10)),
             fast_model_timeout_seconds=float(router.get("fast_model_timeout_seconds", 45)),
+            queue_enabled=bool(queue.get("enabled", True)),
+            queue_db=(base / queue.get("db_path", "state/queue.db")).resolve(),
+            queue_workers=max(1, int(queue.get("workers", 2))),
+            queue_max_attempts=max(1, int(queue.get("max_attempts", 3))),
+            queue_backoff_base_seconds=float(queue.get("backoff_base_seconds", 30)),
+            queue_backoff_cap_seconds=float(queue.get("backoff_cap_seconds", 900)),
+            queue_task_timeout_seconds=float(queue.get("task_timeout_seconds", 900)),
+            queue_dedupe_window_seconds=float(queue.get("dedupe_window_seconds", 30)),
+            queue_retention_days=float(queue.get("retention_days", 30)),
+            queue_poll_interval_seconds=float(queue.get("poll_interval_seconds", 0.5)),
             providers=data.get("providers", {}),
             voice_enabled=bool(voice.get("enabled", True)),
             voice_stt_model=voice.get("stt_model", "base.en"),

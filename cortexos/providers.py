@@ -12,7 +12,15 @@ from .config import Settings
 
 
 class ProviderError(RuntimeError):
-    pass
+    """Provider failure with a retry hint for the durable queue.
+
+    ``retryable=False`` means retrying without changing configuration is
+    pointless (missing CLI, unknown agent, invalid input mode).
+    """
+
+    def __init__(self, message: str, retryable: bool = False):
+        super().__init__(message)
+        self.retryable = retryable
 
 
 class AgentProvider:
@@ -82,7 +90,7 @@ class AgentProvider:
                 except ProcessLookupError:
                     pass
                 await proc.wait()
-            raise ProviderError(f"{name} did not finish within 15 minutes") from exc
+            raise ProviderError(f"{name} did not finish within 15 minutes", retryable=True) from exc
         except asyncio.CancelledError:
             if 'proc' in locals() and proc.returncode is None:
                 try:
@@ -102,7 +110,7 @@ class AgentProvider:
         if total > 20 * 1024 * 1024:
             output += "\n\n[Output truncated after 20 MB]"
         if proc.returncode:
-            raise ProviderError(f"{name} exited with code {proc.returncode}: {output[-3000:]}")
+            raise ProviderError(f"{name} exited with code {proc.returncode}: {output[-3000:]}", retryable=True)
         return output
 
     def interrupt(self, request_id: str) -> bool:

@@ -29,6 +29,7 @@ class HealthCheck:
             "skills": self._check_skills(),
             "voice": self._check_voice(),
             "router": self._check_router(),
+            "queue": self._check_queue(),
         }
         overall = "ok" if all(c.get("status") == "ok" for c in checks.values()) else "degraded"
         return {"status": overall, "checked_at": datetime.now(timezone.utc).isoformat(), "checks": checks}
@@ -76,6 +77,20 @@ class HealthCheck:
             else:
                 detail["status"] = "ok"
             return detail
+        except Exception as exc:
+            return {"status": "error", "error": str(exc)}
+
+    def _check_queue(self) -> dict:
+        """Durable queue depth plus worker heartbeats."""
+        queue = getattr(self.service, "queue", None) if self.service else None
+        if queue is None:
+            return {"status": "disabled"}
+        try:
+            stats = queue.store.stats()
+            workers = queue.store.workers()
+            alive = [worker for worker in workers if worker.get("alive")]
+            return {"status": "ok" if alive else "degraded",
+                    "workers_alive": len(alive), "workers_total": len(workers), **stats}
         except Exception as exc:
             return {"status": "error", "error": str(exc)}
 

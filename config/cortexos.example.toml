@@ -19,6 +19,19 @@ fast_model_api_key = "local"
 # jev_min_confidence = 0.5
 # jev_timeout_seconds = 10
 
+[queue]
+# Durable task queue (SQLite under state/). Defaults shown.
+# enabled = true
+# db_path = "state/queue.db"
+# workers = 2
+# max_attempts = 3
+# backoff_base_seconds = 30
+# backoff_cap_seconds = 900
+# task_timeout_seconds = 900
+# dedupe_window_seconds = 30
+# retention_days = 30
+# poll_interval_seconds = 0.5
+
 [providers.codex]
 name = "Codex"
 command = "codex"

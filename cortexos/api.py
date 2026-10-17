@@ -17,6 +17,7 @@ from .service import CortexService
 from .sessions import TerminalManager, terminal_websocket
 from .streaming import RequestStreams, MetricsBroadcaster
 from .scheduler import run_scheduler
+from .queue import QueueManager, QueueStore, QueueError
 from .agents import AgentCoordinator
 from .ops import HealthCheck, BackupManager, backup_loop
 from .voice import LocalVoice, VoiceUnavailable
@@ -33,6 +34,8 @@ backup_task: asyncio.Task | None = None
 coordinator = AgentCoordinator(service.registry, service.vault, jev=service.fast_model.jev)
 health = HealthCheck(service=service, vault=service.vault, voice=voice)
 backups = BackupManager(service.vault)
+queue_store: QueueStore | None = None
+queue_mgr: QueueManager | None = None
 app = FastAPI(title="CortexOS Bridge", version="0.1.0")
 hud_dir = settings.root / "apps" / "hud"
 
@@ -72,6 +75,16 @@ class RequestBody(BaseModel):
     background: bool = False
 
 
+class TaskBody(BaseModel):
+    prompt: str = Field(min_length=1, max_length=20000)
+    backend: str | None = None
+    skill_id: str | None = None
+    priority: int = Field(default=5, ge=1, le=9)
+    max_attempts: int | None = Field(default=None, ge=1, le=10)
+    dedupe_key: str | None = Field(default=None, max_length=200)
+    scheduled_for: float | None = Field(default=None, ge=0)
+
+
 class FeedbackBody(BaseModel):
     skill_id: str
     useful: bool
@@ -96,12 +109,36 @@ class TerminalBody(BaseModel):
     rows: int = 28
 
 
-def start_background_request(prompt: str, backend: str | None, skill_id: str | None, request_id: str | None = None) -> dict:
+async def queue_stream_sink(stream_id: str, event: dict, finish: bool) -> None:
+    stream = request_streams.get(stream_id)
+    if stream is None:
+        return
+    if finish:
+        await stream.finish(event)
+    else:
+        await stream.publish(event)
+
+
+async def start_background_request(prompt: str, backend: str | None, skill_id: str | None,
+                                   request_id: str | None = None) -> dict:
     request_id = request_id or str(uuid.uuid4())
     if request_id in background_tasks:
         raise HTTPException(status_code=409, detail="Request ID is already active")
     if service.vault.request_exists(request_id):
         raise HTTPException(status_code=409, detail="Request ID has already been used; submit a new request instead.")
+    if queue_mgr is not None:
+        existing = queue_mgr.store.get(request_id)
+        if existing and existing["status"] in ("queued", "running", "awaiting_approval"):
+            raise HTTPException(status_code=409, detail="Request ID is already active")
+        request_streams.create(request_id)
+        outcome = await queue_mgr.enqueue(prompt, backend=backend, skill_id=skill_id,
+                                          origin="api-background", task_id=request_id,
+                                          dedupe_window=settings.queue_dedupe_window_seconds)
+        task = outcome["task"]
+        return {"id": request_id, "task_id": task["id"], "status": task["status"],
+                "duplicate": not outcome["created"],
+                "stream": f"/api/requests/{request_id}/stream", "queued": True}
+    # Fallback when the queue is disabled: in-memory background task (lost on restart).
     stream = request_streams.create(request_id)
 
     async def run_background():
@@ -129,6 +166,8 @@ def start_background_approval(request_id: str) -> dict:
                                            on_output=lambda text: stream.publish({"type": "output", "data": text}))
         except Exception as exc:
             result = {"id": request_id, "status": "error", "error": str(exc)}
+        if queue_mgr is not None:
+            await queue_mgr.note_approval_outcome(request_id, result)
         await stream.finish(result)
 
     task = asyncio.create_task(run_approval())
@@ -232,6 +271,11 @@ async def request_stream_socket(websocket: WebSocket, request_id: str):
 
 @app.on_event("shutdown")
 async def shutdown_sessions():
+    global queue_mgr
+    if queue_mgr is not None:
+        await queue_mgr.stop()
+        service.queue = None
+        queue_mgr = None
     if scheduler_task:
         scheduler_task.cancel()
         await asyncio.gather(scheduler_task, return_exceptions=True)
@@ -247,10 +291,21 @@ async def shutdown_sessions():
 
 @app.on_event("startup")
 async def start_scheduler():
-    global scheduler_task
+    global scheduler_task, backup_task, queue_mgr, queue_store
     service.vault.bootstrap()
+    if settings.queue_enabled:
+        queue_store = QueueStore(settings.queue_db)
+        queue_mgr = QueueManager(service, queue_store, workers=settings.queue_workers,
+                                 poll_interval=settings.queue_poll_interval_seconds,
+                                 task_timeout=settings.queue_task_timeout_seconds,
+                                 backoff_base=settings.queue_backoff_base_seconds,
+                                 backoff_cap=settings.queue_backoff_cap_seconds,
+                                 max_attempts=settings.queue_max_attempts,
+                                 retention_days=settings.queue_retention_days,
+                                 event_sink=queue_stream_sink)
+        service.queue = queue_mgr
+        await queue_mgr.start()
     scheduler_task = asyncio.create_task(run_scheduler(service))
-    global backup_task
     backup_task = asyncio.create_task(backup_loop(backups))
 
 
@@ -317,7 +372,7 @@ def pending_approvals():
 @app.post("/api/requests")
 async def submit(body: RequestBody):
     if body.background:
-        return start_background_request(body.prompt, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
+        return await start_background_request(body.prompt, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
     result = await service.submit(body.prompt, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
     if result.get("status") == "error" and "Request ID has already been used" in result.get("error", ""):
         raise HTTPException(status_code=409, detail=result["error"])
@@ -352,7 +407,7 @@ async def voice_turn(body: VoiceTurnBody):
     if not transcript:
         raise HTTPException(status_code=422, detail="Whisper did not detect speech")
     if body.background:
-        result = start_background_request(transcript, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
+        result = await start_background_request(transcript, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
         result["transcript"] = transcript
     else:
         result = await service.submit(transcript, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
@@ -375,12 +430,18 @@ async def voice_speak(body: SpeakBody):
 async def approve(request_id: str, background: bool = False):
     if background:
         return start_background_approval(request_id)
-    return await service.approve(request_id)
+    result = await service.approve(request_id)
+    if queue_mgr is not None:
+        await queue_mgr.note_approval_outcome(request_id, result)
+    return result
 
 
 @app.post("/api/requests/{request_id}/reject")
-def reject(request_id: str):
-    return service.reject(request_id)
+async def reject(request_id: str):
+    result = service.reject(request_id)
+    if queue_mgr is not None:
+        await queue_mgr.note_rejection(request_id)
+    return result
 
 
 @app.post("/api/requests/{request_id}/feedback")
@@ -390,6 +451,79 @@ async def feedback(request_id: str, body: FeedbackBody):
     await metrics_bus.broadcast({"type": "metrics", "metrics": service.vault.metrics(),
                                  "history": service.vault.metrics_history()})
     return result
+
+
+@app.post("/api/tasks")
+async def create_task(body: TaskBody):
+    if queue_mgr is None:
+        raise HTTPException(status_code=503, detail="Task queue is disabled (see [queue] in config/cortexos.toml)")
+    try:
+        outcome = await queue_mgr.enqueue(body.prompt, backend=body.backend, skill_id=body.skill_id,
+                                          priority=body.priority, max_attempts=body.max_attempts,
+                                          dedupe_key=body.dedupe_key, scheduled_for=body.scheduled_for,
+                                          origin="api",
+                                          dedupe_window=settings.queue_dedupe_window_seconds)
+    except QueueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"task": outcome["task"], "duplicate": not outcome["created"]}
+
+
+@app.get("/api/tasks")
+def list_tasks(status: str | None = None, origin: str | None = None, limit: int = 50, offset: int = 0):
+    if queue_mgr is None:
+        raise HTTPException(status_code=503, detail="Task queue is disabled")
+    try:
+        tasks = queue_mgr.store.list(status=status, origin=origin, limit=limit, offset=offset)
+    except QueueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"tasks": tasks, "summary": queue_mgr.store.stats()}
+
+
+@app.get("/api/tasks/{task_id}")
+def task_detail(task_id: str):
+    if queue_mgr is None:
+        raise HTTPException(status_code=503, detail="Task queue is disabled")
+    task = queue_mgr.store.get(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"task": task, "events": queue_mgr.store.events(task_id, limit=200)}
+
+
+@app.get("/api/tasks/{task_id}/events")
+def task_events(task_id: str, after_seq: int = 0, limit: int = 200):
+    if queue_mgr is None:
+        raise HTTPException(status_code=503, detail="Task queue is disabled")
+    if queue_mgr.store.get(task_id) is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"events": queue_mgr.store.events(task_id, after_seq=after_seq, limit=limit)}
+
+
+@app.post("/api/tasks/{task_id}/cancel")
+async def cancel_task(task_id: str):
+    if queue_mgr is None:
+        raise HTTPException(status_code=503, detail="Task queue is disabled")
+    try:
+        return await queue_mgr.cancel(task_id)
+    except QueueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/api/tasks/{task_id}/retry")
+async def retry_task(task_id: str):
+    if queue_mgr is None:
+        raise HTTPException(status_code=503, detail="Task queue is disabled")
+    try:
+        return await queue_mgr.retry(task_id)
+    except QueueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/api/queue/summary")
+def queue_summary():
+    if queue_mgr is None:
+        return {"enabled": False}
+    return {"enabled": True, "summary": queue_mgr.store.stats(),
+            "workers": queue_mgr.store.workers(), "recovery": queue_mgr.recovery_report}
 
 
 @app.get("/api/health")

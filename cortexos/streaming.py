@@ -22,6 +22,8 @@ class RequestStream:
             self.condition.notify_all()
 
     async def finish(self, result: dict) -> None:
+        if self.done:
+            return
         response = dict(result)
         if isinstance(response.get("result"), str):
             response["result"] = response["result"][:8000]

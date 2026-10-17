@@ -14,3 +14,4 @@ apps/obsidian-plugin/styles.css
 config/server.key
 config/server.crt
 cortexos.egg-info/
+state/

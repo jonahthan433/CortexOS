@@ -19,6 +19,7 @@ class CortexService:
         self.agent = AgentProvider(settings)
         self.fast_model = FastModel(settings)
         self.pending: dict[str, dict] = self.vault.load_state().get("pending_approvals", {})
+        self.queue = None  # attached by the Bridge once the durable queue starts
 
     def status(self) -> dict:
         return {"name": "CortexOS", "state": "Idle", "backend": self.settings.backend,
@@ -148,7 +149,8 @@ class CortexService:
         except Exception as exc:
             self.vault.log_request(request_id, prompt, "error", 3, backend or self.settings.backend)
             self.vault.receipt(request_id, {"status": "error", "error": str(exc), "skill": skill.id if skill else None})
-            return {"id": request_id, "status": "error", "error": str(exc), "route_reason": reason}
+            return {"id": request_id, "status": "error", "error": str(exc), "route_reason": reason,
+                    "retryable": bool(getattr(exc, "retryable", False))}
 
     def _finish(self, request_id: str, prompt: str, result: str, status: str, tier: int, backend: str | None, skill,
                 reason: str | None = None) -> dict:
