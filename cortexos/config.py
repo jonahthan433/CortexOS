@@ -52,6 +52,15 @@ class Settings:
     connectors_enabled: bool = True
     connectors_state_dir: Path = Path("state/connectors")
     connectors_client_dir: Path = Path("config/connectors")
+    telegram_enabled: bool = False
+    telegram_allow: tuple[str, ...] = ()
+    telegram_env_file: Path = Path("/home/hermes/.hermes/.env")
+    telegram_token_file: Path = Path("/etc/cortexos/telegram-bridge.token")
+    telegram_send_command: str = "/opt/cortexos/hermes-run"
+    telegram_send_timeout_seconds: float = 60.0
+    telegram_notify_retries: bool = False
+    telegram_rate_per_minute: int = 20
+    telegram_max_reply_chars: int = 3500
 
     @property
     def agent_ids(self) -> list[str]:
@@ -101,6 +110,7 @@ class Settings:
         queue = data.get("queue", {})
         llm = data.get("llm", {})
         connectors = data.get("connectors", {})
+        telegram = data.get("telegram", {})
         return cls(
             root=base,
             host=bridge.get("host", "127.0.0.1"),
@@ -144,4 +154,13 @@ class Settings:
             connectors_enabled=bool(connectors.get("enabled", True)),
             connectors_state_dir=(base / connectors.get("state_dir", "state/connectors")).resolve(),
             connectors_client_dir=(base / connectors.get("client_dir", "config/connectors")).resolve(),
+            telegram_enabled=bool(telegram.get("enabled", False)),
+            telegram_allow=tuple(str(item) for item in (telegram.get("allow") or []) if str(item).strip()),
+            telegram_env_file=Path(base / str(telegram.get("env_file", "/home/hermes/.hermes/.env"))).resolve(),
+            telegram_token_file=Path(base / str(telegram.get("token_file", "/etc/cortexos/telegram-bridge.token"))).resolve(),
+            telegram_send_command=str(telegram.get("send_command") or "/opt/cortexos/hermes-run"),
+            telegram_send_timeout_seconds=float(telegram.get("send_timeout_seconds", 60)),
+            telegram_notify_retries=bool(telegram.get("notify_retries", False)),
+            telegram_rate_per_minute=max(1, int(telegram.get("rate_per_minute", 20))),
+            telegram_max_reply_chars=max(200, int(telegram.get("max_reply_chars", 3500))),
         )

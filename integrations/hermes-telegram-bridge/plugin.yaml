@@ -1,0 +1,10 @@
+name: cortexos-bridge
+version: 0.1.0
+description: >-
+  CortexOS command center for Telegram. Forwards only its own trigger commands
+  (/task, /tasks, /agents, /assign, /taskstatus, /cancel, /reject,
+  /approve <uuid>, and the /cx namespace) to the local CortexOS bridge over
+  loopback and replies with the bridge's response. Every other message flows
+  to Hermes exactly as before. Results and approvals are delivered back to the
+  same chat by CortexOS through `hermes send`; this plugin runs no poller and
+  owns no bot credentials of its own.

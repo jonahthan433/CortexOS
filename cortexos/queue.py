@@ -575,6 +575,40 @@ class QueueManager:
         self._stop = asyncio.Event()
         self._boot_token = uuid.uuid4().hex[:8]
         self.recovery_report: dict = {}
+        self._pause_path = Path(self.store.db_path).parent / "dispatch.json"
+        self._pause_cache: tuple[float, bool] | None = None
+
+    # ----------------------------------------------------------------- paused
+
+    def dispatch_paused(self) -> bool:
+        """True while new task dispatch is paused (running tasks continue).
+
+        Persisted as ``state/dispatch.json`` next to the queue database so the
+        flag survives restarts; absent or unreadable file means running."""
+        try:
+            mtime = self._pause_path.stat().st_mtime
+        except OSError:
+            return False
+        if self._pause_cache and self._pause_cache[0] == mtime:
+            return self._pause_cache[1]
+        paused = False
+        try:
+            paused = bool(json.loads(self._pause_path.read_text(encoding="utf-8")).get("paused"))
+        except (OSError, ValueError):
+            paused = False
+        self._pause_cache = (mtime, paused)
+        return paused
+
+    def set_dispatch_paused(self, paused: bool) -> bool:
+        self._pause_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = self._pause_path.with_suffix(".tmp")
+        tmp.write_text(json.dumps({"paused": bool(paused), "updated_at": time.time()}), encoding="utf-8")
+        os.replace(tmp, self._pause_path)
+        with contextlib.suppress(OSError):
+            os.chmod(self._pause_path, 0o600)
+        self._pause_cache = None
+        logger.info("queue dispatch %s", "paused" if paused else "resumed")
+        return bool(paused)
 
     # ----------------------------------------------------------------- control
 
@@ -726,6 +760,9 @@ class QueueManager:
             try:
                 self.store.worker_heartbeat(worker_id, status="idle", pid=os.getpid(),
                                             boot_token=self._boot_token)
+                if self.dispatch_paused():
+                    await _sleep_or_stop(self._stop, 1.0)
+                    continue
                 task = self.store.claim(worker_id, lease_seconds=self.task_timeout + 60)
             except asyncio.CancelledError:
                 raise

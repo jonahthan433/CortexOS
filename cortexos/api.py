@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import binascii
 import asyncio
+import logging
 import time
 import uuid
 import hmac
@@ -28,8 +29,12 @@ from .ops import HealthCheck, BackupManager, backup_loop
 from .voice import LocalVoice, VoiceUnavailable
 from .auth import (AuthError, AuthStore, LoginThrottle, MIN_PASSWORD_LENGTH,
                    SESSION_COOKIE, SESSION_TTL_SECONDS)
+from . import telegram as telegram_module
+from .telegram import (HermesSendSender, InboundMessage, TelegramBridge,
+                       TelegramNotifier, ensure_bridge_token)
 
 settings = Settings.load()
+logger = logging.getLogger("cortexos.api")
 service = CortexService(settings)
 vault_browser = VaultBrowser(settings.vault)
 voice = LocalVoice(settings)
@@ -46,6 +51,9 @@ health = HealthCheck(service=service, vault=service.vault, voice=voice)
 backups = BackupManager(service.vault)
 queue_store: QueueStore | None = None
 queue_mgr: QueueManager | None = None
+telegram_bridge: TelegramBridge | None = None
+telegram_notifier: TelegramNotifier | None = None
+telegram_notifier_task: asyncio.Task | None = None
 app = FastAPI(title="CortexOS Bridge", version="0.1.0")
 hud_dir = settings.root / "apps" / "hud"
 
@@ -54,7 +62,8 @@ def token_matches(candidate: str) -> bool:
     return hmac.compare_digest(candidate.encode("utf-8"), settings.bridge_token.encode("utf-8"))
 
 
-PUBLIC_API_PATHS = {"/api/auth/status", "/api/auth/login", "/api/auth/setup", "/api/auth/logout"}
+PUBLIC_API_PATHS = {"/api/auth/status", "/api/auth/login", "/api/auth/setup", "/api/auth/logout",
+                    "/api/telegram/inbound"}
 
 
 def bearer_matches(request) -> bool:
@@ -164,6 +173,17 @@ class TaskBody(BaseModel):
     scheduled_for: float | None = Field(default=None, ge=0)
 
 
+class TelegramInboundBody(BaseModel):
+    chat_id: Annotated[str, StringConstraints(min_length=1, max_length=32)]
+    user_id: Annotated[str, StringConstraints(min_length=1, max_length=32)]
+    text: Annotated[str, StringConstraints(min_length=1, max_length=4000)]
+    message_id: int | None = None
+    update_id: int | None = None
+    username: Annotated[str | None, StringConstraints(max_length=64)] = None
+    chat_type: Annotated[str | None, StringConstraints(max_length=16)] = None
+    ts: float | None = None
+
+
 class FeedbackBody(BaseModel):
     skill_id: str
     useful: bool
@@ -236,6 +256,39 @@ async def queue_stream_sink(stream_id: str, event: dict, finish: bool) -> None:
         await stream.finish(event)
     else:
         await stream.publish(event)
+
+
+async def combined_queue_sink(stream_id: str, event: dict, finish: bool) -> None:
+    """Queue events fan out to the request streams (HUD) and, when enabled, to
+    the Telegram notifier for origin=telegram tasks. The notifier can never
+    break the stream path: it guards itself."""
+    await queue_stream_sink(stream_id, event, finish)
+    if telegram_notifier is not None:
+        await telegram_notifier.on_event(stream_id, event, finish)
+
+
+async def telegram_reject_fn(request_id: str) -> dict:
+    result = service.reject(request_id)
+    if queue_mgr is not None:
+        await queue_mgr.note_rejection(request_id)
+    return result
+
+
+def setup_telegram() -> None:
+    """Build the Telegram bridge/notifier when [telegram] enabled = true.
+    The scoped ingress token file is created if missing (0640 root:hermes)."""
+    global telegram_bridge, telegram_notifier
+    if not settings.telegram_enabled:
+        return
+    if not ensure_bridge_token(settings.telegram_token_file):
+        logger.warning("telegram bridge enabled but the ingress token file could not be created; ingress stays closed")
+        return
+    telegram_bridge = TelegramBridge(settings)
+    sender = HermesSendSender(settings.telegram_send_command,
+                              timeout=settings.telegram_send_timeout_seconds)
+    telegram_notifier = TelegramNotifier(settings, sender=sender)
+    logger.info("telegram bridge enabled: ingress on /api/telegram/inbound, notifications via %s",
+                settings.telegram_send_command)
 
 
 def request_known(request_id: str) -> bool:
@@ -531,7 +584,11 @@ async def request_stream_socket(websocket: WebSocket, request_id: str):
 
 @app.on_event("shutdown")
 async def shutdown_sessions():
-    global queue_mgr
+    global queue_mgr, telegram_notifier_task
+    if telegram_notifier_task is not None:
+        telegram_notifier_task.cancel()
+        await asyncio.gather(telegram_notifier_task, return_exceptions=True)
+        telegram_notifier_task = None
     if queue_mgr is not None:
         await queue_mgr.stop()
         service.queue = None
@@ -551,8 +608,9 @@ async def shutdown_sessions():
 
 @app.on_event("startup")
 async def start_scheduler():
-    global scheduler_task, backup_task, queue_mgr, queue_store
+    global scheduler_task, backup_task, queue_mgr, queue_store, telegram_notifier_task
     service.vault.bootstrap()
+    setup_telegram()
     if settings.queue_enabled:
         queue_store = QueueStore(settings.queue_db)
         queue_mgr = QueueManager(service, queue_store, workers=settings.queue_workers,
@@ -562,9 +620,18 @@ async def start_scheduler():
                                  backoff_cap=settings.queue_backoff_cap_seconds,
                                  max_attempts=settings.queue_max_attempts,
                                  retention_days=settings.queue_retention_days,
-                                 event_sink=queue_stream_sink)
+                                 event_sink=combined_queue_sink if telegram_notifier is not None else queue_stream_sink)
         service.queue = queue_mgr
         await queue_mgr.start()
+        if telegram_bridge is not None:
+            telegram_bridge.bind(queue_mgr, queue_store, service)
+            telegram_bridge.approve_fn = start_background_approval
+            telegram_bridge.reject_fn = telegram_reject_fn
+            telegram_bridge.directory_provider = lambda: agents_directory(
+                settings, coordinator, service.gateway, settings.queue_db)
+        if telegram_notifier is not None:
+            telegram_notifier.store = queue_store
+            telegram_notifier_task = asyncio.create_task(telegram_notifier.run(), name="telegram-notifier")
     scheduler_task = asyncio.create_task(run_scheduler(service))
     backup_task = asyncio.create_task(backup_loop(backups))
 
@@ -950,6 +1017,36 @@ async def reject(request_id: str):
     if queue_mgr is not None:
         await queue_mgr.note_rejection(request_id)
     return result
+
+
+@app.post("/api/telegram/inbound")
+async def telegram_inbound(body: TelegramInboundBody, request: Request):
+    """Scoped ingress for the Hermes gateway Telegram plugin.
+
+    Guarded by its own token file (never the main bridge token), the sender
+    allowlist shared with Hermes, and a per-user rate limit. Returns the exact
+    reply text for the bot to send back in the originating chat."""
+    if telegram_bridge is None:
+        return JSONResponse(status_code=503, content={"detail": "Telegram bridge is disabled"})
+    supplied = request.headers.get(telegram_module.BRIDGE_HEADER) or ""
+    if not supplied:
+        authorization = request.headers.get("authorization", "")
+        supplied = authorization[7:] if authorization.lower().startswith("bearer ") else ""
+    if not telegram_bridge.token_ok(supplied):
+        return JSONResponse(status_code=401, content={"detail": "Invalid bridge token"})
+    if not telegram_bridge.user_allowed(body.user_id):
+        logger.warning("telegram bridge rejected an unauthorized sender")
+        return JSONResponse(status_code=403, content={"detail": "Sender is not authorized"})
+    if not telegram_bridge.rate_ok(body.user_id):
+        return JSONResponse(status_code=429, content={"detail": "Too many requests"},
+                            headers={"Retry-After": "60"})
+    if not telegram_module.is_trigger(body.text):
+        return {"reply": telegram_bridge.help_text()}
+    reply = await telegram_bridge.handle(InboundMessage(
+        chat_id=str(body.chat_id), user_id=str(body.user_id), text=body.text,
+        message_id=body.message_id, update_id=body.update_id, username=body.username,
+        chat_type=body.chat_type, ts=body.ts))
+    return {"reply": reply}
 
 
 @app.post("/api/requests/{request_id}/feedback")
