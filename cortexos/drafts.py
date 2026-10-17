@@ -30,6 +30,10 @@ class DraftStore:
 
     def _write(self, draft: dict) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
+        try:
+            os.chmod(self.root, 0o700)
+        except OSError:
+            pass
         payload = json.dumps(draft, indent=2, ensure_ascii=False, sort_keys=True)
         fd, temporary = tempfile.mkstemp(prefix=".draft-", suffix=".json", dir=self.root)
         try:

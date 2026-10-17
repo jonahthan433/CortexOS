@@ -34,6 +34,9 @@ def test_store_roundtrip_update_list_discard(tmp_path):
     service = make_service(tmp_path)
     draft = service.create_draft(kind="note", body="Call the accountant about Q3.", title="Accountant")
     assert draft["id"].startswith("draft-") and draft["status"] == "draft" and draft["revision"] == 1
+    drafts_dir = tmp_path / "state" / "drafts"
+    assert drafts_dir.stat().st_mode & 0o777 == 0o700
+    assert (drafts_dir / f"{draft['id']}.json").stat().st_mode & 0o777 == 0o600
     fetched = service.drafts.get(draft["id"])
     assert fetched["title"] == "Accountant"
     assert [item["id"] for item in service.drafts.list()] == [draft["id"]]

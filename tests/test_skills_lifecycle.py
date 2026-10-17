@@ -132,6 +132,9 @@ def test_history_baseline_then_change_entries(tmp_path):
     assert view["entries"][0]["current"] is True
     assert [item["source"] for item in view["entries"]] == ["change", "baseline"]
     assert view["baseline_hash"] == view["entries"][1]["hash"]
+    history_dir = tmp_path / "state" / "skill_history"
+    assert history_dir.stat().st_mode & 0o777 == 0o700
+    assert (history_dir / "demo.json").stat().st_mode & 0o777 == 0o600
 
 
 def test_history_is_capped(tmp_path):
