@@ -119,6 +119,43 @@ async def queue_stream_sink(stream_id: str, event: dict, finish: bool) -> None:
         await stream.publish(event)
 
 
+def request_known(request_id: str) -> bool:
+    """A request stream may be created on demand only for requests that exist:
+    live or recorded vault requests, pending approvals, or queue tasks."""
+    if request_id in service.pending or service.vault.request_exists(request_id):
+        return True
+    if queue_mgr is not None:
+        return (queue_mgr.store.get(request_id) is not None
+                or queue_mgr.store.find_by_request_id(request_id) is not None)
+    return False
+
+
+async def replay_task_snapshot(stream, request_id: str) -> None:
+    """A watcher may connect after the task already moved on (or finished)
+    without a stream existing. Send the real current state so the viewer is
+    never left waiting on silence, and close the stream if the task is done."""
+    if queue_mgr is None:
+        return
+    task = queue_mgr.store.get(request_id) or queue_mgr.store.find_by_request_id(request_id)
+    if task is None:
+        return
+    await stream.publish({"type": "task", "status": task["status"], "task": task})
+    if task["status"] == "completed":
+        await stream.finish({"id": task["id"], "status": "completed", "task": task["id"],
+                             "result": task.get("result_ref")})
+    elif task["status"] in {"failed", "cancelled"}:
+        await stream.finish({"id": task["id"], "status": "error", "task": task["id"],
+                             "error": task.get("error") or f"task {task['status']}"})
+
+
+def request_interrupt(request_id: str) -> bool:
+    """Stop button: SIGINT the provider process and/or cooperatively cancel the
+    owning durable queue task. Returns True when a stop was actually sent."""
+    stopped = service.agent.interrupt(request_id)
+    queued = queue_mgr is not None and queue_mgr.request_cancel_by_request_id(request_id)
+    return bool(stopped or queued)
+
+
 async def start_background_request(prompt: str, backend: str | None, skill_id: str | None,
                                    request_id: str | None = None) -> dict:
     request_id = request_id or str(uuid.uuid4())
@@ -260,13 +297,18 @@ async def terminal_socket(websocket: WebSocket, session_id: str):
 async def request_stream_socket(websocket: WebSocket, request_id: str):
     if not await check_websocket_origin(websocket):
         return
-    stream = request_streams.get(request_id)
-    if stream is None:
-        await websocket.close(code=4404, reason="Request stream not found")
-        return
     if not await authenticate_websocket(websocket):
         return
-    await request_streams.serve(websocket, stream, service.agent.interrupt)
+    stream = request_streams.get(request_id)
+    if stream is None:
+        # Tasks submitted directly to the queue have no stream until someone
+        # watches them; create it on demand for real requests only.
+        if not request_known(request_id):
+            await websocket.close(code=4404, reason="Request stream not found")
+            return
+        stream = request_streams.create(request_id)
+        await replay_task_snapshot(stream, request_id)
+    await request_streams.serve(websocket, stream, request_interrupt)
 
 
 @app.on_event("shutdown")

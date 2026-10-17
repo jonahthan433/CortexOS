@@ -99,6 +99,9 @@ def test_manager_retries_transient_failure_then_succeeds(tmp_path):
             assert task["request_id"] == f"{task_id}-a2"
             kinds = [event["kind"] for event in store.events(task_id)]
             assert "retry_scheduled" in kinds and "completed" in kinds
+            # Output and finish events must both stream under the task id,
+            # even on retried attempts (attempt ids only link to the vault).
+            assert all(e["stream"] == task_id for e in events)
         finally:
             await manager.stop()
     run(scenario())
@@ -297,3 +300,46 @@ def test_reconcile_keeps_live_pending(tmp_path):
 def test_provider_error_retryable_flag():
     assert ProviderError("missing").retryable is False
     assert ProviderError("timeout", retryable=True).retryable is True
+
+
+def test_request_cancel_by_request_id_cancels_running(tmp_path):
+    async def hanging(prompt, backend, skill_id, request_id, on_output):
+        await asyncio.Event().wait()
+
+    async def scenario():
+        manager, store, events, service = make_manager(tmp_path, hanging)
+        await manager.start()
+        try:
+            outcome = await manager.enqueue("stop me")
+            task_id = outcome["task"]["id"]
+            await wait_for_status(store, task_id, "running")
+            assert manager.request_cancel_by_request_id(task_id) is True
+            await wait_for_status(store, task_id, "cancelled")
+            # Once finished, a second stop is a no-op, not a fake success.
+            assert manager.request_cancel_by_request_id(task_id) is False
+        finally:
+            await manager.stop()
+    run(scenario())
+
+
+def test_error_after_interrupt_marks_cancelled_not_retry(tmp_path):
+    async def slow_error(prompt, backend, skill_id, request_id, on_output):
+        await asyncio.sleep(0.2)
+        return {"id": request_id, "status": "error",
+                "error": "provider exited with code 2 after SIGINT", "retryable": True}
+
+    async def scenario():
+        manager, store, events, service = make_manager(tmp_path, slow_error)
+        await manager.start()
+        try:
+            outcome = await manager.enqueue("interrupt then provider error", max_attempts=3)
+            task_id = outcome["task"]["id"]
+            await wait_for_status(store, task_id, "running")
+            # Human pressed stop: flag set, provider then returns its own error.
+            store.request_cancel(task_id)
+            task = await wait_for_status(store, task_id, "cancelled")
+            assert task["attempts"] == 1  # no retry was scheduled
+            assert "cancelled by human" in (task["error"] or "")
+        finally:
+            await manager.stop()
+    run(scenario())

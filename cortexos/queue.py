@@ -670,6 +670,19 @@ class QueueManager:
         await self._emit(task_id, {"type": "task", "status": "queued", "task": _summary(task)})
         return {"id": task_id, "status": "queued", "task": _summary(task)}
 
+    def request_cancel_by_request_id(self, request_id: str) -> bool:
+        """Sync helper for interrupt paths (WebSocket stop button): cooperatively
+        cancel the running task that owns this request id or task id. Returns
+        True when a stop was actually sent."""
+        task = self.store.find_by_request_id(request_id) or self.store.get(request_id)
+        if task is None or task["status"] != "running":
+            return False
+        self.store.request_cancel(task["id"])
+        execution = self._executions.get(task["id"])
+        if execution is not None:
+            execution.cancel()
+        return True
+
     async def note_approval_outcome(self, request_id: str, result: dict) -> None:
         task = self.store.find_by_request_id(request_id)
         if task is None or task["id"] == "" or task["status"] != "awaiting_approval":
@@ -680,12 +693,12 @@ class QueueManager:
                                 meta_patch={"tier": result.get("tier"), "backend": result.get("backend"),
                                             "receipt": result.get("receipt")},
                                 event="completed_after_approval")
-            await self._finish_stream(task.get("request_id"), result)
+            await self._finish_stream(task["id"], result)
         elif status == "error":
             updated = self.store.fail(task["id"], str(result.get("error", "error after approval")),
                                       retryable=False)
-            await self._finish_stream(task.get("request_id"),
-                                      {"id": task.get("request_id"), "status": "error",
+            await self._finish_stream(task["id"],
+                                      {"id": task["id"], "status": "error",
                                        "error": str(result.get("error", "")), "task": task["id"]})
         else:
             updated = self.store.cancel_queued(task["id"], reason=f"approval ended with status {status}")
@@ -695,8 +708,8 @@ class QueueManager:
         if task is None or task["status"] != "awaiting_approval":
             return
         self.store.cancel_queued(task["id"], reason="approval rejected by human")
-        await self._finish_stream(task.get("request_id"),
-                                  {"id": request_id, "status": "rejected", "task": task["id"]})
+        await self._finish_stream(task["id"],
+                                  {"id": task["id"], "status": "rejected", "task": task["id"]})
 
     # ---------------------------------------------------------------- workers
 
@@ -761,20 +774,17 @@ class QueueManager:
             else:
                 updated = self.store.mark_cancelled(task_id, reason="cancelled by human while running")
                 await self._emit(task_id, {"type": "task", "status": "cancelled", "task": _summary(updated)})
-                await self._finish_stream(request_id, {"id": request_id, "status": "cancelled",
-                                                       "task": task_id})
+                await self._finish_stream(task_id, {"id": task_id, "status": "cancelled",
+                                                    "task": task_id})
             return
         except asyncio.TimeoutError:
-            updated = self.store.fail(task_id, f"task exceeded queue timeout ({self.task_timeout:.0f}s)",
-                                      retryable=True, backoff_base=self.backoff_base,
-                                      backoff_cap=self.backoff_cap)
-            await self._after_attempt(updated, request_id, task_id)
+            await self._fail_or_cancel(task_id, request_id,
+                                       f"task exceeded queue timeout ({self.task_timeout:.0f}s)",
+                                       retryable=True)
             return
         except Exception as exc:
             retryable = bool(getattr(exc, "retryable", True))
-            updated = self.store.fail(task_id, str(exc), retryable=retryable,
-                                      backoff_base=self.backoff_base, backoff_cap=self.backoff_cap)
-            await self._after_attempt(updated, request_id, task_id)
+            await self._fail_or_cancel(task_id, request_id, str(exc), retryable=retryable)
             return
         finally:
             self._executions.pop(task_id, None)
@@ -790,25 +800,39 @@ class QueueManager:
                             "receipt": result.get("receipt")},
                 event="completed")
             await self._emit(task_id, {"type": "task", "status": "completed", "task": _summary(updated)})
-            await self._finish_stream(request_id, result)
+            await self._finish_stream(task_id, result)
         elif status == "awaiting_approval":
             updated = self.store.await_approval(
                 task_id, meta_patch={"risk_level": result.get("risk_level"), "reason": result.get("reason")},
                 message=f"risk={result.get('risk_level')}: {result.get('reason')}")
             await self._emit(task_id, {"type": "task", "status": "awaiting_approval", "task": _summary(updated)})
-            await self._finish_stream(request_id, result)
+            await self._finish_stream(task_id, result)
         elif status == "error":
             error = str(result.get("error", "unknown error"))
             if "already been used" in error:
                 await self._handle_duplicate(task, error)
             else:
-                updated = self.store.fail(task_id, error, retryable=bool(result.get("retryable", False)),
-                                          backoff_base=self.backoff_base, backoff_cap=self.backoff_cap)
-                await self._after_attempt(updated, request_id, task_id)
+                await self._fail_or_cancel(task_id, request_id, error,
+                                           retryable=bool(result.get("retryable", False)))
         else:
-            updated = self.store.fail(task_id, f"unexpected submit status: {status!r}", retryable=False,
-                                      backoff_base=self.backoff_base, backoff_cap=self.backoff_cap)
-            await self._after_attempt(updated, request_id, task_id)
+            await self._fail_or_cancel(task_id, request_id, f"unexpected submit status: {status!r}",
+                                       retryable=False)
+
+    async def _fail_or_cancel(self, task_id: str, request_id: str | None, error: str,
+                              *, retryable: bool) -> None:
+        """Record the failed attempt. If the human already asked to stop this
+        task, record a cancellation instead of a retryable failure so the
+        provider's post-interrupt error output cannot silently re-run."""
+        row = self.store.get(task_id)
+        if row and row.get("cancel_requested"):
+            updated = self.store.mark_cancelled(task_id, reason="cancelled by human while running")
+            await self._emit(task_id, {"type": "task", "status": "cancelled", "task": _summary(updated)})
+            await self._finish_stream(task_id, {"id": task_id, "status": "cancelled",
+                                                "task": task_id, "error": error})
+            return
+        updated = self.store.fail(task_id, error, retryable=retryable,
+                                  backoff_base=self.backoff_base, backoff_cap=self.backoff_cap)
+        await self._after_attempt(updated, task_id)
 
     async def _handle_duplicate(self, task: dict, error: str) -> None:
         """The attempt's request id already exists in the vault (crash between
@@ -822,15 +846,14 @@ class QueueManager:
                                           event="completed_after_recovery",
                                           message="request id already used; completed vault record found")
             await self._emit(task_id, {"type": "task", "status": "completed", "task": _summary(updated)})
-            await self._finish_stream(task.get("request_id"), {"id": task.get("request_id"),
-                                                               "status": "completed", "task": task_id})
+            await self._finish_stream(task_id, {"id": task_id, "status": "completed", "task": task_id})
         else:
             updated = self.store.fail(task_id, f"duplicate request id without completed record: {error}",
                                       retryable=False, backoff_base=self.backoff_base,
                                       backoff_cap=self.backoff_cap)
-            await self._after_attempt(updated, task.get("request_id"), task_id)
+            await self._after_attempt(updated, task_id)
 
-    async def _after_attempt(self, updated: dict | None, request_id: str | None, task_id: str) -> None:
+    async def _after_attempt(self, updated: dict | None, task_id: str) -> None:
         if updated is None:
             return
         if updated["status"] == "queued":
@@ -838,15 +861,15 @@ class QueueManager:
                                        "attempts": updated["attempts"],
                                        "next_attempt_at": updated.get("next_attempt_at"),
                                        "task": _summary(updated)})
-            await self._finish_stream(request_id, {"id": request_id, "status": "retrying",
-                                                   "error": updated.get("error"),
-                                                   "attempts": updated["attempts"],
-                                                   "next_attempt_at": updated.get("next_attempt_at"),
-                                                   "task": task_id})
+            await self._finish_stream(task_id, {"id": task_id, "status": "retrying",
+                                                "error": updated.get("error"),
+                                                "attempts": updated["attempts"],
+                                                "next_attempt_at": updated.get("next_attempt_at"),
+                                                "task": task_id})
         else:
             await self._emit(task_id, {"type": "task", "status": updated["status"], "task": _summary(updated)})
-            await self._finish_stream(request_id, {"id": request_id, "status": "error",
-                                                   "error": updated.get("error"), "task": task_id})
+            await self._finish_stream(task_id, {"id": task_id, "status": "error",
+                                                "error": updated.get("error"), "task": task_id})
 
     # ------------------------------------------------------------------ vault
 
