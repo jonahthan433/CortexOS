@@ -171,6 +171,25 @@ def test_write_requires_approval_and_executes_after_approval_with_receipt(tmp_pa
     assert "ya29" not in blob and "1//refresh" not in blob and CLIENT_SECRET not in blob
 
 
+def test_blocked_connector_never_creates_an_approval(tmp_path):
+    settings = make_settings(tmp_path)
+    write_client(settings)  # client file exists, but authorization has not happened
+    service = CortexService(settings)
+    api = MockAPI()
+    service.connectors = ConnectorRuntime(settings, transport=api.transport())
+    with pytest.raises(ConnectorBlocked) as excinfo:
+        asyncio.run(service.request_connector_operation(
+            "gmail", "messages.send", {"to": ["bob@example.com"], "subject": "Hi", "body": "Hello"}))
+    assert excinfo.value.status == "blocked_missing_credentials"
+    assert service.pending == {} and api.calls == []
+    write_token(service.connectors, scopes=list(GMAIL_READ))
+    with pytest.raises(ConnectorBlocked) as scope_exc:
+        asyncio.run(service.request_connector_operation(
+            "gmail", "messages.send", {"to": ["bob@example.com"], "subject": "Hi", "body": "Hello"}))
+    assert scope_exc.value.status == "missing_scope"
+    assert service.pending == {} and api.calls == []
+
+
 def test_rejecting_a_connector_approval_never_executes(tmp_path):
     settings = make_settings(tmp_path)
     write_client(settings)

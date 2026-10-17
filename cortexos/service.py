@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timezone
 
 from .config import Settings
-from .connectors import ConnectorError, ConnectorRuntime, scrub_secrets, validate_args
+from .connectors import ConnectorBlocked, ConnectorError, ConnectorRuntime, scrub_secrets, validate_args
 from .drafts import DraftStore
 from .llm import ModelGateway
 from .providers import AgentProvider, FastModel
@@ -319,6 +319,19 @@ class CortexService:
         connector = self.connectors.connector(connector_id)
         operation = connector.operation(operation_name)
         cleaned = validate_args(operation, args)
+        # Refuse up front when the connector cannot run at all, so blocked calls
+        # never create an approval that could not be executed. The runtime still
+        # re-checks credentials and scopes at execution time (defense in depth).
+        credential = connector.credential_status()
+        if credential["status"] != "ready":
+            raise ConnectorBlocked(credential["status"], credential.get("detail", ""))
+        granted = set((self.connectors.store.token(connector_id) or {}).get("scopes") or [])
+        missing = [scope for scope in operation.scopes if scope not in granted]
+        if missing:
+            raise ConnectorBlocked(
+                "missing_scope",
+                "Granted scopes do not include: " + ", ".join(missing)
+                + ". Re-authorize with the extended scope set to enable this operation.")
         if operation.approval:
             approval_id = str(uuid.uuid4())
             summary = self.connectors.summary(connector, operation, cleaned)
