@@ -125,6 +125,14 @@ class DraftUpdateBody(BaseModel):
     target: dict[str, Any] | None = None
 
 
+class SnoozeBody(BaseModel):
+    hours: float = Field(default=24, ge=0.1, le=168)
+
+
+class SuggestionActBody(BaseModel):
+    action: str = Field(min_length=1, max_length=40)
+
+
 class SpeakBody(BaseModel):
     text: Annotated[str, StringConstraints(min_length=1, max_length=5000)]
 
@@ -747,6 +755,37 @@ async def regenerate_draft(draft_id: str):
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     return {**draft, "execution": service.draft_execution(draft)}
+
+
+@app.get("/api/suggestions")
+def suggestions():
+    return service.suggestions_report()
+
+
+@app.post("/api/suggestions/{suggestion_id}/dismiss")
+def dismiss_suggestion(suggestion_id: str):
+    try:
+        return service.suggestions.dismiss(suggestion_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/api/suggestions/{suggestion_id}/snooze")
+def snooze_suggestion(suggestion_id: str, body: SnoozeBody):
+    try:
+        return service.suggestions.snooze(suggestion_id, seconds=body.hours * 3600)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/api/suggestions/{suggestion_id}/act")
+async def act_on_suggestion(suggestion_id: str, body: SuggestionActBody):
+    try:
+        return await service.suggestion_act(suggestion_id, body.action)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except QueueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @app.post("/api/requests/{request_id}/approve")

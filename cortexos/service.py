@@ -10,6 +10,7 @@ from .llm import ModelGateway
 from .providers import AgentProvider, FastModel
 from .router import Router
 from .skills import Skill, SkillHistory, SkillRegistry, declared_gate
+from .suggestions import SuggestionEngine
 from .vault import Vault
 
 
@@ -26,6 +27,7 @@ class CortexService:
         self.fast_model = FastModel(settings, gateway=self.gateway)
         self.history = SkillHistory(settings.root / "state" / "skill_history")
         self.drafts = DraftStore(settings.root / "state" / "drafts")
+        self.suggestions = SuggestionEngine(settings.root / "state")
         self._receipt_index: tuple[float, dict] | None = None
         self.pending: dict[str, dict] = self.vault.load_state().get("pending_approvals", {})
         self.queue = None  # attached by the Bridge once the durable queue starts
@@ -270,6 +272,41 @@ class CortexService:
         except Exception as exc:
             raise RuntimeError(self.gateway.scrub(str(exc))) from exc
         return self.drafts.update(draft_id, body=text.strip(), source="regenerate")
+
+    # ------------------------------------------------------------- suggestions
+
+    def suggestions_report(self) -> dict:
+        return self.suggestions.evaluate(self)
+
+    async def suggestion_act(self, subject_id: str, action: str) -> dict:
+        """Run one explicitly chosen suggestion action against current state."""
+        report = self.suggestions.evaluate(self, use_cache=False)
+        item = self.suggestions.find(report, subject_id)
+        if not item:
+            raise ValueError("Suggestion not found or no longer active")
+        chosen = next((entry for entry in item["actions"] if entry["action"] == action), None)
+        if not chosen:
+            raise ValueError(f"Action {action!r} is not available for this suggestion")
+        if action == "inspect":
+            return {"suggestion": subject_id, "action": action, "executed": False,
+                    "reference": chosen.get("ref")}
+        if action == "retry_task":
+            if self.queue is None:
+                raise ValueError("The durable queue is not running")
+            task_id = str(chosen.get("ref", "")).removeprefix("task:")
+            result = await self.queue.retry(task_id)
+            self.suggestions._cache = None
+            return {"suggestion": subject_id, "action": action, "executed": True, "result": result}
+        if action == "request_review":
+            if not chosen.get("available", False):
+                raise ValueError(chosen.get("reason") or "This review is not available yet")
+            skill_id = str(chosen.get("ref", "")).removeprefix("skill:")
+            ledger = self.request_promotion(skill_id)
+            self.suggestions._cache = None
+            return {"suggestion": subject_id, "action": action, "executed": True,
+                    "result": {"skill": skill_id, "status": ledger.get("status"),
+                               "skill_hash": ledger.get("skill_hash")}}
+        raise ValueError(f"Unsupported action: {action}")
 
     # ---------------------------------------------------------------- requests
 
