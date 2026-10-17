@@ -763,7 +763,7 @@ class QueueManager:
         try:
             result = await asyncio.wait_for(
                 self.service.submit(task["prompt"], task.get("backend"), task.get("skill_id"),
-                                    request_id=request_id, on_output=on_output),
+                                    request_id=request_id, on_output=on_output, task_id=task_id),
                 timeout=self.task_timeout)
         except asyncio.CancelledError:
             if self._stop.is_set():

@@ -24,7 +24,10 @@ async def scheduler_tick(service, dry_run: bool = False, now_epoch: float | None
         if not job.get("enabled", False) or not skill_id or not job.get("prompt"):
             continue
         skill = service.registry.get(skill_id)
-        if not skill or service.vault.promotion(skill_id).get("status") != "approved":
+        if not skill:
+            continue
+        permitted, _reason = service.automation_permitted(skill)
+        if not permitted:
             continue
         key = str(job.get("id") or f"{skill_id}-{index}")
         if any(item.get("skill_id") == skill_id for item in service.pending.values()):

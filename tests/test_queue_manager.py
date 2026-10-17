@@ -29,7 +29,7 @@ class FakeService:
         self.pending: dict = {}
         self._submit_impl = submit_impl
 
-    async def submit(self, prompt, backend=None, skill_id=None, request_id=None, on_output=None):
+    async def submit(self, prompt, backend=None, skill_id=None, request_id=None, on_output=None, task_id=None):
         return await self._submit_impl(prompt, backend, skill_id, request_id, on_output)
 
     def reject(self, request_id):

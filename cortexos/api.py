@@ -94,6 +94,11 @@ class FeedbackBody(BaseModel):
     useful: bool
 
 
+class RollbackBody(BaseModel):
+    hash: str = Field(min_length=1, max_length=128)
+    confirm: bool = False
+
+
 class VoiceTurnBody(BaseModel):
     audio_base64: Annotated[str, StringConstraints(min_length=1, max_length=28_000_000)]
     content_type: str = "audio/webm"
@@ -454,11 +459,25 @@ async def start_scheduler():
     backup_task = asyncio.create_task(backup_loop(backups))
 
 
+def _skill_stats_summary(skill):
+    stats = service.skill_stats(skill.id, skill=skill)
+    stats.pop("recent_runs", None)
+    return stats
+
+
 @app.get("/api/skills")
 def skills():
     return [{"id": s.id, "name": s.name, "domain": s.domain, "description": s.description,
              "risk_level": s.risk_level, "approval_required": s.approval_required, "automation_ready": s.automation_ready,
-             **service.vault.skill_stats(s.id)} for s in service.registry.list()]
+             "version": s.version, **_skill_stats_summary(s)} for s in service.registry.list()]
+
+
+@app.get("/api/skills/validation")
+def skills_validation():
+    scan = service.registry.scan()
+    return {"valid": len(scan.skills),
+            "rejected": sum(1 for item in scan.problems if item.get("rejected")),
+            "problems": scan.problems}
 
 
 @app.get("/api/skills/{skill_id}")
@@ -478,8 +497,50 @@ def skill_detail(skill_id: str):
     return {"id": skill.id, "name": skill.name, "domain": skill.domain, "description": skill.description,
             "triggers": skill.trigger_phrases, "tier": skill.tier, "risk_level": skill.risk_level,
             "approval_required": skill.approval_required, "automation_ready": skill.automation_ready,
+            "version": skill.version, "version_source": skill.version_source, "content_hash": skill.content_hash,
+            "tests": skill.tests, "problems": skill.problems,
             "path": relative_path, "files": files, "instructions": skill.instructions[:20000],
-            **service.vault.skill_stats(skill.id)}
+            **service.skill_stats(skill.id, skill=skill)}
+
+
+@app.get("/api/skills/{skill_id}/history")
+def skill_history(skill_id: str):
+    if not service.registry.get(skill_id):
+        raise HTTPException(status_code=404, detail="Skill not found")
+    try:
+        return service.history_view(skill_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/api/skills/{skill_id}/history/{target_hash}")
+def skill_history_entry(skill_id: str, target_hash: str):
+    if not service.registry.get(skill_id):
+        raise HTTPException(status_code=404, detail="Skill not found")
+    try:
+        return service.history_entry(skill_id, target_hash)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/api/skills/{skill_id}/test")
+def run_skill_test(skill_id: str):
+    if not service.registry.get(skill_id):
+        raise HTTPException(status_code=404, detail="Skill not found")
+    try:
+        return service.run_skill_tests(skill_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.post("/api/skills/{skill_id}/rollback")
+def rollback_skill(skill_id: str, body: RollbackBody):
+    if not service.registry.get(skill_id):
+        raise HTTPException(status_code=404, detail="Skill not found")
+    try:
+        return service.rollback_skill(skill_id, body.hash, confirm=body.confirm)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @app.post("/api/skills/{skill_id}/promote")
@@ -487,7 +548,7 @@ def promote_skill(skill_id: str):
     if not service.registry.get(skill_id):
         raise HTTPException(status_code=404, detail="Skill not found")
     try:
-        return service.vault.promote_skill(skill_id)
+        return service.request_promotion(skill_id)
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
@@ -497,7 +558,7 @@ def approve_skill_promotion(skill_id: str):
     if not service.registry.get(skill_id):
         raise HTTPException(status_code=404, detail="Skill not found")
     try:
-        return service.vault.approve_promotion(skill_id)
+        return service.approve_promotion(skill_id)
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 

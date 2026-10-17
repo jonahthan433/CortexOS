@@ -153,7 +153,8 @@ class Vault:
         path.write_text(f"---\nid: {request_id}\ncreated: {now().isoformat()}\n---\n\n# Skill receipt\n\n```json\n{json.dumps(payload, indent=2, ensure_ascii=False)}\n```\n", encoding="utf-8")
         return path
 
-    def skill_feedback(self, request_id: str, skill_id: str, useful: bool) -> Path:
+    def skill_feedback(self, request_id: str, skill_id: str, useful: bool,
+                       skill_hash: str | None = None) -> Path:
         # One pass over receipts; each file parsed once.
         receipts = [(path, data) for path in (self.root / "receipts").glob("**/*.md")
                     if (data := self._receipt_data(path))]
@@ -165,7 +166,8 @@ class Vault:
                for _, data in receipts):
             raise ValueError("Feedback has already been recorded for this run")
         return self.receipt(f"{request_id}-feedback", {"event": "feedback", "request_id": request_id,
-                                                         "skill": skill_id, "status": "successful" if useful else "unsuccessful"})
+                                                         "skill": skill_id, "status": "successful" if useful else "unsuccessful",
+                                                         **({"skill_hash": skill_hash} if skill_hash else {})})
 
     @staticmethod
     def _receipt_data(path: Path) -> dict:
@@ -269,25 +271,136 @@ class Vault:
             entries.append({"name": name, "path": str(path.relative_to(self.root)), "metrics": metrics})
         return entries
 
-    def skill_stats(self, skill_id: str) -> dict:
-        feedback_events: dict[str, str] = {}
+    NON_EXECUTION_EVENTS = {"feedback", "skill_test", "promotion", "approval_request",
+                            "approval_decision", "skill_rollback", "scheduled_run"}
+
+    @staticmethod
+    def _receipt_at(path: Path) -> str | None:
+        match = re.match(r"(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})", path.stem)
+        if not match:
+            return None
+        year, month, day, hour, minute, second = match.groups()
+        return f"{year}-{month}-{day} {hour}:{minute}:{second}"
+
+    def receipt_index(self, per_skill_limit: int = 15) -> dict[str, dict]:
+        """Single pass over receipts -> per-skill evidence buckets.
+
+        Buckets keep only bounded metadata (no instructions, no secret values):
+        feedback (keyed by request id, with the skill hash recorded at run
+        time), execution receipts, and declared-test receipts.
+        """
+        index: dict[str, dict] = {}
         for path in sorted((self.root / "receipts").glob("**/*.md")):
-            text = path.read_text(encoding="utf-8")
-            match = re.search(r"```json\s*(\{.*?\})\s*```", text, re.S)
-            if not match:
+            data = self._receipt_data(path)
+            skill = data.get("skill")
+            if not skill or not isinstance(skill, str):
                 continue
-            try:
-                data = json.loads(match.group(1))
-            except ValueError:
+            bucket = index.setdefault(skill, {"feedback": {}, "executions": [], "tests": []})
+            event = data.get("event")
+            at = self._receipt_at(path)
+            if event == "feedback":
+                bucket["feedback"][str(data.get("request_id", path.stem))] = {
+                    "status": data.get("status", ""), "skill_hash": data.get("skill_hash"), "at": at}
+            elif event == "skill_test":
+                bucket["tests"].append({"request_id": str(data.get("request_id", path.stem)),
+                                        "status": data.get("status"), "skill_hash": data.get("skill_hash"),
+                                        "at": at, "passed": data.get("passed"), "total": data.get("total")})
+                bucket["tests"] = bucket["tests"][-per_skill_limit:]
+            elif event not in self.NON_EXECUTION_EVENTS and data.get("status") in {"completed", "error"}:
+                bucket["executions"].append({"request_id": str(data.get("request_id", path.stem)),
+                                             "task_id": data.get("task_id"), "status": data.get("status"),
+                                             "tier": data.get("tier"), "at": at,
+                                             "output": data.get("output"),
+                                             "error": (str(data.get("error"))[:300] or None) if data.get("error") else None})
+                bucket["executions"] = bucket["executions"][-per_skill_limit:]
+        return index
+
+    def skill_stats(self, skill_id: str, *, current_hash: str | None = None,
+                    baseline_hash: str | None = None, index: dict | None = None) -> dict:
+        """Per-skill run evidence, optionally scoped to a skill version.
+
+        With current_hash set, only feedback recorded for that exact version
+        counts; receipts without a recorded hash are legacy and count only
+        while the skill is unchanged from its recorded baseline. Runs for
+        other versions are reported as stale and cannot certify the current
+        code for automation review.
+        """
+        if index is None:
+            index = self.receipt_index()
+        bucket = index.get(skill_id, {})
+        successful = failed = legacy_successful = legacy_failed = stale = 0
+        for item in bucket.get("feedback", {}).values():
+            status = item.get("status")
+            recorded = item.get("skill_hash")
+            if current_hash and recorded and recorded != current_hash:
+                stale += 1
                 continue
-            if data.get("skill") != skill_id:
+            if current_hash and not recorded:
+                if not (baseline_hash and baseline_hash == current_hash):
+                    stale += 1
+                    continue
+                legacy_successful += status == "successful"
+                legacy_failed += status == "unsuccessful"
                 continue
-            if data.get("event") != "feedback":
-                continue
-            feedback_events[data.get("request_id", path.stem)] = data.get("status", "")
-        statuses = list(feedback_events.values())
-        successes = statuses.count("successful")
-        errors = statuses.count("unsuccessful")
+            successful += status == "successful"
+            failed += status == "unsuccessful"
+        total_success = successful + legacy_successful
+        total_failed = failed + legacy_failed
         promotion = self.promotion(skill_id)
-        return {"successful_runs": successes, "error_runs": errors, "automation_review_due": successes >= 5,
-                "promotion_status": promotion["status"]}
+        stats = {
+            "successful_runs": total_success,
+            "error_runs": total_failed,
+            "automation_review_due": total_success >= 5,
+            "promotion_status": promotion.get("status", "not_started"),
+            "recent_runs": list(reversed(bucket.get("executions", [])))[:10],
+        }
+        tests = bucket.get("tests", [])
+        if current_hash:
+            scoped_tests = [item for item in tests if item.get("skill_hash") == current_hash]
+            latest = scoped_tests[-1] if scoped_tests else None
+            stats["evidence"] = {
+                "hash": current_hash,
+                "baseline_hash": baseline_hash,
+                "legacy_runs_counted": (legacy_successful + legacy_failed) > 0,
+                "stale_runs": stale,
+                "test": {"status": latest.get("status") or "unknown", "at": latest.get("at"),
+                         "passed": latest.get("passed"), "total": latest.get("total")} if latest else None,
+            }
+        elif tests:
+            latest = tests[-1]
+            stats["test_evidence"] = {"status": latest.get("status") or "unknown", "at": latest.get("at"),
+                                      "passed": latest.get("passed"), "total": latest.get("total")}
+        return stats
+
+    def promote_skill(self, skill_id: str, *, stats: dict | None = None, skill_hash: str | None = None) -> dict:
+        stats = stats or self.skill_stats(skill_id)
+        current = self.promotion(skill_id)
+        if stats["successful_runs"] < 5:
+            raise ValueError("Five user-confirmed successful runs are required")
+        if current["status"] in {"pending_review", "approved"} and (not skill_hash or current.get("skill_hash") == skill_hash):
+            return current
+        history = current.get("history", [])
+        history.append({"status": "pending_review", "at": now().isoformat(),
+                        **({"skill_hash": skill_hash} if skill_hash else {})})
+        data = {"event": "promotion", "skill": skill_id, "status": "pending_review", "history": history,
+                "skill_hash": skill_hash,
+                "evidence": {"successful_runs": stats["successful_runs"], "error_runs": stats["error_runs"],
+                             "test": (stats.get("evidence") or {}).get("test")}}
+        self._write_promotion(skill_id, data)
+        return data
+
+    def approve_promotion(self, skill_id: str, *, skill_hash: str | None = None) -> dict:
+        current = self.promotion(skill_id)
+        if current["status"] != "pending_review":
+            raise ValueError("Skill must be pending automation review")
+        recorded = skill_hash or current.get("skill_hash")
+        history = current.get("history", [])
+        history.append({"status": "approved", "at": now().isoformat(),
+                        **({"skill_hash": recorded} if recorded else {})})
+        data = {"event": "promotion", "skill": skill_id, "status": "approved", "history": history}
+        if recorded:
+            data["skill_hash"] = recorded
+        if current.get("evidence"):
+            data["evidence"] = current["evidence"]
+        self._write_promotion(skill_id, data)
+        return data
