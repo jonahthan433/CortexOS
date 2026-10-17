@@ -40,3 +40,46 @@ test('detailSections builds the drawer table without inventing fields', () => {
   assert.deepEqual(bare.map(pair => pair[0]), ['description', 'risk', 'automation']);
   assert.deepEqual(panel.detailSections(null), []);
 });
+
+test('versionLine states the pinned version, source, and hash', () => {
+  assert.equal(panel.versionLine({ version: '1.2.0', version_source: 'manifest', content_hash: 'abcdef1234567890' }),
+    'v1.2.0 · manifest · abcdef123456…');
+  assert.equal(panel.versionLine({ version: '1.0.0' }), 'v1.0.0 · unknown source · no hash');
+  assert.equal(panel.versionLine(null), '');
+});
+
+test('problemLines surfaces each validation problem verbatim', () => {
+  assert.deepEqual(panel.problemLines(['bad tier', 'missing field']), ['bad tier', 'missing field']);
+  assert.deepEqual(panel.problemLines(null), []);
+  assert.deepEqual(panel.problemLines([]), []);
+});
+
+test('historyRows marks the current version and rollback eligibility', () => {
+  const rows = panel.historyRows({ entries: [
+    { hash: 'aaaaaaaa1111', version: '2.0.0', source: 'change', at: 5, current: true },
+    { hash: 'bbbbbbbb2222', version: '1.0.0', source: 'baseline', at: 1 }
+  ] });
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0].hash8, 'aaaaaaaa');
+  assert.equal(rows[0].current, true);
+  assert.equal(rows[0].rollbackAllowed, false);
+  assert.equal(rows[1].rollbackAllowed, true);
+  assert.equal(rows[1].source, 'baseline');
+  assert.deepEqual(panel.historyRows(null), []);
+});
+
+test('test result helpers report pass counts and mismatches', () => {
+  const result = {
+    passed: 1, total: 2, status: 'failed', receipt: 'x',
+    cases: [
+      { name: 'route', passed: true, mismatches: [] },
+      { name: 'gate', passed: false, mismatches: ['expected tier 3, routed to tier 2'] }
+    ]
+  };
+  assert.equal(panel.testSummary(result), '1/2 passed · failed · receipt recorded');
+  const lines = panel.testCaseLines(result);
+  assert.equal(lines[0], '✓ route');
+  assert.ok(lines[1].startsWith('✗ gate — expected tier 3'));
+  assert.equal(panel.testSummary(null), '');
+  assert.deepEqual(panel.testCaseLines(null), []);
+});

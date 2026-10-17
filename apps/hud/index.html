@@ -69,6 +69,41 @@
       <div class="queue-detail" id="queue-detail" hidden></div>
     </section>
 
+    <section class="panel suggestions-panel" data-panel="suggestions">
+      <div class="section-head"><div><div class="eyebrow">EVIDENCE-BACKED</div><h3>Suggestions</h3></div>
+        <div class="queue-head-controls"><span class="queue-updated" id="suggestions-summary">evaluating…</span><button class="icon-button" id="suggestions-refresh" title="Re-evaluate now">↻</button></div>
+      </div>
+      <div class="suggestions-note" id="suggestions-note" hidden></div>
+      <div class="suggestions-list" id="suggestions-list"><p class="dim">Evaluating current state…</p></div>
+    </section>
+
+    <section class="panel drafts-panel" data-panel="drafts">
+      <div class="section-head"><div><div class="eyebrow">NOTHING SENT UNTIL YOU SAVE</div><h3>Drafts</h3></div>
+        <div class="queue-head-controls"><button class="icon-button" id="drafts-refresh" title="Reload drafts">↻</button></div>
+      </div>
+      <div class="draft-new">
+        <select id="draft-kind" aria-label="Draft kind"><option value="note">Note → vault</option><option value="task">Task → queue</option><option value="email">Email (connector)</option><option value="connector">Connector action</option></select>
+        <input id="draft-title" type="text" placeholder="Title (optional)" autocomplete="off" aria-label="Draft title" maxlength="200">
+        <textarea id="draft-body" rows="3" placeholder="Draft text — stored locally until you save it explicitly" aria-label="Draft text"></textarea>
+        <button class="run" id="draft-create">Create draft</button>
+      </div>
+      <div class="draft-voice-row">
+        <label><input type="checkbox" id="draft-voice-toggle"> Voice requests create drafts</label>
+        <select id="draft-voice-kind" aria-label="Draft kind for voice requests"><option value="note">Note</option><option value="task">Task</option><option value="email">Email</option><option value="connector">Connector action</option></select>
+      </div>
+      <div class="drafts-note" id="drafts-note" hidden></div>
+      <div class="drafts-list" id="drafts-list"><p class="dim">Loading drafts…</p></div>
+      <div class="draft-editor" id="draft-editor"></div>
+    </section>
+
+    <section class="panel connectors-panel" data-panel="connectors">
+      <div class="section-head"><div><div class="eyebrow">AUTHORIZED EXTERNAL OPS</div><h3>Connectors</h3></div>
+        <div class="queue-head-controls"><span class="queue-updated" id="connectors-summary">loading…</span><button class="icon-button" id="connectors-refresh" title="Reload connector status">↻</button></div>
+      </div>
+      <div class="connectors-note" id="connectors-note" hidden></div>
+      <div class="connectors-list" id="connectors-list"><p class="dim">Loading connector declarations…</p></div>
+    </section>
+
     <section class="panel activity-panel" data-panel="activity">
       <div class="section-head"><div><div class="eyebrow">SEARCH EVERYTHING</div><h3>Activity</h3></div>
         <div class="queue-head-controls"><span class="queue-updated" id="activity-updated">no data yet</span><button class="icon-button" id="activity-refresh" title="Refresh activity">↻</button></div>
@@ -142,7 +177,7 @@
     </section>
   </main>
   <footer class="dock-bar" id="terminal-dock"><span class="dock-item">⌘ Terminals <b id="dock-count">0</b> open</span><span class="dock-item dock-sep">Shared with Obsidian</span><button class="ghost dock-btn" id="dock-new-terminal">+ New terminal</button></footer>
-  <script src="/queue-panel.js"></script><script src="/activity-panel.js"></script><script src="/vault-panel.js"></script><script src="/agents-panel.js"></script><script src="/settings-panel.js"></script><script src="/skills-panel.js"></script><script src="/terminal.bundle.js"></script><script src="/hud.js"></script>
+  <script src="/queue-panel.js"></script><script src="/activity-panel.js"></script><script src="/vault-panel.js"></script><script src="/agents-panel.js"></script><script src="/settings-panel.js"></script><script src="/skills-panel.js"></script><script src="/suggestions-panel.js"></script><script src="/drafts-panel.js"></script><script src="/connectors-panel.js"></script><script src="/terminal.bundle.js"></script><script src="/hud.js"></script>
   <style>
 #skill-grid{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
 .skill-chip{border:1px solid #263744;background:#0a121a;color:#aebdc5;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:10px;white-space:nowrap;font-family:var(--display)}

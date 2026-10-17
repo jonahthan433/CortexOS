@@ -150,3 +150,30 @@
 .system-grid{grid-template-columns:1fr}
 .activity-controls input{min-width:120px}
 }
+
+/* Stage 7: suggestions, drafts, connectors panels */
+.suggestions-panel,.drafts-panel,.connectors-panel{grid-column:1/-1}
+.suggestions-list,.drafts-list,.connectors-list{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto}
+.suggestion-card .suggestion-why{font-size:11px;line-height:1.5;margin:6px 0 2px;color:#bfd0d3}
+.suggestion-evidence{display:block}
+.suggestion-actions,.draft-actions,.connector-actions{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.draft-new{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.draft-new input[type=text],.draft-editor input[type=text]{background:#0a131c;border:1px solid var(--line);border-radius:6px;color:var(--text);padding:7px;font-size:11px}
+.draft-new textarea,.draft-body{width:100%;background:#0a131c;border:1px solid var(--line);border-radius:6px;color:var(--text);padding:7px;font:11px var(--mono)}
+.draft-new select,.draft-voice-row select{background:#0a131c;border:1px solid var(--line);border-radius:6px;color:var(--text);padding:6px;font-size:11px}
+.draft-voice-row{display:flex;gap:10px;align-items:center;margin:4px 0 8px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.draft-row{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:6px}
+.draft-row-main{flex:1;text-align:left;background:none;border:0;color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.draft-editor{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.draft-editor-head{display:flex;gap:8px;align-items:center}
+.connector-card{margin-bottom:8px}
+.connector-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.connector-op{border-top:1px solid var(--line);padding:7px 0;display:flex;flex-direction:column;gap:3px}
+.connector-url{font-size:11px;color:var(--mint)}
+.connector-url-text{display:block;word-break:break-all;font-size:9px;color:var(--muted);margin:4px 0}
+.suggestions-note,.drafts-note,.connectors-note{font-size:11px;color:var(--amber);margin:4px 0 8px}
+.skill-problem{display:block;color:var(--amber);margin:2px 0}
+.skill-history{display:flex;flex-direction:column;gap:5px;margin-top:6px}
+.skill-history-row{display:flex;gap:8px;align-items:center;font-size:10px;flex-wrap:wrap}
+.skill-test-result{display:flex;flex-direction:column;gap:2px;margin-top:5px}
+@media(max-width:700px){.suggestions-panel{order:8}.drafts-panel{order:9}.connectors-panel{order:10}}
