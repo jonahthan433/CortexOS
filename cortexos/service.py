@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timezone
 
 from .config import Settings
+from .drafts import DraftStore
 from .llm import ModelGateway
 from .providers import AgentProvider, FastModel
 from .router import Router
@@ -24,6 +25,7 @@ class CortexService:
         self.gateway = ModelGateway(settings)
         self.fast_model = FastModel(settings, gateway=self.gateway)
         self.history = SkillHistory(settings.root / "state" / "skill_history")
+        self.drafts = DraftStore(settings.root / "state" / "drafts")
         self._receipt_index: tuple[float, dict] | None = None
         self.pending: dict[str, dict] = self.vault.load_state().get("pending_approvals", {})
         self.queue = None  # attached by the Bridge once the durable queue starts
@@ -196,6 +198,78 @@ class CortexService:
         self._receipt_index = None
         return {"skill": skill_id, "status": "rolled_back", "to_hash": target_hash,
                 "to_version": entry.get("version"), "receipt": str(receipt)}
+
+    # ------------------------------------------------------------------ drafts
+
+    def create_draft(self, *, kind: str = "note", body: str, title: str | None = None,
+                     target: dict | None = None, transcript: str | None = None,
+                     source: str = "text") -> dict:
+        """Persist a draft. Drafting itself never sends, publishes, or executes."""
+        return self.drafts.create(kind=kind, body=body, title=title, target=target,
+                                  transcript=transcript, source=source)
+
+    def draft_execution(self, draft: dict) -> dict:
+        """Honest execution availability for one draft, before any action is attempted."""
+        if draft["kind"] == "note":
+            return {"available": True, "action": "save_note",
+                    "reason": "Saves the draft to the vault output folder."}
+        if draft["kind"] == "task":
+            return {"available": True, "action": "enqueue_task",
+                    "reason": "Creates a durable queue task; run-time approval gates still apply."}
+        return {"available": False, "action": None,
+                "reason": "Connector execution is not wired in this build; the draft is stored locally only."}
+
+    async def save_draft(self, draft_id: str) -> dict:
+        draft = self.drafts.get(draft_id)
+        if not draft:
+            raise ValueError("Draft not found")
+        if draft.get("status") == "saved":
+            return {"status": "already_saved", "draft": draft, "reference": draft.get("saved_ref")}
+        execution = self.draft_execution(draft)
+        if not execution["available"]:
+            raise ValueError(execution["reason"])
+        if draft["kind"] == "note":
+            path = self.vault.write_note(draft["id"], draft["title"], draft["body"])
+            saved = self.drafts.mark_saved(draft["id"], str(path))
+            receipt = self.vault.receipt(f"{draft['id']}-save", {
+                "event": "draft_saved", "draft_id": draft["id"], "kind": "note",
+                "target": str(path), "status": "completed"})
+            return {"status": "saved", "draft": saved, "reference": str(path), "receipt": str(receipt)}
+        # kind == "task": hand off to the durable queue, or direct submit without one.
+        origin = f"draft:{draft['id']}"
+        detail: dict = {}
+        if self.queue is not None:
+            outcome = await self.queue.enqueue(draft["body"], origin=origin, dedupe_key=origin,
+                                               meta={"draft_id": draft["id"], "source": "draft"})
+            task = outcome.get("task") or {}
+            reference = task.get("id") or draft["id"]
+            detail = {"task": task.get("id"), "created": outcome.get("created")}
+        else:
+            result = await self.submit(draft["body"], request_id=f"{draft['id']}-run")
+            reference = result.get("id") or draft["id"]
+            detail = {"request_id": reference, "state": result.get("status")}
+        saved = self.drafts.mark_saved(draft["id"], reference)
+        receipt = self.vault.receipt(f"{draft['id']}-save", {
+            "event": "draft_saved", "draft_id": draft["id"], "kind": "task",
+            "target": reference, "status": "completed"})
+        return {"status": "saved", "draft": saved, "reference": reference, "receipt": str(receipt), **detail}
+
+    async def regenerate_draft(self, draft_id: str) -> dict:
+        draft = self.drafts.get(draft_id)
+        if not draft:
+            raise ValueError("Draft not found")
+        if draft.get("status") == "saved":
+            raise ValueError("Saved drafts are kept as references; create a new draft to regenerate")
+        source_text = (draft.get("transcript") or draft.get("body") or "").strip()
+        if not source_text:
+            raise ValueError("Draft has no text to regenerate from")
+        prompt = (f"Rewrite the following {draft['kind']} draft so it reads clearly and is ready to save. "
+                  f"Keep it concise and preserve the original meaning.\n\n{source_text}")
+        try:
+            text = await self.fast_model.assist(prompt)
+        except Exception as exc:
+            raise RuntimeError(self.gateway.scrub(str(exc))) from exc
+        return self.drafts.update(draft_id, body=text.strip(), source="regenerate")
 
     # ---------------------------------------------------------------- requests
 

@@ -147,6 +147,12 @@ class Vault:
         path.write_text(f"---\nid: {request_id}\ncreated: {now().isoformat()}\nskill: {skill_id or ''}\n---\n\n# {title}\n\n## Request\n\n{prompt}\n\n## Result\n\n{result}\n", encoding="utf-8")
         return path
 
+    def write_note(self, note_id: str, title: str, body: str) -> Path:
+        self.bootstrap()
+        path = self._dated_path("output", note_id)
+        path.write_text(f"---\nid: {note_id}\ncreated: {now().isoformat()}\ntype: note\n---\n\n# {title}\n\n{body}\n", encoding="utf-8")
+        return path
+
     def receipt(self, request_id: str, payload: dict) -> Path:
         self.bootstrap()
         path = self._dated_path("receipts", request_id)

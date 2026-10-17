@@ -249,6 +249,19 @@ class FastModel:
             self.last_error = self._scrub(f"fast model: {exc}")
             raise
 
+    async def assist(self, prompt: str, *, max_tokens: int | None = None) -> str:
+        """Provider-backed text assistance (draft cleanup). Raises when no fast
+        model is configured instead of returning a system notice as content."""
+        if not self.settings.fast_model_enabled:
+            self.last_error = "fast model disabled"
+            raise ProviderError("Fast model is disabled; enable router.fast_model_enabled and an llm provider first")
+        text = await self._chat([
+            {"role": "system", "content": "You clean up user text. Preserve meaning and language; fix speech-recognition artifacts; return only the cleaned text with no commentary."},
+            {"role": "user", "content": prompt},
+        ], temperature=0.2, max_tokens=max_tokens or self.settings.fast_model_max_tokens or None)
+        self.last_error = None
+        return text
+
     async def classify(self, prompt: str) -> str:
         """Cheap intent classifier; only a confident QUICK result can select tier 2."""
         decision = await self.jev.decide("tier", prompt)

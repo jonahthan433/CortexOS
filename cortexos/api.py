@@ -11,7 +11,7 @@ from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.responses import Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints
-from typing import Annotated
+from typing import Annotated, Any, Literal
 
 from .config import Settings
 from .service import CortexService
@@ -106,6 +106,23 @@ class VoiceTurnBody(BaseModel):
     skill_id: str | None = None
     request_id: uuid.UUID | None = None
     background: bool = False
+    as_draft: bool = False
+    draft_kind: Literal["note", "task", "email", "connector"] = "note"
+    draft_target: dict[str, Any] | None = None
+
+
+class DraftBody(BaseModel):
+    kind: Literal["note", "task", "email", "connector"] = "note"
+    body: Annotated[str, StringConstraints(min_length=1, max_length=20000)]
+    title: Annotated[str, StringConstraints(max_length=200)] | None = None
+    target: dict[str, Any] | None = None
+    transcript: Annotated[str, StringConstraints(max_length=40000)] | None = None
+
+
+class DraftUpdateBody(BaseModel):
+    title: Annotated[str, StringConstraints(max_length=200)] | None = None
+    body: Annotated[str, StringConstraints(min_length=1, max_length=20000)] | None = None
+    target: dict[str, Any] | None = None
 
 
 class SpeakBody(BaseModel):
@@ -633,6 +650,14 @@ async def voice_turn(body: VoiceTurnBody):
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     if not transcript:
         raise HTTPException(status_code=422, detail="Whisper did not detect speech")
+    if body.as_draft:
+        try:
+            draft = service.create_draft(kind=body.draft_kind, body=transcript, transcript=transcript,
+                                         target=body.draft_target, source="voice")
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return {"id": draft["id"], "status": "draft", "transcript": transcript,
+                "draft": {**draft, "execution": service.draft_execution(draft)}}
     if body.background:
         result = await start_background_request(transcript, body.backend, body.skill_id, str(body.request_id) if body.request_id else None)
         result["transcript"] = transcript
@@ -651,6 +676,77 @@ async def voice_speak(body: SpeakBody):
     except VoiceUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     return Response(content=wav, media_type="audio/wav", headers={"Cache-Control": "no-store"})
+
+
+@app.get("/api/drafts")
+def list_drafts():
+    return [{"id": draft["id"], "kind": draft["kind"], "title": draft["title"],
+             "target": draft.get("target"), "source": draft.get("source"),
+             "status": draft.get("status"), "revision": draft.get("revision"),
+             "created_at": draft.get("created_at"), "updated_at": draft.get("updated_at"),
+             "has_transcript": bool(draft.get("transcript"))}
+            for draft in service.drafts.list()]
+
+
+@app.post("/api/drafts")
+def create_draft(body: DraftBody):
+    try:
+        draft = service.create_draft(kind=body.kind, body=body.body, title=body.title,
+                                     target=body.target, transcript=body.transcript, source="text")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {**draft, "execution": service.draft_execution(draft)}
+
+
+@app.get("/api/drafts/{draft_id}")
+def draft_detail(draft_id: str):
+    draft = service.drafts.get(draft_id)
+    if not draft:
+        raise HTTPException(status_code=404, detail="Draft not found")
+    return {**draft, "execution": service.draft_execution(draft)}
+
+
+@app.put("/api/drafts/{draft_id}")
+def update_draft(draft_id: str, body: DraftUpdateBody):
+    if not service.drafts.get(draft_id):
+        raise HTTPException(status_code=404, detail="Draft not found")
+    try:
+        draft = service.drafts.update(draft_id, title=body.title, body=body.body, target=body.target)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {**draft, "execution": service.draft_execution(draft)}
+
+
+@app.delete("/api/drafts/{draft_id}")
+def delete_draft(draft_id: str):
+    if not service.drafts.delete(draft_id):
+        raise HTTPException(status_code=404, detail="Draft not found")
+    return {"id": draft_id, "status": "discarded"}
+
+
+@app.post("/api/drafts/{draft_id}/save")
+async def save_draft(draft_id: str):
+    if not service.drafts.get(draft_id):
+        raise HTTPException(status_code=404, detail="Draft not found")
+    try:
+        return await service.save_draft(draft_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except QueueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post("/api/drafts/{draft_id}/regenerate")
+async def regenerate_draft(draft_id: str):
+    if not service.drafts.get(draft_id):
+        raise HTTPException(status_code=404, detail="Draft not found")
+    try:
+        draft = await service.regenerate_draft(draft_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {**draft, "execution": service.draft_execution(draft)}
 
 
 @app.post("/api/requests/{request_id}/approve")
