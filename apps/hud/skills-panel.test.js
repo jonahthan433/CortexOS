@@ -44,8 +44,19 @@ test('detailSections builds the drawer table without inventing fields', () => {
 test('versionLine states the pinned version, source, and hash', () => {
   assert.equal(panel.versionLine({ version: '1.2.0', version_source: 'manifest', content_hash: 'abcdef1234567890' }),
     'v1.2.0 · manifest · abcdef123456…');
+  assert.equal(panel.versionLine({ version: '1.2.0', version_source: 'manifest', content_hash: 'sha256:abcdef1234567890' }),
+    'v1.2.0 · manifest · abcdef123456…');
   assert.equal(panel.versionLine({ version: '1.0.0' }), 'v1.0.0 · unknown source · no hash');
   assert.equal(panel.versionLine(null), '');
+});
+
+test('formatAge accepts epoch numbers and ISO timestamps, never emitting NaN', () => {
+  const now = 1000000;
+  assert.equal(panel.formatAge(now - 30, now), '30s ago');
+  const isoNow = Date.parse('1970-01-01T00:16:40Z') / 1000;
+  assert.equal(panel.formatAge('1970-01-01T00:16:00Z', isoNow), '40s ago');
+  assert.equal(panel.formatAge('not-a-date', now), 'unknown');
+  assert.equal(panel.formatAge(null, now), 'unknown');
 });
 
 test('problemLines surfaces each validation problem verbatim', () => {
@@ -56,11 +67,12 @@ test('problemLines surfaces each validation problem verbatim', () => {
 
 test('historyRows marks the current version and rollback eligibility', () => {
   const rows = panel.historyRows({ entries: [
-    { hash: 'aaaaaaaa1111', version: '2.0.0', source: 'change', at: 5, current: true },
+    { hash: 'sha256:aaaaaaaa1111', version: '2.0.0', source: 'change', at: 5, current: true },
     { hash: 'bbbbbbbb2222', version: '1.0.0', source: 'baseline', at: 1 }
   ] });
   assert.equal(rows.length, 2);
   assert.equal(rows[0].hash8, 'aaaaaaaa');
+  assert.equal(rows[0].hash, 'sha256:aaaaaaaa1111');
   assert.equal(rows[0].current, true);
   assert.equal(rows[0].rollbackAllowed, false);
   assert.equal(rows[1].rollbackAllowed, true);

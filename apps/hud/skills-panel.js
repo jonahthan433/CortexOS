@@ -53,7 +53,7 @@
 
   function versionLine(skill) {
     if (!skill) return '';
-    var hash = skill.content_hash ? String(skill.content_hash).slice(0, 12) + '…' : 'no hash';
+    var hash = skill.content_hash ? String(skill.content_hash).replace(/^sha256:/, '').slice(0, 12) + '…' : 'no hash';
     return 'v' + (skill.version || '?') + ' · ' + (skill.version_source || 'unknown source') + ' · ' + hash;
   }
 
@@ -63,8 +63,10 @@
 
   function formatAge(epoch, nowSeconds) {
     if (epoch === null || epoch === undefined || epoch === '') return 'unknown';
+    var seconds = typeof epoch === 'number' ? epoch : Date.parse(epoch) / 1000;
+    if (!isFinite(seconds)) return 'unknown';
     var now = nowSeconds === undefined ? Date.now() / 1000 : nowSeconds;
-    var age = Math.max(0, Math.round(now - Number(epoch)));
+    var age = Math.max(0, Math.round(now - seconds));
     if (age < 10) return 'just now';
     if (age < 90) return age + 's ago';
     if (age < 5400) return Math.round(age / 60) + 'm ago';
@@ -77,7 +79,7 @@
     return history.entries.map(function (entry) {
       return {
         hash: entry.hash,
-        hash8: String(entry.hash || '').slice(0, 8),
+        hash8: String(entry.hash || '').replace(/^sha256:/, '').slice(0, 8),
         version: entry.version || '?',
         source: entry.source || 'unknown',
         at: entry.at,
