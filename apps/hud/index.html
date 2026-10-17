@@ -148,10 +148,11 @@
 .skill-chip{border:1px solid #263744;background:#0a121a;color:#aebdc5;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:10px;white-space:nowrap;font-family:var(--display)}
 .skill-chip:hover{border-color:#4ed1a9;color:var(--mint);background:#0e1d24}
 .skill-grid-count{font:8px var(--mono);color:#5d7079;letter-spacing:.8px;align-self:center;margin-left:4px}
-.dock-bar{position:sticky;bottom:0;z-index:14;display:flex;align-items:center;gap:14px;padding:8px 18px;margin:13px -24px -18px;background:linear-gradient(180deg,#070d13f2,#05080d);border-top:1px solid #1b2934;font:9px var(--mono);color:#758b94;letter-spacing:.8px}
+.dock-bar{position:sticky;bottom:0;z-index:14;display:flex;align-items:center;gap:14px;padding:8px 18px;margin:13px 0 0;background:linear-gradient(180deg,#070d13f2,#05080d);border-top:1px solid #1b2934;font:9px var(--mono);color:#758b94;letter-spacing:.8px}
 .dock-item b{color:var(--mint);font-weight:400}
 .dock-sep{border-left:1px solid #1e303a;padding-left:14px}
 .dock-btn{margin-left:auto}
+@media(max-width:700px){.dock-bar{flex-wrap:wrap;gap:8px;padding:8px 12px}.dock-sep{border-left:0;padding-left:0}}
 #state-pills{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin:0 0 12px}
 .state-pill{border:1px solid #263744;background:#0a121a;color:#8fa4ad;padding:5px 11px;border-radius:20px;font:9px 'DM Mono',monospace;letter-spacing:1px;cursor:pointer;text-transform:uppercase}
 .state-pill:hover{border-color:#4aa993;color:var(--mint)}
