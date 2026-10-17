@@ -7,7 +7,7 @@ import time
 import uuid
 import hmac
 
-from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi import FastAPI, HTTPException, Request, WebSocket
 from fastapi.responses import Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints
@@ -26,11 +26,15 @@ from .connectors import (ConnectorApprovalRequired, ConnectorBlocked, ConnectorE
 from .agents import AgentCoordinator
 from .ops import HealthCheck, BackupManager, backup_loop
 from .voice import LocalVoice, VoiceUnavailable
+from .auth import (AuthError, AuthStore, LoginThrottle, MIN_PASSWORD_LENGTH,
+                   SESSION_COOKIE, SESSION_TTL_SECONDS)
 
 settings = Settings.load()
 service = CortexService(settings)
 vault_browser = VaultBrowser(settings.vault)
 voice = LocalVoice(settings)
+auth_store = AuthStore(settings.root / "config" / "auth.json")
+login_throttle = LoginThrottle()
 terminals = TerminalManager(settings, service.vault)
 request_streams = RequestStreams()
 metrics_bus = MetricsBroadcaster()
@@ -50,27 +54,96 @@ def token_matches(candidate: str) -> bool:
     return hmac.compare_digest(candidate.encode("utf-8"), settings.bridge_token.encode("utf-8"))
 
 
+PUBLIC_API_PATHS = {"/api/auth/status", "/api/auth/login", "/api/auth/setup", "/api/auth/logout"}
+
+
+def bearer_matches(request) -> bool:
+    supplied = request.headers.get("authorization", "")
+    token = supplied[7:] if supplied.lower().startswith("bearer ") else ""
+    return bool(token) and token_matches(token)
+
+
+def session_matches(candidate: str | None) -> bool:
+    return bool(candidate) and auth_store.verify_session(candidate)
+
+
 @app.middleware("http")
 async def require_bridge_token(request, call_next):
-    if request.url.path.startswith("/api/"):
-        supplied = request.headers.get("authorization", "")
-        token = supplied[7:] if supplied.lower().startswith("bearer ") else ""
-        if not token or not token_matches(token):
-            return JSONResponse(status_code=401, content={"detail": "Bridge token required"},
+    if request.url.path.startswith("/api/") and request.url.path not in PUBLIC_API_PATHS:
+        if not bearer_matches(request) and not session_matches(request.cookies.get(SESSION_COOKIE)):
+            return JSONResponse(status_code=401, content={"detail": "Sign in required"},
                                 headers={"WWW-Authenticate": "Bearer"})
     return await call_next(request)
 
 
 async def authenticate_websocket(websocket: WebSocket) -> bool:
     await websocket.accept()
+    if session_matches(websocket.cookies.get(SESSION_COOKIE)):
+        return True
     try:
         message = await asyncio.wait_for(websocket.receive_json(), timeout=5)
         if message.get("type") == "auth" and token_matches(str(message.get("token", ""))):
             return True
     except (asyncio.TimeoutError, ValueError):
         pass
-    await websocket.close(code=4401, reason="Bridge token required")
+    await websocket.close(code=4401, reason="Authentication required")
     return False
+
+
+class AuthLoginBody(BaseModel):
+    password: str = Field(min_length=1, max_length=200)
+
+
+class AuthSetupBody(BaseModel):
+    password: str = Field(min_length=MIN_PASSWORD_LENGTH, max_length=200)
+
+
+def set_session_cookie(response: Response, value: str | None) -> None:
+    if not value:
+        return
+    response.set_cookie(SESSION_COOKIE, value, max_age=SESSION_TTL_SECONDS, path="/",
+                        httponly=True, samesite="strict", secure=True)
+
+
+@app.get("/api/auth/status")
+async def auth_status(request: Request):
+    authenticated = bearer_matches(request) or session_matches(request.cookies.get(SESSION_COOKIE))
+    return {"authenticated": bool(authenticated), **auth_store.status()}
+
+
+@app.post("/api/auth/setup")
+async def auth_setup(body: AuthSetupBody, response: Response):
+    if auth_store.has_password():
+        raise HTTPException(status_code=409, detail="A dashboard password is already set; sign in instead")
+    try:
+        auth_store.set_password(body.password)
+    except AuthError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    set_session_cookie(response, auth_store.issue_session())
+    return {"ok": True}
+
+
+@app.post("/api/auth/login")
+async def auth_login(body: AuthLoginBody, request: Request, response: Response):
+    key = request.client.host if request.client else "unknown"
+    retry_after = login_throttle.retry_after(key)
+    if retry_after:
+        raise HTTPException(status_code=429, detail="Too many failed sign-in attempts; wait before retrying",
+                            headers={"Retry-After": str(retry_after)})
+    if not auth_store.has_password():
+        raise HTTPException(status_code=409, detail="No dashboard password is set yet; complete first-run setup")
+    if not auth_store.verify_password(body.password):
+        login_throttle.record_failure(key)
+        raise HTTPException(status_code=401, detail="Wrong password")
+    login_throttle.reset(key)
+    set_session_cookie(response, auth_store.issue_session())
+    return {"ok": True}
+
+
+@app.post("/api/auth/logout")
+async def auth_logout(response: Response):
+    response.delete_cookie(SESSION_COOKIE, path="/")
+    return {"ok": True}
 
 
 class RequestBody(BaseModel):

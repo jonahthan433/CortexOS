@@ -6,6 +6,22 @@
   <link rel="stylesheet" href="/hud.css"><link rel="stylesheet" href="/terminal.bundle.css">
 </head>
 <body>
+  <div id="auth-view" class="auth-view" hidden>
+    <form class="auth-card" id="auth-form">
+      <div class="eyebrow">CORTEXOS / SECURE ACCESS</div>
+      <h1 id="auth-title">Sign in</h1>
+      <p id="auth-hint" class="dim"></p>
+      <label for="auth-password">Password</label>
+      <input id="auth-password" type="password" autocomplete="current-password">
+      <div id="auth-confirm-row" hidden>
+        <label for="auth-confirm">Confirm password</label>
+        <input id="auth-confirm" type="password" autocomplete="new-password">
+      </div>
+      <p id="auth-error" class="auth-error" hidden></p>
+      <button id="auth-submit" type="submit">Sign in</button>
+      <p class="dim auth-foot">Password login protects this dashboard. Scripts, the CLI, and the Obsidian plugin keep using the bridge token.</p>
+    </form>
+  </div>
   <main class="command-center">
     <header class="topbar">
       <div class="brand"><span class="orb"></span><span>CORTEX<span class="muted">OS</span></span></div>
@@ -177,7 +193,7 @@
     </section>
   </main>
   <footer class="dock-bar" id="terminal-dock"><span class="dock-item">⌘ Terminals <b id="dock-count">0</b> open</span><span class="dock-item dock-sep">Shared with Obsidian</span><button class="ghost dock-btn" id="dock-new-terminal">+ New terminal</button></footer>
-  <script src="/queue-panel.js"></script><script src="/activity-panel.js"></script><script src="/vault-panel.js"></script><script src="/agents-panel.js"></script><script src="/settings-panel.js"></script><script src="/skills-panel.js"></script><script src="/suggestions-panel.js"></script><script src="/drafts-panel.js"></script><script src="/connectors-panel.js"></script><script src="/terminal.bundle.js"></script><script src="/hud.js"></script>
+  <script src="/queue-panel.js"></script><script src="/activity-panel.js"></script><script src="/vault-panel.js"></script><script src="/agents-panel.js"></script><script src="/settings-panel.js"></script><script src="/skills-panel.js"></script><script src="/suggestions-panel.js"></script><script src="/drafts-panel.js"></script><script src="/connectors-panel.js"></script><script src="/auth-panel.js"></script><script src="/terminal.bundle.js"></script><script src="/hud.js"></script>
   <style>
 #skill-grid{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
 .skill-chip{border:1px solid #263744;background:#0a121a;color:#aebdc5;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:10px;white-space:nowrap;font-family:var(--display)}

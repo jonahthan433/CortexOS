@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import getpass
 import json
 import shutil
 import sys
@@ -21,6 +22,9 @@ def main() -> None:
     service = sub.add_parser("service", help="Manage the always-on per-user CortexOS Bridge")
     service.add_argument("action", choices=("install", "start", "stop", "restart", "status", "uninstall"))
     sub.add_parser("token", help="Print the local Bridge token for the HUD or plugin")
+    auth = sub.add_parser("auth", help="Manage dashboard password sign-in (login page)")
+    auth.add_argument("action", choices=("status", "set-password", "clear"))
+    auth.add_argument("--yes", action="store_true", help="Skip the 'clear' confirmation prompt")
     ask = sub.add_parser("ask", help="Submit a prompt through the router")
     ask.add_argument("prompt")
     ask.add_argument("skill_id", nargs="?", help="Optional skill id; omit for automatic routing")
@@ -53,6 +57,39 @@ def main() -> None:
         uvicorn.run("cortexos.api:app", host=host, port=settings.port, reload=False, **ssl_kwargs)
     elif args.command == "token":
         print(Settings.load().bridge_token)
+    elif args.command == "auth":
+        from .auth import AuthError, AuthStore
+        store = AuthStore(Settings.load().root / "config" / "auth.json")
+        if args.action == "status":
+            state = store.status()
+            print(f"dashboard password: {'set' if state['has_password'] else 'not set'}")
+            print(f"auth file: {store.path}")
+        elif args.action == "set-password":
+            if sys.stdin.isatty():
+                first = getpass.getpass("New dashboard password: ")
+                again = getpass.getpass("Repeat password: ")
+                if first != again:
+                    print("Passwords do not match.", file=sys.stderr)
+                    raise SystemExit(1)
+            else:
+                first = sys.stdin.readline().rstrip("\n")
+            try:
+                store.set_password(first)
+            except AuthError as exc:
+                print(f"Could not set password: {exc}", file=sys.stderr)
+                raise SystemExit(1) from exc
+            print("Dashboard password updated; existing sessions were signed out.")
+        else:  # clear
+            if not args.yes:
+                if not sys.stdin.isatty():
+                    print("Refusing to clear without --yes on a non-interactive input.", file=sys.stderr)
+                    raise SystemExit(2)
+                answer = input("Remove the dashboard password and return to first-run setup? [y/N] ").strip().lower()
+                if answer != "y":
+                    print("Aborted.")
+                    return
+            store.clear()
+            print("Dashboard password removed; the next visit asks to create one.")
     elif args.command == "service":
         from .service_manager import manage
         try:
