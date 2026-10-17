@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import shutil
 import sys
 from pathlib import Path
@@ -25,6 +26,11 @@ def main() -> None:
     ask.add_argument("skill_id", nargs="?", help="Optional skill id; omit for automatic routing")
     ask.add_argument("--backend", help="Configured agent ID; omit to use automatic tier routing")
     ask.add_argument("--skill", dest="skill_flag", help="Alternative to the positional skill id")
+    connectors = sub.add_parser("connectors", help="Inspect or authorize connectors (OAuth setup)")
+    connectors.add_argument("action", choices=("status", "authorize", "complete", "revoke"))
+    connectors.add_argument("connector_id", nargs="?", help="gmail, calendar, drive, or youtube")
+    connectors.add_argument("state", nargs="?", help="OAuth state printed by 'authorize'")
+    connectors.add_argument("code", nargs="?", help="OAuth code copied from the redirect URL")
     args = parser.parse_args()
     if args.command == "init-vault":
         vault_path = args.path.expanduser().resolve()
@@ -54,6 +60,40 @@ def main() -> None:
         except RuntimeError as exc:
             print(f"CortexOS service error: {exc}", file=sys.stderr)
             raise SystemExit(1) from exc
+    elif args.command == "connectors":
+        from .connectors import ConnectorError, ConnectorRuntime
+        runtime = ConnectorRuntime(Settings.load())
+        if args.action == "status":
+            print(json.dumps(runtime.status(), indent=2))
+        elif not args.connector_id:
+            print("A connector id is required (gmail, calendar, drive, youtube).", file=sys.stderr)
+            raise SystemExit(2)
+        elif args.action == "authorize":
+            try:
+                start = runtime.oauth_start(args.connector_id)
+            except ConnectorError as exc:
+                print(f"Cannot start authorization: {exc}", file=sys.stderr)
+                raise SystemExit(1) from exc
+            print("Open this URL, approve access, then copy the code parameter from the final redirect URL:")
+            print(start["url"])
+            print(f"state: {start['state']}")
+            print(f"then run: cortexos connectors complete {args.connector_id} {start['state']} <code>")
+        elif args.action == "complete":
+            if not args.state or not args.code:
+                print("Usage: cortexos connectors complete <connector_id> <state> <code>", file=sys.stderr)
+                raise SystemExit(2)
+            try:
+                result = asyncio.run(runtime.oauth_exchange(args.connector_id, args.state, args.code))
+            except ConnectorError as exc:
+                print(f"Authorization failed: {exc}", file=sys.stderr)
+                raise SystemExit(1) from exc
+            print(json.dumps(result, indent=2))
+        elif args.action == "revoke":
+            try:
+                print(json.dumps(runtime.revoke(args.connector_id), indent=2))
+            except ConnectorError as exc:
+                print(f"Revoke failed: {exc}", file=sys.stderr)
+                raise SystemExit(1) from exc
     else:
         result = asyncio.run(CortexService(Settings.load()).submit(args.prompt, args.backend, args.skill_id or args.skill_flag))
         print(result.get("result") or result)

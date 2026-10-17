@@ -49,6 +49,9 @@ class Settings:
     voice_tts_name: str = "af_heart"
     voice_browser_fallback: bool = True
     bridge_token: str = ""
+    connectors_enabled: bool = True
+    connectors_state_dir: Path = Path("state/connectors")
+    connectors_client_dir: Path = Path("config/connectors")
 
     @property
     def agent_ids(self) -> list[str]:
@@ -97,6 +100,7 @@ class Settings:
         voice = data.get("voice", {})
         queue = data.get("queue", {})
         llm = data.get("llm", {})
+        connectors = data.get("connectors", {})
         return cls(
             root=base,
             host=bridge.get("host", "127.0.0.1"),
@@ -137,4 +141,7 @@ class Settings:
             voice_tts_name=voice.get("tts_voice", "af_heart"),
             voice_browser_fallback=bool(voice.get("browser_fallback", True)),
             bridge_token=token,
+            connectors_enabled=bool(connectors.get("enabled", True)),
+            connectors_state_dir=(base / connectors.get("state_dir", "state/connectors")).resolve(),
+            connectors_client_dir=(base / connectors.get("client_dir", "config/connectors")).resolve(),
         )

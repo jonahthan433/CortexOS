@@ -21,6 +21,8 @@ from .sessions import TerminalManager, terminal_websocket
 from .streaming import RequestStreams, MetricsBroadcaster
 from .scheduler import run_scheduler
 from .queue import QueueManager, QueueStore, QueueError
+from .connectors import (ConnectorApprovalRequired, ConnectorBlocked, ConnectorError,
+                         ConnectorRateLimited, ConnectorValidationError, scrub_secrets)
 from .agents import AgentCoordinator
 from .ops import HealthCheck, BackupManager, backup_loop
 from .voice import LocalVoice, VoiceUnavailable
@@ -131,6 +133,16 @@ class SnoozeBody(BaseModel):
 
 class SuggestionActBody(BaseModel):
     action: str = Field(min_length=1, max_length=40)
+
+
+class ConnectorOperationBody(BaseModel):
+    args: dict[str, Any] = Field(default_factory=dict)
+    idempotency_key: Annotated[str, StringConstraints(max_length=200)] | None = None
+
+
+class OAuthExchangeBody(BaseModel):
+    state: Annotated[str, StringConstraints(min_length=1, max_length=200)]
+    code: Annotated[str, StringConstraints(min_length=1, max_length=2000)]
 
 
 class SpeakBody(BaseModel):
@@ -786,6 +798,67 @@ async def act_on_suggestion(suggestion_id: str, body: SuggestionActBody):
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except QueueError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/api/connectors")
+def connectors_status():
+    return service.connectors.status()
+
+
+@app.get("/api/connectors/{connector_id}")
+def connector_detail(connector_id: str):
+    for item in service.connectors.status()["connectors"]:
+        if item["id"] == connector_id:
+            return item
+    raise HTTPException(status_code=404, detail="Connector not found")
+
+
+@app.post("/api/connectors/{connector_id}/health")
+async def connector_health(connector_id: str):
+    try:
+        return await service.connectors.probe(connector_id)
+    except ConnectorValidationError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ConnectorError as exc:
+        raise HTTPException(status_code=502, detail=scrub_secrets(str(exc))) from exc
+
+
+@app.post("/api/connectors/{connector_id}/operations/{operation_name}")
+async def connector_operation(connector_id: str, operation_name: str, body: ConnectorOperationBody):
+    try:
+        return await service.request_connector_operation(connector_id, operation_name, body.args,
+                                                         body.idempotency_key)
+    except ConnectorValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except ConnectorApprovalRequired as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except ConnectorRateLimited as exc:
+        raise HTTPException(status_code=429, detail=str(exc),
+                            headers={"Retry-After": str(int(exc.retry_after))}) from exc
+    except ConnectorBlocked as exc:
+        raise HTTPException(status_code=409, detail=f"{exc.status}: {exc.detail}") from exc
+    except ConnectorError as exc:
+        raise HTTPException(status_code=502, detail=scrub_secrets(str(exc))) from exc
+
+
+@app.post("/api/connectors/{connector_id}/oauth/start")
+def connector_oauth_start(connector_id: str):
+    try:
+        return service.connectors.oauth_start(connector_id)
+    except ConnectorValidationError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ConnectorBlocked as exc:
+        raise HTTPException(status_code=409, detail=f"{exc.status}: {exc.detail}") from exc
+
+
+@app.post("/api/connectors/{connector_id}/oauth/exchange")
+async def connector_oauth_exchange(connector_id: str, body: OAuthExchangeBody):
+    try:
+        return await service.connectors.oauth_exchange(connector_id, body.state, body.code)
+    except ConnectorValidationError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ConnectorBlocked as exc:
+        raise HTTPException(status_code=409, detail=f"{exc.status}: {exc.detail}") from exc
 
 
 @app.post("/api/requests/{request_id}/approve")

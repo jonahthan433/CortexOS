@@ -62,6 +62,24 @@ tts_voice = "af_heart"
 browser_fallback = true
 
 # ---------------------------------------------------------------------------
+# Connectors: authorized external operations (Gmail, Google Calendar, Drive,
+# YouTube). Read operations run directly; every write/external operation needs
+# a per-run human approval and idempotency protection. Tokens live server-side
+# under state/connectors/ (0600) and are never returned by any API.
+#
+# Setup per service:
+#   1. In Google Cloud, create an OAuth client (Desktop app) and enable the API.
+#   2. Place {"client_id": "...", "client_secret": "..."} in
+#      config/connectors/<id>.json and chmod 600 that file.
+#   3. Run:  cortexos connectors authorize <id>
+#      then: cortexos connectors complete <id> <state> <code>
+# Until step 3 completes, the connector reports blocked_missing_credentials.
+# [connectors]
+# enabled = true
+# state_dir = "state/connectors"
+# client_dir = "config/connectors"
+
+# ---------------------------------------------------------------------------
 # Universal LLM providers (optional). These are *inference endpoints* that
 # agents can be assigned to. CLI coding agents stay under [providers.*].
 # API keys can live here (keep this file 0600) or come from environment

@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timezone
 
 from .config import Settings
+from .connectors import ConnectorError, ConnectorRuntime, scrub_secrets, validate_args
 from .drafts import DraftStore
 from .llm import ModelGateway
 from .providers import AgentProvider, FastModel
@@ -28,6 +29,7 @@ class CortexService:
         self.history = SkillHistory(settings.root / "state" / "skill_history")
         self.drafts = DraftStore(settings.root / "state" / "drafts")
         self.suggestions = SuggestionEngine(settings.root / "state")
+        self.connectors = ConnectorRuntime(settings)
         self._receipt_index: tuple[float, dict] | None = None
         self.pending: dict[str, dict] = self.vault.load_state().get("pending_approvals", {})
         self.queue = None  # attached by the Bridge once the durable queue starts
@@ -308,6 +310,68 @@ class CortexService:
                                "skill_hash": ledger.get("skill_hash")}}
         raise ValueError(f"Unsupported action: {action}")
 
+    # ------------------------------------------------------ connector actions
+
+    async def request_connector_operation(self, connector_id: str, operation_name: str, args: dict,
+                                          idempotency_key: str | None = None) -> dict:
+        """Read operations run now (audited); write/external operations create a
+        pending approval through the existing approval store — never a bypass."""
+        connector = self.connectors.connector(connector_id)
+        operation = connector.operation(operation_name)
+        cleaned = validate_args(operation, args)
+        if operation.approval:
+            approval_id = str(uuid.uuid4())
+            summary = self.connectors.summary(connector, operation, cleaned)
+            pending = {"kind": "connector", "prompt": summary, "connector": connector_id,
+                       "operation": operation_name, "args": cleaned,
+                       "idempotency_key": idempotency_key,
+                       "risk_level": "external_action",
+                       "reason": f"{connector_id}.{operation_name} requires per-run human approval",
+                       "created_at": time.time()}
+            self.pending[approval_id] = pending
+            self.vault.save_pending(approval_id, pending)
+            self.vault.receipt(f"{approval_id}-approval-pending", {
+                "event": "approval_request", "request_id": approval_id, "kind": "connector",
+                "connector": connector_id, "operation": operation_name, "status": "awaiting_approval",
+                "risk_level": "external_action", "side_effect": operation.side_effect})
+            return {"status": "awaiting_approval", "approval_id": approval_id, "connector": connector_id,
+                    "operation": operation_name, "summary": summary, "side_effect": operation.side_effect,
+                    "message": "This connector operation requires explicit human approval before execution."}
+        try:
+            result = await self.connectors.execute(connector_id, operation_name, cleaned)
+        except ConnectorError as exc:
+            self.vault.receipt(f"conn-{connector_id}-{int(time.time() * 1000)}", {
+                "event": "connector_op", "connector": connector_id, "operation": operation_name,
+                "status": "error", "error": scrub_secrets(str(exc))})
+            raise
+        return result
+
+    async def _approve_connector(self, request_id: str, pending: dict) -> dict:
+        try:
+            result = await self.connectors.execute(pending.get("connector"), pending.get("operation"),
+                                                   pending.get("args") or {}, approved=True,
+                                                   idempotency_key=pending.get("idempotency_key"))
+        except ConnectorError as exc:
+            error = scrub_secrets(str(exc))
+            self.vault.log_request(request_id, pending.get("prompt", ""), "error", 3, "connector")
+            self.vault.receipt(request_id, {"event": "connector_op", "request_id": request_id,
+                                            "kind": "connector", "connector": pending.get("connector"),
+                                            "operation": pending.get("operation"), "status": "error",
+                                            "approval": "approved", "error": error})
+            return {"id": request_id, "status": "error", "error": error,
+                    "connector": pending.get("connector"), "operation": pending.get("operation")}
+        status = "deduplicated" if result.get("status") == "deduplicated" else "completed"
+        self.vault.receipt(request_id, {"event": "connector_op", "request_id": request_id, "kind": "connector",
+                                        "connector": result.get("connector"), "operation": result.get("operation"),
+                                        "status": status, "approval": "approved",
+                                        "side_effect": result.get("side_effect"),
+                                        "result_ref": result.get("result_ref"),
+                                        "duration_ms": (result.get("meta") or {}).get("duration_ms")})
+        self.vault.log_request(request_id, pending.get("prompt", ""), "completed", 3, "connector")
+        return {"id": request_id, "status": result.get("status"), "connector": result.get("connector"),
+                "operation": result.get("operation"), "result_ref": result.get("result_ref"),
+                "result": result}
+
     # ---------------------------------------------------------------- requests
 
     @staticmethod
@@ -435,6 +499,8 @@ class CortexService:
         if not pending:
             return {"id": request_id, "status": "error", "error": "No pending approval for this request."}
         self.vault.remove_pending(request_id)
+        if pending.get("kind") == "connector":
+            return await self._approve_connector(request_id, pending)
         skill = self.registry.get(pending["skill_id"]) if pending.get("skill_id") else None
         return await self._execute(request_id, pending["prompt"], pending.get("backend"), skill, approved=True,
                                     on_output=on_output, reason="human-approved pending request",
