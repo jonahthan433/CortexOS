@@ -53,3 +53,100 @@
 @keyframes qpulse{0%,100%{box-shadow:0 0 0 0 rgba(120,242,204,.25)}50%{box-shadow:0 0 10px 2px rgba(120,242,204,.25)}}
 .panel.flash{outline:1px solid var(--mint);outline-offset:2px;transition:outline-color .4s}
 @media(max-width:700px){.queue-submit input{min-width:0;width:100%}.queue-row{flex-direction:column}.q-actions{flex-direction:row;border-left:0;border-top:1px solid var(--line)}}
+
+/* Stage 6 · activity, vault, agents, settings panels, skill detail, mobile pass */
+.activity-panel,.vault-panel,.agents-panel,.settings-panel{grid-column:1/-1}
+.activity-controls{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.activity-controls input{flex:1;min-width:160px;background:#071018;border:1px solid #20313a;border-radius:6px;padding:9px 10px;color:var(--text);font-size:11px;outline:none}
+.activity-controls input:focus{border-color:#4b9986}
+.activity-controls select{background:#0a131c;color:#d9e8ec;border:1px solid #263744;border-radius:6px;padding:8px 10px;font-size:11px}
+.activity-list{display:flex;flex-direction:column;gap:5px;max-height:420px;overflow:auto}
+.activity-row{display:flex;flex-direction:column;gap:3px;text-align:left;border:1px solid #1a2934;background:#09131a;border-radius:7px;padding:9px 11px;cursor:pointer;width:100%}
+.activity-row:hover{border-color:#3d8c78;background:#0c1b20}
+.activity-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.activity-time{font:9px var(--mono);color:var(--muted);flex:none;min-width:52px}
+.activity-kind{font:8px var(--mono);letter-spacing:.8px;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:2px 6px;flex:none}
+.k-task{color:var(--mint);border-color:#2c6b57}
+.k-event{color:var(--cyan);border-color:#24506b}
+.k-request{color:var(--amber);border-color:#6b5a2c}
+.activity-title{font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:120px}
+.activity-detail{font:9px var(--mono);color:var(--muted);overflow-wrap:anywhere}
+.activity-more{display:flex;justify-content:center;margin-top:10px}
+.chip{font:8px var(--mono);letter-spacing:.4px;text-transform:uppercase;border:1px solid var(--line);border-radius:20px;padding:3px 8px;color:var(--muted);white-space:nowrap;background:#0a131c}
+.chip.cap{text-transform:none;letter-spacing:.2px}
+.badge-ok{color:var(--mint);border-color:#2c6b57}
+.badge-warn{color:var(--amber);border-color:#6b5a2c}
+.badge-planned{color:var(--muted)}
+.vault-breadcrumbs{display:flex;gap:2px;flex-wrap:wrap;margin:0 0 9px;align-items:center}
+.crumb{border:0;background:transparent;color:#748491;padding:5px 7px;border-radius:5px;cursor:pointer;font:9px var(--mono);letter-spacing:.5px}
+.crumb:hover{background:#10202a;color:var(--mint)}
+.crumb.current{color:var(--mint)}
+.vault-body{display:grid;grid-template-columns:minmax(220px,320px) minmax(0,1fr);gap:10px;align-items:start}
+.vault-list{display:flex;flex-direction:column;gap:3px;max-height:420px;overflow:auto}
+.vault-search-results{display:flex;flex-direction:column;gap:4px;max-height:420px;overflow:auto}
+.vault-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;text-align:left;border:1px solid #1a2934;background:#09131a;border-radius:6px;padding:8px 10px;cursor:pointer;width:100%;color:#c7d6dc}
+.vault-row:hover{border-color:#3d8c78;background:#0c1b20}
+.vault-row.selected{border-color:#4aa993}
+.vault-name{flex:1;min-width:120px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vault-meta{font:8px var(--mono);color:var(--muted);flex:none}
+.vault-snippet{flex-basis:100%;font:9px var(--mono);color:#8ba0a8;overflow-wrap:anywhere}
+.vault-viewer{border:1px solid #1a2934;background:#071018;border-radius:8px;padding:11px}
+.vault-viewer-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px}
+.vault-viewer-head strong{font:10px var(--mono);color:var(--mint);overflow-wrap:anywhere;margin-right:auto}
+.vault-viewer-head .ghost{margin-left:auto}
+#vault-viewer-body{max-height:420px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:10px var(--mono);color:#c3d0d8;margin:8px 0 0}
+.agents-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:9px}
+.agent-head{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.agent-head strong{font:500 13px var(--display)}
+.agent-head .chip{margin-left:auto}
+.agent-lane{display:block;font:8px var(--mono);color:#70d8b8;letter-spacing:.6px;text-transform:uppercase;margin:4px 0}
+.agent-detail{margin:6px 0;font-size:10px;color:#9db0b6;line-height:1.5}
+.agent-assign{display:block;font:9px var(--mono);color:var(--cyan);margin:2px 0;overflow-wrap:anywhere}
+.chip-row{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 0}
+.agent-issues{margin:6px 0 0;padding-left:16px;color:var(--red);font-size:9px;line-height:1.5}
+.agent-recent{display:flex;flex-direction:column;gap:3px;margin-top:8px}
+.agent-run{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#0a131c;border:1px solid #1a2934;border-radius:6px;padding:5px 8px;cursor:pointer;text-align:left;font-size:10px;color:#c1d0d2;width:100%}
+.agent-run:hover{border-color:#3d8c78}
+.agent-run span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agent-card.planned{opacity:.72;border-style:dashed}
+.settings-block{margin:0 0 16px}
+.providers-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:9px;margin-top:7px}
+.provider-health{display:block;font:9px var(--mono);color:var(--muted);margin-top:7px;overflow-wrap:anywhere}
+.provider-controls{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.provider-result{display:block;font:9px var(--mono);color:var(--cyan);margin-top:6px;overflow-wrap:anywhere}
+.assign-list{display:flex;flex-direction:column;gap:6px;margin:7px 0}
+.assign-form{border:1px dashed #2a3f4c;border-radius:8px;padding:11px}
+.assign-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.assign-row label{font:8px var(--mono);color:#758895;letter-spacing:.8px;text-transform:uppercase}
+.assign-form input:not([type=checkbox]){background:#071018;border:1px solid #20313a;border-radius:6px;padding:8px 9px;color:var(--text);font-size:11px;outline:none;min-width:150px}
+.assign-form input:not([type=checkbox]):focus{border-color:#4b9986}
+.assign-row select{background:#0a131c;color:#d9e8ec;border:1px solid #263744;border-radius:6px;padding:8px 9px;font-size:11px}
+.assign-row .check{display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font:10px 'DM Sans',sans-serif;color:#aebdc5}
+.system-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;margin-top:7px}
+.system-row{display:flex;justify-content:space-between;gap:10px;border:1px solid #1a2934;background:#09131a;border-radius:6px;padding:7px 9px}
+.system-key{font:8px var(--mono);color:#758895;letter-spacing:.8px;text-transform:uppercase}
+.system-value{font:10px var(--mono);color:#c7d6dc;overflow-wrap:anywhere;text-align:right}
+#skill-detail{position:fixed;z-index:32;right:20px;top:74px;width:min(430px,calc(100vw - 40px));max-height:calc(100vh - 100px);overflow:auto;padding:16px;background:#0b121b;border:1px solid #293b4b;border-radius:12px;box-shadow:0 18px 60px #000c}
+.skill-detail-head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.skill-detail-head strong{font:600 14px var(--display)}
+.skill-detail-head .ghost{margin-left:auto}
+.skill-row{display:flex;gap:8px;margin:5px 0}
+.skill-key{flex:0 0 92px;font:8px var(--mono);color:#758895;letter-spacing:.8px;text-transform:uppercase;padding-top:2px}
+.skill-value{font-size:10px;color:#c7d6dc;line-height:1.5;overflow-wrap:anywhere}
+.skill-instructions{max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-word;font:10px var(--mono);color:#b8c8cb;background:#071018;border:1px solid #1a2934;border-radius:6px;padding:9px;margin:6px 0 10px}
+.skill-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.skill{cursor:pointer}
+@media(max-width:700px){
+.activity-panel{order:8}.vault-panel{order:9}.agents-panel{order:10}.settings-panel{order:11}
+.vault-body{grid-template-columns:1fr}
+.vault-list,.vault-search-results{max-height:260px}
+.agents-list{grid-template-columns:1fr}
+.providers-list{grid-template-columns:1fr}
+.assign-form input:not([type=checkbox]){flex:1 1 140px;min-width:0}
+.assign-row select{flex:1 1 140px;max-width:none}
+.activity-title{white-space:normal}
+.activity-row{padding:10px}
+#skill-detail{left:8px;right:8px;width:auto;top:64px;max-height:calc(100vh - 84px)}
+.system-grid{grid-template-columns:1fr}
+.activity-controls input{min-width:120px}
+}

@@ -9,7 +9,7 @@
   <main class="command-center">
     <header class="topbar">
       <div class="brand"><span class="orb"></span><span>CORTEX<span class="muted">OS</span></span></div>
-      <nav class="tabs" aria-label="Workspace"><button class="nav active" data-tab="Overview">Overview</button><button class="nav" data-tab="Audience">Audience</button><button class="nav" data-tab="Research">Research</button><button class="nav" data-tab="Tasks">Tasks</button><button class="nav" data-tab="Morning Intel">Morning Intel</button></nav>
+      <nav class="tabs" aria-label="Workspace"><button class="nav active" data-scroll="vitals">Overview</button><button class="nav" data-scroll="skills">Skills</button><button class="nav" data-scroll="terminal">Terminal</button><button class="nav" data-scroll="queue">Tasks</button><button class="nav" data-scroll="activity">Activity</button><button class="nav" data-scroll="vault">Vault</button><button class="nav" data-scroll="agents">Agents</button><button class="nav" data-scroll="settings">Settings</button></nav>
       <div class="top-controls"><label class="agent-label" for="backend">AGENT</label><select id="backend" aria-label="Agent for this request"><option value="auto">Auto</option><option value="codex">Codex</option><option value="claude">Claude Code</option></select><button class="ghost customize" id="customize-layout">Customize</button></div>
       <div class="top-clock" id="clock-wrap" aria-label="Clock"><strong id="clock">--:--:--</strong></div>
 <div class="system-pills" aria-label="System health"><span class="health-pill" id="core-pill"><i></i>CORE <b>—</b></span><span class="health-pill" id="vault-pill"><i></i>VAULT <b>—</b></span><span class="health-pill" id="terminals-pill"><i></i>TERMINALS <b>—</b></span><span class="health-pill" id="agents-pill"><i></i>AGENTS <b>—</b></span></div>
@@ -68,9 +68,81 @@
       <div class="queue-list" id="queue-list"><p class="dim">Loading tasks…</p></div>
       <div class="queue-detail" id="queue-detail" hidden></div>
     </section>
+
+    <section class="panel activity-panel" data-panel="activity">
+      <div class="section-head"><div><div class="eyebrow">SEARCH EVERYTHING</div><h3>Activity</h3></div>
+        <div class="queue-head-controls"><span class="queue-updated" id="activity-updated">no data yet</span><button class="icon-button" id="activity-refresh" title="Refresh activity">↻</button></div>
+      </div>
+      <div class="activity-controls">
+        <input id="activity-search" placeholder="Search tasks, task events, and vault requests…" autocomplete="off" aria-label="Activity search">
+        <select id="activity-kind" aria-label="Filter by kind"><option value="all">All kinds</option><option value="task">Tasks</option><option value="event">Task events</option><option value="request">Vault requests</option></select>
+        <select id="activity-status" aria-label="Filter by status"><option value="">Any status</option><option value="queued">Queued</option><option value="running">Running</option><option value="awaiting_approval">Awaiting approval</option><option value="completed">Completed</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option><option value="rejected">Rejected</option></select>
+      </div>
+      <div class="queue-banner" id="activity-banner" hidden></div>
+      <div class="activity-list" id="activity-list"><p class="dim">Loading activity…</p></div>
+      <div class="activity-more"><button class="ghost" id="activity-more" hidden>Load more</button></div>
+    </section>
+
+    <section class="panel vault-panel" data-panel="vault">
+      <div class="section-head"><div><div class="eyebrow">KNOWLEDGE BASE</div><h3>Vault</h3></div>
+        <div class="queue-head-controls"><span class="queue-updated" id="vault-updated">—</span><button class="icon-button" id="vault-refresh" title="Reload the current folder">↻</button></div>
+      </div>
+      <div class="activity-controls">
+        <input id="vault-search" placeholder="Search file names and content…" autocomplete="off" aria-label="Vault search">
+        <button class="ghost" id="vault-search-run">Search</button>
+        <button class="ghost" id="vault-search-clear" hidden>Clear search</button>
+      </div>
+      <div class="vault-breadcrumbs" id="vault-breadcrumbs"></div>
+      <div class="queue-banner" id="vault-banner" hidden></div>
+      <div class="vault-body">
+        <div class="vault-list" id="vault-list"><p class="dim">Loading vault…</p></div>
+        <div class="vault-viewer" id="vault-viewer" hidden>
+          <div class="vault-viewer-head"><strong id="vault-viewer-title">—</strong><span class="hint" id="vault-viewer-meta"></span><button class="ghost" id="vault-viewer-close">Close</button></div>
+          <pre id="vault-viewer-body"></pre>
+        </div>
+        <div class="vault-search-results" id="vault-search-results" hidden></div>
+      </div>
+    </section>
+
+    <section class="panel agents-panel" data-panel="agents">
+      <div class="section-head"><div><div class="eyebrow">REGISTRY</div><h3>Agents</h3></div>
+        <div class="queue-head-controls"><select id="agents-filter" aria-label="Filter agents"><option value="all">All agents</option><option value="cli">CLI adapters</option><option value="llm">Model agents</option><option value="role">Role agents</option></select><button class="icon-button" id="agents-refresh" title="Refresh agents">↻</button></div>
+      </div>
+      <div class="queue-banner" id="agents-banner" hidden></div>
+      <div class="agents-list" id="agents-list"><p class="dim">Loading agents…</p></div>
+    </section>
+
+    <section class="panel settings-panel" data-panel="settings">
+      <div class="section-head"><div><div class="eyebrow">CONTROL</div><h3>Settings</h3></div>
+        <div class="queue-head-controls"><span class="queue-updated" id="settings-updated">no data yet</span><button class="icon-button" id="settings-refresh" title="Refresh settings">↻</button></div>
+      </div>
+      <div class="queue-banner" id="settings-banner" hidden></div>
+      <div class="settings-block"><div class="eyebrow">LLM PROVIDERS <span class="hint">keys stay server-side, values are never shown</span></div><div class="providers-list" id="settings-providers"><p class="dim">Loading providers…</p></div></div>
+      <div class="settings-block"><div class="eyebrow">AGENT → PROVIDER ASSIGNMENTS <span class="hint">changing a provider never changes agent identity or approval rules</span></div>
+        <div class="assign-list" id="settings-assign-list"><p class="dim">Loading assignments…</p></div>
+        <form class="assign-form" id="settings-assign-form">
+          <div class="assign-row">
+            <label for="assign-agent">Agent</label><input id="assign-agent" list="assign-agent-options" placeholder="agent id (e.g. hermes or gemini-flash)" autocomplete="off" required>
+            <datalist id="assign-agent-options"></datalist>
+            <label for="assign-provider">Provider</label><select id="assign-provider" required></select>
+            <label for="assign-model">Model</label><input id="assign-model" list="assign-model-options" placeholder="model id" autocomplete="off">
+            <datalist id="assign-model-options"></datalist>
+          </div>
+          <div class="assign-row">
+            <label for="assign-fallback-provider">Fallback</label><select id="assign-fallback-provider"><option value="">none</option></select>
+            <label for="assign-fallback-model">Fallback model</label><input id="assign-fallback-model" placeholder="model id" autocomplete="off">
+            <label class="check"><input type="checkbox" id="assign-cloud-fallback"> Allow local→cloud fallback</label>
+            <button class="run" type="submit" id="assign-save">Save assignment <span>↗</span></button>
+            <button class="ghost" type="button" id="assign-clear">Clear form</button>
+          </div>
+          <p class="hint" id="assign-hint">Assignments are validated server-side and stored in state/llm_assignments.json. Local→cloud fallback is refused unless explicitly allowed.</p>
+        </form>
+      </div>
+      <div class="settings-block"><div class="eyebrow">SYSTEM (READ-ONLY)</div><div class="system-grid" id="settings-system"><p class="dim">Loading system state…</p></div></div>
+    </section>
   </main>
   <footer class="dock-bar" id="terminal-dock"><span class="dock-item">⌘ Terminals <b id="dock-count">0</b> open</span><span class="dock-item dock-sep">Shared with Obsidian</span><button class="ghost dock-btn" id="dock-new-terminal">+ New terminal</button></footer>
-  <script src="/queue-panel.js"></script><script src="/terminal.bundle.js"></script><script src="/hud.js"></script>
+  <script src="/queue-panel.js"></script><script src="/activity-panel.js"></script><script src="/vault-panel.js"></script><script src="/agents-panel.js"></script><script src="/settings-panel.js"></script><script src="/skills-panel.js"></script><script src="/terminal.bundle.js"></script><script src="/hud.js"></script>
   <style>
 #skill-grid{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
 .skill-chip{border:1px solid #263744;background:#0a121a;color:#aebdc5;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:10px;white-space:nowrap;font-family:var(--display)}

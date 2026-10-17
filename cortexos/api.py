@@ -461,6 +461,27 @@ def skills():
              **service.vault.skill_stats(s.id)} for s in service.registry.list()]
 
 
+@app.get("/api/skills/{skill_id}")
+def skill_detail(skill_id: str):
+    skill = service.registry.get(skill_id)
+    if not skill:
+        raise HTTPException(status_code=404, detail="Skill not found")
+    try:
+        relative_path = str(skill.path.relative_to(settings.skills.parent))
+    except ValueError:
+        relative_path = skill.path.name
+    files: list[str] = []
+    try:
+        files = sorted(item.name for item in skill.path.iterdir() if item.is_file())
+    except OSError:
+        files = []
+    return {"id": skill.id, "name": skill.name, "domain": skill.domain, "description": skill.description,
+            "triggers": skill.trigger_phrases, "tier": skill.tier, "risk_level": skill.risk_level,
+            "approval_required": skill.approval_required, "automation_ready": skill.automation_ready,
+            "path": relative_path, "files": files, "instructions": skill.instructions[:20000],
+            **service.vault.skill_stats(skill.id)}
+
+
 @app.post("/api/skills/{skill_id}/promote")
 def promote_skill(skill_id: str):
     if not service.registry.get(skill_id):
