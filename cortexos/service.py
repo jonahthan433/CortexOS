@@ -54,7 +54,12 @@ class CortexService:
         if decision is None and route.tier != 1:
             # Tier 1/2 are local reads and read-only answers; only agent work
             # (or an undecidable request) passes through the action gate.
-            tier_decision = await self.fast_model.classify(prompt)
+            try:
+                tier_decision = await self.fast_model.classify(prompt)
+            except Exception:
+                # An unavailable classifier must never break submission; work
+                # continues conservatively and the risk gate still applies.
+                tier_decision = "WORK"
             if tier_decision == "WORK":
                 decision = await self.fast_model.classify_action(prompt)
         if decision and decision["requires_approval"]:
@@ -70,7 +75,8 @@ class CortexService:
                 "reason": decision["reason"],
             })
             return {"id": request_id, "status": "awaiting_approval", "message": "This request requires explicit human approval before execution.", "skill": skill.id if skill else None,
-                    "risk_level": decision["risk_level"], "reason": decision["reason"]}
+                    "risk_level": decision["risk_level"], "reason": decision["reason"],
+                    "route_reason": route.reason}
 
         if route.tier == 1:
             if prompt.strip().lower() in {"help", "list skills", "show skills"} or prompt.strip().lower().startswith("list skills"):
@@ -84,7 +90,7 @@ class CortexService:
                 result = "\n".join(f"- {p.relative_to(self.settings.vault)}" for p in files) or "No metric files yet. Add only real, user-provided numbers under metrics/."
             else:
                 result = str(self.status())
-            return self._finish(request_id, prompt, result, "completed", 1, backend, skill)
+            return self._finish(request_id, prompt, result, "completed", 1, backend, skill, reason=route.reason)
 
         if route.tier == 2:
             if not self.settings.fast_model_enabled:
@@ -92,7 +98,7 @@ class CortexService:
         if route.tier == 2:
             try:
                 result = await self.fast_model.answer(prompt)
-                return self._finish(request_id, prompt, result, "completed", 2, backend, skill)
+                return self._finish(request_id, prompt, result, "completed", 2, backend, skill, reason=route.reason)
             except Exception as exc:
                 # Fallback is visible and uses the selected agent backend.
                 route = type(route)(3, skill, f"tier 2 unavailable: {exc}")
@@ -102,17 +108,17 @@ class CortexService:
             # tier-1 local handler. Tier 2 answering still requires a configured fast model.
             # Reuse the gate-phase verdict; a second call can disagree (nondeterministic jev).
             if tier_decision == "LOCAL":
-                return self._finish(request_id, prompt, str(self.status()), "completed", 1, backend, skill)
+                return self._finish(request_id, prompt, str(self.status()), "completed", 1, backend, skill, reason=route.reason)
             if tier_decision == "QUICK" and self.settings.fast_model_enabled:
                 try:
                     result = await self.fast_model.answer(prompt)
-                    return self._finish(request_id, prompt, result, "completed", 2, backend, skill)
+                    return self._finish(request_id, prompt, result, "completed", 2, backend, skill, reason=route.reason)
                 except Exception:
                     pass  # Conservative fallback: continue to the selected agent backend.
 
         if route.tier == 3 or (skill and skill.tier == 3):
-            return await self._execute(request_id, prompt, backend, skill, on_output=on_output)
-        return self._finish(request_id, prompt, "No execution path matched.", "completed", route.tier, backend, skill)
+            return await self._execute(request_id, prompt, backend, skill, on_output=on_output, reason=route.reason)
+        return self._finish(request_id, prompt, "No execution path matched.", "completed", route.tier, backend, skill, reason=route.reason)
 
     async def approve(self, request_id: str, on_output=None) -> dict:
         pending = self.pending.pop(request_id, None)
@@ -121,7 +127,7 @@ class CortexService:
         self.vault.remove_pending(request_id)
         skill = self.registry.get(pending["skill_id"]) if pending.get("skill_id") else None
         return await self._execute(request_id, pending["prompt"], pending.get("backend"), skill, approved=True,
-                                    on_output=on_output)
+                                    on_output=on_output, reason="human-approved pending request")
 
     def reject(self, request_id: str) -> dict:
         pending = self.pending.pop(request_id, None)
@@ -134,23 +140,25 @@ class CortexService:
         return {"id": request_id, "status": "rejected"}
 
     async def _execute(self, request_id: str, prompt: str, backend: str | None, skill, approved: bool = False,
-                       on_output=None) -> dict:
+                       on_output=None, reason: str | None = None) -> dict:
         try:
             result = await self.agent.run(prompt, skill.instructions if skill else "", backend, approved=approved,
                                           request_id=request_id, on_output=on_output)
-            return self._finish(request_id, prompt, result, "completed", 3, backend, skill)
+            return self._finish(request_id, prompt, result, "completed", 3, backend, skill, reason=reason)
         except Exception as exc:
             self.vault.log_request(request_id, prompt, "error", 3, backend or self.settings.backend)
             self.vault.receipt(request_id, {"status": "error", "error": str(exc), "skill": skill.id if skill else None})
-            return {"id": request_id, "status": "error", "error": str(exc)}
+            return {"id": request_id, "status": "error", "error": str(exc), "route_reason": reason}
 
-    def _finish(self, request_id: str, prompt: str, result: str, status: str, tier: int, backend: str | None, skill) -> dict:
+    def _finish(self, request_id: str, prompt: str, result: str, status: str, tier: int, backend: str | None, skill,
+                reason: str | None = None) -> dict:
         output = self.vault.write_result(request_id, prompt, result, skill.id if skill else None)
         self.vault.log_request(request_id, prompt, status, tier, backend or self.settings.backend, str(output))
         receipt = self.vault.receipt(request_id, {"request_id": request_id, "status": status, "tier": tier, "backend": backend or self.settings.backend,
                                                      "skill": skill.id if skill else None, "output": str(output)})
         return {"id": request_id, "status": status, "tier": tier, "backend": backend or self.settings.backend,
-                "skill": skill.id if skill else None, "result": result, "output": str(output), "receipt": str(receipt)}
+                "skill": skill.id if skill else None, "result": result, "output": str(output), "receipt": str(receipt),
+                "route_reason": reason}
 
     def feedback(self, request_id: str, skill_id: str, useful: bool) -> dict:
         if not self.registry.get(skill_id):

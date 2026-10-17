@@ -28,6 +28,7 @@ class HealthCheck:
             "vault": self._check_vault(),
             "skills": self._check_skills(),
             "voice": self._check_voice(),
+            "router": self._check_router(),
         }
         overall = "ok" if all(c.get("status") == "ok" for c in checks.values()) else "degraded"
         return {"status": overall, "checked_at": datetime.now(timezone.utc).isoformat(), "checks": checks}
@@ -58,6 +59,23 @@ class HealthCheck:
             status = self.voice.status()
             ready = status.get("stt") == "ready" and status.get("tts") == "ready"
             return {"status": "ok" if ready else "degraded", "stt": status.get("stt"), "tts": status.get("tts")}
+        except Exception as exc:
+            return {"status": "error", "error": str(exc)}
+
+    def _check_router(self) -> dict:
+        """Report configured routing backends and the most recent provider failure."""
+        if not self.service:
+            return {"status": "unknown"}
+        try:
+            fast = self.service.fast_model
+            last_error = fast.last_error or fast.jev.last_error
+            detail = {"fast_model_enabled": fast.settings.fast_model_enabled,
+                      "jev_enabled": fast.settings.jev_enabled}
+            if last_error:
+                detail.update({"status": "degraded", "last_error": last_error})
+            else:
+                detail["status"] = "ok"
+            return detail
         except Exception as exc:
             return {"status": "error", "error": str(exc)}
 

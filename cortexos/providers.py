@@ -132,6 +132,7 @@ class JevRouter:
 
     def __init__(self, settings: Settings):
         self.settings = settings
+        self.last_error: str | None = None
 
     async def decide(self, kind: str, prompt: str, extra: dict | None = None) -> str | None:
         if not self.settings.jev_enabled or not self.settings.jev_api_key:
@@ -171,7 +172,7 @@ class JevRouter:
         }
         payload["questions"][kind].update(extra or {})
         try:
-            async with httpx.AsyncClient(timeout=10) as client:
+            async with httpx.AsyncClient(timeout=self.settings.jev_timeout_seconds) as client:
                 response = await client.post(
                     self.settings.jev_base_url.rstrip("/") + "/alpha/decisions",
                     headers={"Authorization": f"Bearer {self.settings.jev_api_key}"},
@@ -180,30 +181,38 @@ class JevRouter:
                 answer = response.json()["answers"][kind]
                 value = str(answer.get("choice", "")).lower()
                 confidence = float(answer.get("confidence", 0) or 0)
-        except Exception:
+        except Exception as exc:
+            self.last_error = f"jev: {exc}"[:200]
             return None
-        return value if confidence >= 0.5 and value in self.OPTIONS[kind] else None
+        self.last_error = None
+        return value if confidence >= self.settings.jev_min_confidence and value in self.OPTIONS[kind] else None
 
 
 class FastModel:
     def __init__(self, settings: Settings):
         self.settings = settings
         self.jev = JevRouter(settings)
+        self.last_error: str | None = None
 
     async def answer(self, prompt: str) -> str:
         if not self.settings.fast_model_enabled:
             return "Tier 2 is disabled. Enable a local or OpenAI-compatible fast model in config/cortexos.toml."
-        async with httpx.AsyncClient(timeout=45) as client:
-            response = await client.post(
-                self.settings.fast_model_base_url.rstrip("/") + "/chat/completions",
-                headers={"Authorization": f"Bearer {self.settings.fast_model_api_key}"},
-                json={"model": self.settings.fast_model_name, "messages": [
-                    {"role": "system", "content": "Answer briefly. This tier is read-only and must not claim to perform actions."},
-                    {"role": "user", "content": prompt},
-                ], "temperature": 0.2},
-            )
-            response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"].strip()
+        try:
+            async with httpx.AsyncClient(timeout=self.settings.fast_model_timeout_seconds) as client:
+                response = await client.post(
+                    self.settings.fast_model_base_url.rstrip("/") + "/chat/completions",
+                    headers={"Authorization": f"Bearer {self.settings.fast_model_api_key}"},
+                    json={"model": self.settings.fast_model_name, "messages": [
+                        {"role": "system", "content": "Answer briefly. This tier is read-only and must not claim to perform actions."},
+                        {"role": "user", "content": prompt},
+                    ], "temperature": 0.2},
+                )
+                response.raise_for_status()
+                self.last_error = None
+                return response.json()["choices"][0]["message"]["content"].strip()
+        except Exception as exc:
+            self.last_error = f"fast model: {exc}"[:200]
+            raise
 
     async def classify(self, prompt: str) -> str:
         """Cheap intent classifier; only a confident QUICK result can select tier 2."""
@@ -216,18 +225,24 @@ class FastModel:
             return "WORK"
         if not self.settings.fast_model_enabled:
             return "WORK"
-        async with httpx.AsyncClient(timeout=12) as client:
-            response = await client.post(
-                self.settings.fast_model_base_url.rstrip("/") + "/chat/completions",
-                headers={"Authorization": f"Bearer {self.settings.fast_model_api_key}"},
-                json={"model": self.settings.fast_model_name, "messages": [
-                    {"role": "system", "content": "Classify user requests. Reply exactly QUICK only for a short, read-only factual or explanatory answer that needs no tools, fresh research, or deliverable. Reply WORK for everything else, including actions, writing deliverables, research, and ambiguity."},
-                    {"role": "user", "content": prompt},
-                ], "temperature": 0, "max_tokens": 2},
-            )
-            response.raise_for_status()
-            value = response.json()["choices"][0]["message"]["content"].strip().upper()
-            return "QUICK" if value == "QUICK" else "WORK"
+        try:
+            async with httpx.AsyncClient(timeout=min(12, self.settings.fast_model_timeout_seconds)) as client:
+                response = await client.post(
+                    self.settings.fast_model_base_url.rstrip("/") + "/chat/completions",
+                    headers={"Authorization": f"Bearer {self.settings.fast_model_api_key}"},
+                    json={"model": self.settings.fast_model_name, "messages": [
+                        {"role": "system", "content": "Classify user requests. Reply exactly QUICK only for a short, read-only factual or explanatory answer that needs no tools, fresh research, or deliverable. Reply WORK for everything else, including actions, writing deliverables, research, and ambiguity."},
+                        {"role": "user", "content": prompt},
+                    ], "temperature": 0, "max_tokens": 2},
+                )
+                response.raise_for_status()
+                self.last_error = None
+                value = response.json()["choices"][0]["message"]["content"].strip().upper()
+                return "QUICK" if value == "QUICK" else "WORK"
+        except Exception as exc:
+            # Fail conservative: an unavailable classifier never demotes work to tier 1/2.
+            self.last_error = f"classify: {exc}"[:200]
+            return "WORK"
 
     async def classify_action(self, prompt: str, skill_id: str | None = None) -> dict[str, Any]:
         """Return a conservative structured risk decision; failures are unknown/fail-closed."""
@@ -268,5 +283,6 @@ class FastModel:
             reason = decision.get("reason", "")
             return {"risk_level": risk, "requires_approval": required or risk in {"external_action", "financial", "unknown"},
                     "reason": str(reason)[:300]}
-        except Exception:
+        except Exception as exc:
+            self.last_error = f"risk classify: {exc}"[:200]
             return unknown

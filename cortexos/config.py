@@ -24,6 +24,9 @@ class Settings:
     jev_base_url: str = "https://openrouter.ai/api"
     jev_api_key: str = ""
     jev_model: str = "typesafe/jev-1.13"
+    jev_min_confidence: float = 0.5
+    jev_timeout_seconds: float = 10.0
+    fast_model_timeout_seconds: float = 45.0
     providers: dict[str, dict[str, Any]] | None = None
     voice_enabled: bool = True
     voice_stt_model: str = "base.en"
@@ -94,6 +97,9 @@ class Settings:
             jev_base_url=router.get("jev_base_url", "https://openrouter.ai/api"),
             jev_api_key=router.get("jev_api_key", ""),
             jev_model=router.get("jev_model", "typesafe/jev-1.13"),
+            jev_min_confidence=float(router.get("jev_min_confidence", 0.5)),
+            jev_timeout_seconds=float(router.get("jev_timeout_seconds", 10)),
+            fast_model_timeout_seconds=float(router.get("fast_model_timeout_seconds", 45)),
             providers=data.get("providers", {}),
             voice_enabled=bool(voice.get("enabled", True)),
             voice_stt_model=voice.get("stt_model", "base.en"),
