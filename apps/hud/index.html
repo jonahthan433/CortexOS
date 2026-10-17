@@ -17,7 +17,7 @@
 
     <section class="panel vitals-panel" data-panel="vitals">
       <div class="section-head"><div><div class="eyebrow">SYSTEM VITALS</div><h3>At a glance</h3></div><button class="icon-button" id="refresh" title="Refresh live data">↻</button></div>
-      <div class="vital-grid"><article class="vital-card"><span>SKILLS</span><strong id="skill-count">—</strong><small>ready workflows</small></article><article class="vital-card"><span>VOICE</span><strong class="small-value" id="voice-vital">Checking</strong><small id="voice-detail">Whisper · Kokoro</small></article></div>
+      <div class="vital-grid"><article class="vital-card"><span>SKILLS</span><strong id="skill-count">—</strong><small>ready workflows</small></article><article class="vital-card"><span>VOICE</span><strong class="small-value" id="voice-vital">Checking</strong><small id="voice-detail">Whisper · Kokoro</small></article><article class="vital-card"><span>QUEUE</span><strong class="small-value" id="queue-vital">—</strong><small id="queue-vital-detail">workers —</small></article></div>
       <div class="section-head mini-head"><div><div class="eyebrow">LIVE FROM VAULT</div><h3>Metrics</h3></div><span class="hint">metrics/</span></div>
       <section class="metrics" id="metrics"><article class="card"><p class="dim">No metric files found yet.</p></article></section>
       <div class="section-head mini-head"><div><div class="eyebrow">YOUR NOTES</div><h3>Today’s directives</h3></div></div>
@@ -47,9 +47,30 @@
 
     <section class="panel output-panel" data-panel="output"><div class="section-head"><div><div class="eyebrow">LATEST DELIVERABLE</div><h3>Response</h3></div></div><section class="result card" id="result"><p class="dim">Ask by text, voice, or skill. Responses will appear here.</p></section></section>
     <section class="panel approvals-panel" data-panel="approvals"><div class="section-head"><div><div class="eyebrow">HUMAN REVIEW</div><h3>Pending approvals</h3></div></div><section class="approvals-list" id="pending-approvals"><article class="card"><p class="dim">No pending approvals.</p></article></section></section>
+
+    <section class="panel queue-panel" data-panel="queue">
+      <div class="section-head"><div><div class="eyebrow">DURABLE QUEUE</div><h3>Tasks</h3></div>
+        <div class="queue-head-controls"><span class="queue-updated" id="queue-updated">no data yet</span><button class="icon-button" id="queue-refresh" title="Refresh tasks now">↻</button></div>
+      </div>
+      <div class="queue-summary" id="queue-summary"></div>
+      <div class="queue-submit">
+        <input id="queue-prompt" placeholder="Queue a task for the background workers…" autocomplete="off" aria-label="Task prompt">
+        <select id="queue-agent" aria-label="Agent for this task"><option value="auto">Auto</option></select>
+        <select id="queue-priority" aria-label="Task priority"><option value="1">P1 · highest</option><option value="3">P3 · high</option><option value="5" selected>P5 · normal</option><option value="7">P7 · low</option><option value="9">P9 · lowest</option></select>
+        <button class="run" id="queue-submit">Queue <span>↗</span></button>
+      </div>
+      <div class="queue-filters">
+        <select id="queue-filter-status" aria-label="Filter tasks by status"><option value="all">All statuses</option><option value="queued">Queued</option><option value="running">Running</option><option value="awaiting_approval">Awaiting approval</option><option value="completed">Completed</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option></select>
+        <select id="queue-filter-priority" aria-label="Filter tasks by priority"><option value="any">Any priority</option><option value="1">P1</option><option value="2">P2</option><option value="3">P3</option><option value="4">P4</option><option value="5">P5</option><option value="6">P6</option><option value="7">P7</option><option value="8">P8</option><option value="9">P9</option></select>
+        <span class="hint" id="queue-count"></span>
+      </div>
+      <div class="queue-banner" id="queue-banner" hidden></div>
+      <div class="queue-list" id="queue-list"><p class="dim">Loading tasks…</p></div>
+      <div class="queue-detail" id="queue-detail" hidden></div>
+    </section>
   </main>
   <footer class="dock-bar" id="terminal-dock"><span class="dock-item">⌘ Terminals <b id="dock-count">0</b> open</span><span class="dock-item dock-sep">Shared with Obsidian</span><button class="ghost dock-btn" id="dock-new-terminal">+ New terminal</button></footer>
-  <script src="/terminal.bundle.js"></script><script src="/hud.js"></script>
+  <script src="/queue-panel.js"></script><script src="/terminal.bundle.js"></script><script src="/hud.js"></script>
   <style>
 #skill-grid{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
 .skill-chip{border:1px solid #263744;background:#0a121a;color:#aebdc5;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:10px;white-space:nowrap;font-family:var(--display)}
