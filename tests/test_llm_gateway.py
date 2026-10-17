@@ -277,6 +277,37 @@ def test_test_provider_modes_are_honest(tmp_path):
     run(scenario())
 
 
+def test_inference_empty_reply_is_reported_honestly(tmp_path):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return openai_response("", usage=True)
+
+    gateway = make_gateway(tmp_path, handler, providers={
+        "acme": {"kind": "openai_compatible", "base_url": "https://api.acme.test", "api_key": SECRET, "default_model": "m1"},
+    })
+    result = run(gateway.test_provider("acme", "inference"))
+    assert result["status"] == "ok"  # the model genuinely responded (tokens billed)
+    assert "no text" in result["detail"]  # ...but the interface says so plainly
+    assert result["usage"] == {"input_tokens": 7, "output_tokens": 3}
+
+
+def test_fast_model_max_tokens_is_opt_in(tmp_path):
+    from cortexos.providers import FastModel
+
+    captured = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["body"] = json.loads(request.content)
+        return openai_response("ok", usage=False)
+
+    gateway = make_gateway(tmp_path, handler, fast_model_enabled=True)
+    fast = FastModel(gateway.settings, gateway=gateway)
+    assert run(fast.answer("hello")) == "ok"
+    assert "max_tokens" not in captured["body"]  # default: provider decides (historical behavior)
+    gateway.settings.fast_model_max_tokens = 128
+    assert run(fast.answer("hello")) == "ok"
+    assert captured["body"]["max_tokens"] == 128
+
+
 def test_agent_generate_fallback_chain(tmp_path):
     def handler(request: httpx.Request) -> httpx.Response:
         if "primary" in str(request.url):

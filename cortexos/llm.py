@@ -728,8 +728,12 @@ class ModelGateway:
                 result = await self.call(provider_id, target_model,
                                          [{"role": "user", "content": "Reply with the single word: ok"}],
                                          temperature=0, max_tokens=8)
+                detail = f"inference ok ({result.model})"
+                if not result.text:
+                    detail = (f"model responded but returned no text (reasoning-only or tiny max_tokens; "
+                              f"usage: {result.usage})")
                 return {"provider": provider_id, "mode": mode, "status": "ok",
-                        "detail": f"inference ok ({result.model})", "reply": result.text[:80],
+                        "detail": detail, "reply": result.text[:80],
                         "usage": result.usage, "elapsed_ms": result.elapsed_ms}
             except ProviderError as exc:
                 return {"provider": provider_id, "mode": mode, "status": "error",

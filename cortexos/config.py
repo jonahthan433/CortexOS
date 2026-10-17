@@ -20,6 +20,7 @@ class Settings:
     fast_model_base_url: str = "http://127.0.0.1:11434/v1"
     fast_model_name: str = "qwen2.5:3b"
     fast_model_api_key: str = "local"
+    fast_model_max_tokens: int = 0
     jev_enabled: bool = False
     jev_base_url: str = "https://openrouter.ai/api"
     jev_api_key: str = ""
@@ -107,6 +108,7 @@ class Settings:
             fast_model_base_url=router.get("fast_model_base_url", "http://127.0.0.1:11434/v1"),
             fast_model_name=router.get("fast_model_name", "qwen2.5:3b"),
             fast_model_api_key=router.get("fast_model_api_key", "local"),
+            fast_model_max_tokens=int(router.get("fast_model_max_tokens", 0) or 0),
             jev_enabled=bool(router.get("jev_enabled", False)),
             jev_base_url=router.get("jev_base_url", "https://openrouter.ai/api"),
             jev_api_key=router.get("jev_api_key", ""),

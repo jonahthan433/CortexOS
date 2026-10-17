@@ -242,7 +242,7 @@ class FastModel:
             text = await self._chat([
                 {"role": "system", "content": "Answer briefly. This tier is read-only and must not claim to perform actions."},
                 {"role": "user", "content": prompt},
-            ], temperature=0.2)
+            ], temperature=0.2, max_tokens=self.settings.fast_model_max_tokens or None)
             self.last_error = None
             return text
         except Exception as exc:
