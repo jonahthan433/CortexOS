@@ -48,6 +48,18 @@ input_mode = "stdin"
 terminal_command = "claude"
 terminal_args = []
 
+# OpenCode CLI (free models by default). The wrapper scripts run it as the
+# unprivileged agent user and, for agent runs, reduce the JSONL event stream
+# to plain assistant text. Paths are install-specific; point them at your
+# OpenCode binary (see integrations/hermes-bots/ for the free-model setup).
+[providers.opencode]
+name = "OpenCode"
+command = "/opt/cortexos/opencode-run"
+args = ["run", "--format", "json", "-m", "opencode/deepseek-v4.1-flash-free", "{prompt}"]
+input_mode = "argument"
+terminal_command = "/opt/cortexos/opencode-terminal"
+terminal_args = []
+
 # Register another installed CLI by adding [providers.<id>] with a display name,
 # command, args, and terminal_command/terminal_args. Agent prompts use stdin by
 # default; set input_mode = "argument" or place {prompt} in args when needed.

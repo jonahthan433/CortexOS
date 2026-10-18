@@ -297,27 +297,31 @@ class FastModel:
                     "reason": "Jev decision model"}
         if not self.settings.fast_model_enabled:
             return unknown
-        try:
-            raw = await self._chat([
-                {"role": "system", "content": (
-                    "Assess the requested operation's external side-effect risk. Return JSON only with "
-                    "risk_level (read_only, local_write, external_action, financial, or unknown), requires_approval (boolean), "
-                    "and a short reason. Mark sending, publishing, account changes, payments, purchases, "
-                    "financial transfers, bookings, and uncertain actions as requiring approval. A draft-only "
-                    "or analysis-only request is read_only. If context is ambiguous, use unknown and require approval."
-                )},
-                {"role": "user", "content": json.dumps({"skill_id": skill_id, "request": prompt})},
-            ], temperature=0, json_mode=True, timeout_override=15)
-            decision = json.loads(raw)
-            risk = decision.get("risk_level")
-            if risk not in {"read_only", "local_write", "external_action", "financial", "unknown"}:
-                return unknown
-            required = decision.get("requires_approval")
-            if not isinstance(required, bool):
-                return unknown
-            reason = decision.get("reason", "")
-            return {"risk_level": risk, "requires_approval": required or risk in {"external_action", "financial", "unknown"},
-                    "reason": str(reason)[:300]}
-        except Exception as exc:
-            self.last_error = self._scrub(f"risk classify: {exc}")
-            return unknown
+        for _attempt in range(2):
+            # Bounded retry: free models occasionally return an empty or
+            # unparseable body. One retry keeps the gate usable; every failure
+            # still ends in the conservative unknown/approval result.
+            try:
+                raw = await self._chat([
+                    {"role": "system", "content": (
+                        "Assess the requested operation's external side-effect risk. Return JSON only with "
+                        "risk_level (read_only, local_write, external_action, financial, or unknown), requires_approval (boolean), "
+                        "and a short reason. Mark sending, publishing, account changes, payments, purchases, "
+                        "financial transfers, bookings, and uncertain actions as requiring approval. A draft-only "
+                        "or analysis-only request is read_only. If context is ambiguous, use unknown and require approval."
+                    )},
+                    {"role": "user", "content": json.dumps({"skill_id": skill_id, "request": prompt})},
+                ], temperature=0, json_mode=True, max_tokens=400, timeout_override=15)
+                decision = json.loads(raw)
+                risk = decision.get("risk_level")
+                required = decision.get("requires_approval")
+                if risk not in {"read_only", "local_write", "external_action", "financial", "unknown"} \
+                        or not isinstance(required, bool):
+                    raise ValueError("invalid risk decision")
+                reason = decision.get("reason", "")
+                self.last_error = None
+                return {"risk_level": risk, "requires_approval": required or risk in {"external_action", "financial", "unknown"},
+                        "reason": str(reason)[:300]}
+            except Exception as exc:
+                self.last_error = self._scrub(f"risk classify: {exc}")
+        return unknown

@@ -69,7 +69,7 @@ class Settings:
 
     @property
     def agents(self) -> list[dict[str, str]]:
-        labels = {"codex": "Codex", "claude": "Claude Code"}
+        labels = {"codex": "Codex", "claude": "Claude Code", "opencode": "OpenCode"}
         result = []
         for agent_id in self.agent_ids:
             config = (self.providers or {}).get(agent_id, {})

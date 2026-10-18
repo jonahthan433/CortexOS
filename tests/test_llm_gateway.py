@@ -439,6 +439,36 @@ def test_fast_model_uses_gateway(tmp_path):
     assert replies["json"] is False
 
 
+def test_risk_classifier_retries_then_fails_closed(tmp_path):
+    from cortexos.providers import FastModel
+
+    calls = {"n": 0}
+
+    def flaky(request):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            # A free model can answer 200 with an empty body; the classifier
+            # retries exactly once instead of gating everything as unknown.
+            return openai_response("", usage=False)
+        return openai_response(json.dumps({
+            "risk_level": "external_action", "requires_approval": True, "reason": "sends an email",
+        }), usage=False)
+
+    gateway = make_gateway(tmp_path, flaky, fast_model_enabled=True)
+    fast = FastModel(gateway.settings, gateway=gateway)
+
+    async def scenario():
+        decision = await fast.classify_action("send an email to test@example.com")
+        assert decision == {"risk_level": "external_action", "requires_approval": True, "reason": "sends an email"}
+        assert calls["n"] == 2  # one retry, never more
+
+        dead = FastModel(gateway.settings, gateway=make_gateway(
+            tmp_path, lambda request: openai_response("still not json"), fast_model_enabled=True))
+        fallback = await dead.classify_action("anything")
+        assert fallback["risk_level"] == "unknown" and fallback["requires_approval"] is True
+    run(scenario())
+
+
 def test_fast_model_respects_jev_decision_without_http(tmp_path):
     from cortexos.providers import FastModel
 
