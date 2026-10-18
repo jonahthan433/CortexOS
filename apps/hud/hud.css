@@ -413,6 +413,8 @@ body.side-collapsed .side-brand{justify-content:center}
 .assign-row label{font:8px var(--mono);color:#758895;letter-spacing:.8px;text-transform:uppercase}
 .assign-form input:not([type=checkbox]){background:#071018;border:1px solid #20313a;border-radius:var(--radius-xs);padding:8px 9px;color:var(--text);font-size:11px;outline:none;min-width:150px}
 .assign-form input:not([type=checkbox]):focus{border-color:#4b9986}
+#settings-create-form textarea{flex:1 1 100%;min-height:56px;background:#071018;border:1px solid #20313a;border-radius:var(--radius-xs);padding:8px 9px;color:var(--text);font:11px var(--mono);outline:none;resize:vertical}
+#settings-create-form textarea:focus{border-color:#4b9986}
 .assign-row select{background:#0a131c;color:#d9e8ec;border:1px solid #263744;border-radius:var(--radius-xs);padding:8px 9px;font-size:11px}
 .assign-row .check{display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font:10px 'DM Sans',sans-serif;color:#aebdc5}
 .system-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;margin-top:7px}

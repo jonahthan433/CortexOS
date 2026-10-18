@@ -172,6 +172,7 @@ class Assignment:
     provider: str
     model: str = ""
     name: str = ""
+    persona: str = ""
     fallback: list[dict[str, str]] = field(default_factory=list)
     allow_cloud_fallback: bool = False
     requirements: list[str] = field(default_factory=lambda: [REQUIRED_CAPABILITY])
@@ -179,7 +180,8 @@ class Assignment:
 
     def public(self) -> dict:
         return {"agent_id": self.agent_id, "name": self.name or self.agent_id, "provider": self.provider,
-                "model": self.model, "fallback": [dict(item) for item in self.fallback],
+                "model": self.model, "persona": self.persona,
+                "fallback": [dict(item) for item in self.fallback],
                 "allow_cloud_fallback": self.allow_cloud_fallback,
                 "requirements": list(self.requirements), "updated_at": self.updated_at}
 
@@ -260,6 +262,7 @@ class ModelGateway:
                 provider=str(entry.get("provider", "")),
                 model=str(entry.get("model", "")),
                 name=str(entry.get("name", "")),
+                persona=str(entry.get("persona", "")),
                 fallback=[dict(item) for item in entry.get("fallback", []) if isinstance(item, dict)],
                 allow_cloud_fallback=bool(entry.get("allow_cloud_fallback", False)),
                 requirements=[str(item) for item in entry.get("requirements", [REQUIRED_CAPABILITY])],
@@ -311,6 +314,8 @@ class ModelGateway:
         issues: list[str] = []
         if not agent_id or len(agent_id) > 64 or not all(c.isalnum() or c in "._-" for c in agent_id):
             return [f"invalid agent id: {agent_id!r}"]
+        if len(str(entry.get("persona", "") or "")) > 4000:
+            issues.append("persona is longer than 4000 characters")
         provider_id = str(entry.get("provider", ""))
         spec = self.providers.get(provider_id)
         if spec is None:
@@ -355,6 +360,7 @@ class ModelGateway:
             provider=spec.id,
             model=str(entry.get("model") or spec.default_model),
             name=str(entry.get("name", "")),
+            persona=str(entry.get("persona", "") or "")[:4000],
             fallback=[{"provider": str(item.get("provider")), "model": str(item.get("model") or (self.providers[str(item.get("provider"))].default_model if str(item.get("provider")) in self.providers else ""))}
                       for item in (entry.get("fallback") or [])],
             allow_cloud_fallback=bool(entry.get("allow_cloud_fallback", False)),
@@ -560,6 +566,10 @@ class ModelGateway:
         if json_mode and "json_mode" not in requirements:
             requirements.append("json_mode")
         system = agent_system_prompt(self.settings, skill_instructions, approved)
+        if assignment.persona:
+            # A named bot's identity leads, but the standard CortexOS system
+            # prompt (scope, approval state, deliverable rules) stays intact.
+            system = f"## Bot identity\n{assignment.persona.strip()}\n\n{system}"
         messages = [{"role": "system", "content": system}, {"role": "user", "content": prompt}]
         targets = self._attempt_targets(assignment)
         attempts: list[dict] = []

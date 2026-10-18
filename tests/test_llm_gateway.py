@@ -118,6 +118,41 @@ def test_assignment_roundtrip_and_delete(tmp_path):
     assert reloaded.delete_assignment("writer") is False
 
 
+def test_bot_persona_leads_system_prompt_and_roundtrips(tmp_path):
+    seen = {}
+
+    def handler(request):
+        body = json.loads(request.content)
+        seen["system"] = (body.get("messages") or [{}])[0].get("content", "")
+        return openai_response("I am Researcher.")
+
+    gateway = make_gateway(tmp_path, handler, providers={
+        "acme": {"kind": "openai_compatible", "base_url": "https://api.acme.test/v1",
+                 "api_key": SECRET, "default_model": "acme-1"},
+    })
+    saved = gateway.save_assignment("researcher", {
+        "provider": "acme", "model": "acme-1", "name": "Researcher",
+        "persona": "You are Researcher, a meticulous analyst.",
+    })
+    assert saved["persona"] == "You are Researcher, a meticulous analyst."
+    assert saved["name"] == "Researcher"
+
+    reloaded = ModelGateway(gateway.settings, transport=None, assignment_path=tmp_path / "llm_assignments.json")
+    assert reloaded.assignments["researcher"].persona.startswith("You are Researcher")
+
+    async def scenario():
+        outcome = await gateway.generate("researcher", "who are you?")
+        assert outcome.text == "I am Researcher."
+    run(scenario())
+    assert seen["system"].startswith("## Bot identity\nYou are Researcher, a meticulous analyst.")
+    # the standard CortexOS policy survives persona injection
+    assert "Do not perform external actions" in seen["system"]
+
+    too_long = gateway.validate_assignment("researcher", {
+        "provider": "acme", "model": "acme-1", "persona": "x" * 4001})
+    assert any("persona" in issue for issue in too_long)
+
+
 def test_local_to_cloud_fallback_requires_policy(tmp_path):
     gateway = make_gateway(tmp_path, lambda request: openai_response(), providers={
         "local": {"kind": "ollama", "default_model": "qwen"},

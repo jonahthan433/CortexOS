@@ -70,3 +70,29 @@ test('healthText is never dressed up', () => {
   assert.ok(text.startsWith('error: HTTP 402'));
   assert.ok(text.includes('1m ago'));
 });
+
+test('slugifyBot produces safe agent ids', () => {
+  assert.equal(panel.slugifyBot('Researcher'), 'researcher');
+  assert.equal(panel.slugifyBot('  Market  Scout! '), 'market-scout');
+  assert.equal(panel.slugifyBot('Sales/Bot (v2)'), 'sales-bot-v2');
+  assert.equal(panel.slugifyBot('--edge--'), 'edge');
+  assert.equal(panel.slugifyBot('!!!'), '');
+  assert.equal(panel.slugifyBot('a'.repeat(80)).length, 48);
+  assert.equal(panel.slugifyBot(''), '');
+});
+
+test('buildCreateBotBody mirrors the create endpoint contract', () => {
+  const body = panel.buildCreateBotBody({
+    name: '  Researcher ', agentId: 'Researcher', provider: 'openrouter',
+    model: ' nvidia/nemotron-3-super-120b-a12b:free ', persona: '  You are meticulous. '
+  });
+  assert.deepEqual(body, {
+    agent_id: 'researcher', name: 'Researcher', provider: 'openrouter',
+    model: 'nvidia/nemotron-3-super-120b-a12b:free', persona: 'You are meticulous.',
+    fallback: [], allow_cloud_fallback: false, requirements: ['chat']
+  });
+  const derived = panel.buildCreateBotBody({ name: 'Market Scout', provider: 'openrouter' });
+  assert.equal(derived.agent_id, 'market-scout');
+  assert.equal(derived.persona, '');
+  assert.equal(derived.model, '');
+});

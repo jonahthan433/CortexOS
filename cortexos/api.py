@@ -496,9 +496,36 @@ class LlmAssignmentBody(BaseModel):
     provider: str = Field(min_length=1, max_length=64)
     model: str = Field(default="", max_length=120)
     name: str = Field(default="", max_length=80)
+    persona: str = Field(default="", max_length=4000)
     fallback: list[dict] = []
     allow_cloud_fallback: bool = False
     requirements: list[str] = ["chat"]
+
+
+class LlmAgentCreateBody(LlmAssignmentBody):
+    agent_id: str = Field(min_length=1, max_length=64, pattern=r"^[A-Za-z0-9._-]+$")
+
+
+@app.post("/api/llm/agents")
+def llm_agent_create(body: LlmAgentCreateBody):
+    """Create a new named bot/agent bound to a model-gateway provider.
+
+    The id becomes the task backend (`/cx assign <id>` and the HUD selector);
+    CLI agent ids and existing bots are refused so nothing is silently
+    overwritten. Validation, storage, and execution stay in the gateway.
+    """
+    agent_id = body.agent_id.strip()
+    if agent_id in settings.agent_ids:
+        raise HTTPException(status_code=409, detail=f"'{agent_id}' is a configured CLI agent id; pick another id")
+    if service.gateway.resolve(agent_id) is not None:
+        raise HTTPException(status_code=409, detail=f"agent '{agent_id}' already exists; use the assignment form to update it")
+    data = body.model_dump()
+    data.pop("agent_id", None)
+    try:
+        entry = service.gateway.save_assignment(agent_id, data)
+    except ProviderError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"status": "created", "agent": entry}
 
 
 @app.put("/api/llm/agents/{agent_id}")

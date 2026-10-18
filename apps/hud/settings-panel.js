@@ -81,10 +81,33 @@
     return parts.join(' · ');
   }
 
+  function slugifyBot(value) {
+    return String(value || '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/^[-._]+|[-._]+$/g, '')
+      .slice(0, 48);
+  }
+
+  function buildCreateBotBody(draft) {
+    return {
+      agent_id: slugifyBot(draft.agentId || draft.name),
+      name: (draft.name || '').trim(),
+      provider: draft.provider,
+      model: (draft.model || '').trim(),
+      persona: (draft.persona || '').trim(),
+      fallback: [],
+      allow_cloud_fallback: false,
+      requirements: ['chat']
+    };
+  }
+
   var api = { TEST_MODES: TEST_MODES, providerTone: providerTone, providerSummary: providerSummary,
               enabledCapabilities: enabledCapabilities, modelsFor: modelsFor,
               testModeRequiresConfirmation: testModeRequiresConfirmation, healthText: healthText,
-              buildAssignmentBody: buildAssignmentBody, assignmentSummary: assignmentSummary };
+              buildAssignmentBody: buildAssignmentBody, assignmentSummary: assignmentSummary,
+              slugifyBot: slugifyBot, buildCreateBotBody: buildCreateBotBody };
 
   /* ------------------------------------------------------------------ DOM */
 
@@ -94,6 +117,7 @@
     var apiBase = options.api;
     var apiFetch = options.apiFetch;
     var state = { providers: [], assignments: [], agentIds: [] };
+    var botIdTouched = false;
 
     function setBanner(text, kind) {
       var banner = $('settings-banner');
@@ -253,6 +277,12 @@
         id.className = 'dim';
         id.textContent = entry.agent_id;
         head.append(name, id);
+        if (entry.persona) {
+          var botChip = document.createElement('span');
+          botChip.className = 'chip cap';
+          botChip.textContent = 'bot';
+          head.append(botChip);
+        }
         if (entry.issues && entry.issues.length) {
           var badge = document.createElement('span');
           badge.className = 'chip badge-warn';
@@ -320,20 +350,22 @@
       syncModelOptions();
     }
 
-    function syncModelOptions() {
-      var providerSelect = $('assign-provider');
+    function fillModelOptions(providerSelect, datalist) {
+      if (!datalist) return;
       var provider = providerSelect && providerSelect.value
         ? state.providers.filter(function (item) { return item.id === providerSelect.value; })[0]
         : null;
-      var datalist = $('assign-model-options');
-      if (datalist) {
-        datalist.replaceChildren();
-        modelsFor(provider).forEach(function (model) {
-          var option = document.createElement('option');
-          option.value = model;
-          datalist.append(option);
-        });
-      }
+      datalist.replaceChildren();
+      modelsFor(provider).forEach(function (model) {
+        var option = document.createElement('option');
+        option.value = model;
+        datalist.append(option);
+      });
+    }
+
+    function syncModelOptions() {
+      fillModelOptions($('assign-provider'), $('assign-model-options'));
+      fillModelOptions($('create-bot-provider'), $('create-bot-model-options'));
     }
 
     function submitAssignment(event) {
@@ -365,6 +397,45 @@
         refreshAgents();
       }).catch(function (error) {
         setBanner('Assignment failed: ' + error.message, 'error');
+      }).finally(function () {
+        if (save) save.disabled = false;
+      });
+    }
+
+    /* ------------------------------------------------------------ bot creation */
+
+    function submitCreateBot(event) {
+      if (event) event.preventDefault();
+      var name = ($('create-bot-name') || {}).value || '';
+      var agentId = ($('create-bot-id') || {}).value || slugifyBot(name);
+      var provider = ($('create-bot-provider') || {}).value || '';
+      if (!name.trim()) { setBanner('Give the bot a name.', 'warn'); return; }
+      if (!slugifyBot(agentId)) { setBanner('Agent id must contain letters or numbers (e.g. researcher).', 'warn'); return; }
+      if (!provider) { setBanner('Choose a provider for the bot.', 'warn'); return; }
+      var body = buildCreateBotBody({
+        name: name, agentId: agentId, provider: provider,
+        model: (($('create-bot-model') || {}).value || ''),
+        persona: (($('create-bot-persona') || {}).value || '')
+      });
+      var save = $('create-bot-save');
+      if (save) save.disabled = true;
+      call('POST', '/llm/agents', body).then(function (outcome) {
+        if (!outcome.ok) {
+          setBanner('Could not create bot: ' + (outcome.data.detail || ('HTTP ' + outcome.status)), 'error');
+          var failed = $('create-bot-hint');
+          if (failed) failed.textContent = 'Rejected: ' + (outcome.data.detail || ('HTTP ' + outcome.status));
+          return;
+        }
+        setBanner('Bot “' + (body.name || body.agent_id) + '” created — run tasks against ' + body.agent_id + '.', 'ok');
+        var form = $('settings-create-form');
+        if (form) form.reset();
+        botIdTouched = false;
+        var hint = $('create-bot-hint');
+        if (hint) hint.textContent = 'Created ' + body.agent_id + ' on ' + body.provider + '. Pick it in the HUD agent selector or /cx assign ' + body.agent_id;
+        refreshAssignments();
+        refreshAgents();
+      }).catch(function (error) {
+        setBanner('Could not create bot: ' + error.message, 'error');
       }).finally(function () {
         if (save) save.disabled = false;
       });
@@ -413,26 +484,29 @@
 
     /* -------------------------------------------------------------- refresh */
 
+    function fillProviderSelect(select, placeholder) {
+      if (!select) return;
+      var previous = select.value;
+      select.replaceChildren();
+      var empty = document.createElement('option');
+      empty.value = '';
+      empty.textContent = placeholder;
+      select.append(empty);
+      state.providers.forEach(function (provider) {
+        var option = document.createElement('option');
+        option.value = provider.id;
+        option.textContent = provider.id + (provider.enabled ? '' : ' (disabled)');
+        select.append(option);
+      });
+      select.value = state.providers.some(function (p) { return p.id === previous; }) ? previous : '';
+    }
+
     function refreshProviders() {
       return call('GET', '/llm/providers').then(function (outcome) {
         if (!outcome.ok) throw new Error(outcome.data.detail || ('HTTP ' + outcome.status));
         state.providers = outcome.data.providers || [];
-        var select = $('assign-provider');
-        if (select) {
-          var current = select.value;
-          select.replaceChildren();
-          var empty = document.createElement('option');
-          empty.value = '';
-          empty.textContent = 'choose provider…';
-          select.append(empty);
-          state.providers.forEach(function (provider) {
-            var option = document.createElement('option');
-            option.value = provider.id;
-            option.textContent = provider.id + (provider.enabled ? '' : ' (disabled)');
-            select.append(option);
-          });
-          select.value = state.providers.some(function (p) { return p.id === current; }) ? current : '';
-        }
+        fillProviderSelect($('assign-provider'), 'choose provider…');
+        fillProviderSelect($('create-bot-provider'), 'choose provider…');
         var fallback = $('assign-fallback-provider');
         if (fallback) {
           var previous = fallback.value;
@@ -501,6 +575,25 @@
     };
     var providerSelect = $('assign-provider');
     if (providerSelect) providerSelect.onchange = syncModelOptions;
+
+    var createForm = $('settings-create-form');
+    if (createForm) createForm.addEventListener('submit', submitCreateBot);
+    var createClear = $('create-bot-clear');
+    if (createClear) createClear.onclick = function () {
+      if (createForm) createForm.reset();
+      botIdTouched = false;
+      syncModelOptions();
+    };
+    var createName = $('create-bot-name');
+    if (createName) createName.addEventListener('input', function () {
+      if (botIdTouched) return;
+      var idInput = $('create-bot-id');
+      if (idInput) idInput.value = slugifyBot(createName.value);
+    });
+    var createId = $('create-bot-id');
+    if (createId) createId.addEventListener('input', function () { botIdTouched = true; });
+    var createProvider = $('create-bot-provider');
+    if (createProvider) createProvider.onchange = syncModelOptions;
 
     refreshAll();
   }

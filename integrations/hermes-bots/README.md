@@ -5,6 +5,35 @@ each bot is a **Hermes profile** under `~/.hermes/profiles/<name>/` with its own
 config, personality, model, and **its own BotFather token**, while the one
 running host gateway multiplexes all served profiles.
 
+## Two ways to make a bot — pick by where it should live
+
+| | Dashboard bot (CortexOS) | Telegram bot (Hermes profile) |
+|---|---|---|
+| Where you create it | HUD → Settings → **CREATE A BOT** | `hermes profile create <name> --clone` |
+| Identity | display name + persona; one shared gateway identity | its own BotFather token, own Telegram account |
+| How you use it | HUD agent selector, `/cx assign <id>` in Telegram | message the bot directly in Telegram |
+| Needs | a provider (free OpenRouter models ship configured) | a BotFather token (human step) |
+
+### Dashboard bot (verified live 2026-10-18)
+
+Settings → CREATE A BOT asks for a name, an agent id (auto-slugged from the
+name), a model-gateway provider, a model, and an optional persona. The id
+becomes the task backend: it appears in the HUD agent selector and in
+`/cx assign <id> <task>`. Server-side rules: ids must be safe slugs, CLI agent
+ids (`hermes`, `opencode`, …) and existing bots are refused with 409, and the
+persona is capped at 4000 characters. Bots are stored in
+`state/llm_assignments.json` (no secrets) and run through the same approval
+gate and system prompt as every other agent — the persona is prepended, the
+policy text stays intact.
+
+Live proof: a bot `researcher` (persona "You are Researcher, a meticulous
+analyst…") answered `backend=researcher` with *"I am Researcher, a meticulous
+analyst…"* on the free `nvidia/nemotron-3-super-120b-a12b:free` model (cost $0);
+duplicate create → 409, `hermes` as id → 409, malformed id → 422.
+
+## Telegram bot = Hermes profile
+
+
 Verified mechanics (2026-10-18, `hermes` v0.22.1 on VM 103):
 
 - `hermes profile create <name> --clone` copies `config.yaml` (model, providers,

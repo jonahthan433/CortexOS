@@ -258,6 +258,23 @@
           </div>
           <div class="queue-banner" id="settings-banner" hidden></div>
           <div class="settings-block"><div class="eyebrow">LLM PROVIDERS <span class="hint">keys stay server-side, values are never shown</span></div><div class="providers-list" id="settings-providers"><p class="dim">Loading providers…</p></div></div>
+          <div class="settings-block"><div class="eyebrow">CREATE A BOT <span class="hint">named agents run through the model gateway with their own persona</span></div>
+            <form class="assign-form" id="settings-create-form">
+              <div class="assign-row">
+                <label for="create-bot-name">Bot name</label><input id="create-bot-name" placeholder="e.g. Researcher" autocomplete="off" required>
+                <label for="create-bot-id">Agent id</label><input id="create-bot-id" placeholder="researcher" autocomplete="off" required>
+                <label for="create-bot-provider">Provider</label><select id="create-bot-provider" required></select>
+                <label for="create-bot-model">Model</label><input id="create-bot-model" list="create-bot-model-options" placeholder="provider default" autocomplete="off">
+                <datalist id="create-bot-model-options"></datalist>
+              </div>
+              <div class="assign-row">
+                <label for="create-bot-persona">Persona <span class="hint">optional</span></label><textarea id="create-bot-persona" rows="3" placeholder="How should this bot behave? e.g. You are a meticulous research assistant. Cite sources, stay concise, prefer tables."></textarea>
+                <button class="run" type="submit" id="create-bot-save">Create bot <span>＋</span></button>
+                <button class="ghost" type="button" id="create-bot-clear">Clear</button>
+              </div>
+              <p class="hint" id="create-bot-hint">The id becomes the task backend: pick it in the HUD agent selector or use /cx assign &lt;id&gt;. Validation and storage are server-side (state/llm_assignments.json).</p>
+            </form>
+          </div>
           <div class="settings-block"><div class="eyebrow">AGENT → PROVIDER ASSIGNMENTS <span class="hint">changing a provider never changes agent identity or approval rules</span></div>
             <div class="assign-list" id="settings-assign-list"><p class="dim">Loading assignments…</p></div>
             <form class="assign-form" id="settings-assign-form">
