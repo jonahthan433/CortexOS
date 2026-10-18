@@ -79,6 +79,20 @@
     return status !== 'not_configured' && status !== 'disabled';
   }
 
+  function extractOAuthCode(value) {
+    var text = String(value || '').trim();
+    if (!text) return '';
+    var match = text.match(/[?&]code=([^&\s]+)/);
+    if (match) {
+      try {
+        return decodeURIComponent(match[1]);
+      } catch (error) {
+        return match[1];
+      }
+    }
+    return text;
+  }
+
   function summaryLine(status) {
     if (!status) return '';
     var connectors = status.connectors || [];
@@ -98,6 +112,7 @@
     missingScopes: missingScopes,
     fieldsText: fieldsText,
     authorizeEnabled: authorizeEnabled,
+    extractOAuthCode: extractOAuthCode,
     summaryLine: summaryLine,
     refresh: function () {}
   };
@@ -111,7 +126,7 @@
     var apiFetch = options.apiFetch;
     var root = $('connectors-list');
     if (!root) return;
-    var state = { status: null, loading: false, note: '', error: '', health: {} };
+    var state = { status: null, loading: false, note: '', error: '', health: {}, pending: {} };
 
     function request(method, path, body) {
       var init = { method: method };
@@ -155,6 +170,7 @@
     function authorize(id) {
       setNote('Preparing the OAuth URL for ' + id + '…');
       request('POST', '/connectors/' + encodeURIComponent(id) + '/oauth/start').then(function (start) {
+        state.pending[id] = { state: start.state, at: Date.now() };
         setNote('Authorization URL ready — open it deliberately in a browser. State: ' + start.state);
         var card = root.querySelector('[data-connector="' + id + '"] .connector-auth');
         if (card) {
@@ -173,9 +189,45 @@
           note.className = 'dim';
           note.textContent = (start.note || '') + ' Redirect: ' + start.redirect_uri + ' · scopes: '
             + (start.scopes || []).map(scopeShort).join(', ');
-          card.append(link, urlText, note);
+          var row = document.createElement('div');
+          row.className = 'connector-exchange';
+          var input = document.createElement('input');
+          input.type = 'text';
+          input.dataset.role = 'code';
+          input.placeholder = 'paste the code parameter (or the whole redirect URL)';
+          input.autocomplete = 'off';
+          var complete = document.createElement('button');
+          complete.className = 'ghost';
+          complete.textContent = 'Complete authorization';
+          complete.title = 'Exchanges the one-time code for tokens server-side; the code is never stored or displayed again.';
+          complete.onclick = function () { exchange(id); };
+          row.append(input, complete);
+          card.append(link, urlText, note, row);
         }
       }).catch(function (error) { setNote(id + ' cannot start authorization: ' + error.message); });
+    }
+
+    function exchange(id) {
+      var card = root.querySelector('[data-connector="' + id + '"] .connector-auth');
+      var input = card && card.querySelector('input[data-role="code"]');
+      var code = extractOAuthCode(input ? input.value : '');
+      if (!code) { setNote('Paste the code parameter from the redirect URL first.'); return; }
+      var pending = state.pending[id];
+      if (!pending || !pending.state) {
+        setNote('No pending authorization state for ' + id + ' — press Authorize again, then complete with the fresh code.');
+        return;
+      }
+      request('POST', '/connectors/' + encodeURIComponent(id) + '/oauth/exchange',
+        { state: pending.state, code: code }).then(function (result) {
+        if (input) input.value = '';
+        delete state.pending[id];
+        setNote(id + ' authorized — scopes: ' + ((result.scopes || []).map(scopeShort).join(', ') || 'as listed')
+          + '. Tokens are stored server-side and never displayed.');
+        reload();
+      }).catch(function (error) {
+        setNote(id + ' authorization failed: ' + error.message);
+        reload();
+      });
     }
 
     function renderOperation(connector, operation) {

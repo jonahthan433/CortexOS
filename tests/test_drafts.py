@@ -1,6 +1,6 @@
 """Stage 7 drafts tests: store roundtrip, revision history, privacy, and save
 boundaries (notes -> vault, tasks -> queue or the existing submit gate,
-connector kinds explicitly blocked until the connector framework lands)."""
+connector/email -> the connector gate, where unsupported states fail honestly)."""
 from __future__ import annotations
 
 import asyncio
@@ -72,7 +72,8 @@ def test_voice_draft_preserves_transcript_and_privacy(tmp_path):
     assert draft["source"] == "voice"
     assert draft["transcript"] == "remind bob about the uh invoice"
     assert draft["target"]["to"] == ["bob@example.com"]
-    assert service.draft_execution(draft)["available"] is False  # connector execution not wired yet
+    execution = service.draft_execution(draft)
+    assert execution["available"] is True and execution["action"] == "send_email"
     path = tmp_path / "state" / "drafts" / f"{draft['id']}.json"
     assert (path.stat().st_mode & 0o777) == 0o600
 
@@ -134,13 +135,24 @@ def test_save_task_without_queue_submits_directly(tmp_path):
     assert service.drafts.get(draft["id"])["saved_ref"] == f"{draft['id']}-run"
 
 
-def test_connector_and_email_save_is_blocked_honestly(tmp_path):
+def test_connector_draft_fails_honestly_without_credentials(tmp_path):
     service = make_service(tmp_path)
+    # Known connector, known operation, but no OAuth client file yet.
     draft = service.create_draft(kind="connector", body="upload the report",
-                                 target={"connector": "drive", "operation": "upload"})
-    with pytest.raises(ValueError, match="not wired"):
+                                 target={"connector": "drive", "operation": "files.upload",
+                                         "args": {"name": "report.md", "content": "# Report"}})
+    with pytest.raises(ValueError, match="OAuth client file"):
         asyncio.run(service.save_draft(draft["id"]))
     assert service.drafts.get(draft["id"])["status"] == "draft"
+    # Unknown connector ids and unknown operations fail before anything else.
+    unknown = service.create_draft(kind="connector", body="x",
+                                   target={"connector": "nope", "operation": "files.list"})
+    with pytest.raises(ValueError, match="unknown connector|Unknown connector"):
+        asyncio.run(service.save_draft(unknown["id"]))
+    # A connector draft without a target cannot run.
+    incomplete = service.create_draft(kind="connector", body="x")
+    with pytest.raises(ValueError, match="target.connector"):
+        asyncio.run(service.save_draft(incomplete["id"]))
 
 
 def test_regenerate_without_fast_model_fails_honestly(tmp_path):

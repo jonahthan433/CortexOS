@@ -68,6 +68,19 @@ test('authorizeEnabled requires a client file and enabled connectors', () => {
   assert.equal(panel.authorizeEnabled({ credential: { status: 'disabled' } }), false);
 });
 
+test('extractOAuthCode accepts a bare code or a full redirect URL', () => {
+  assert.equal(panel.extractOAuthCode('4/0AX4XfWgEXAMPLE-code'), '4/0AX4XfWgEXAMPLE-code');
+  assert.equal(
+    panel.extractOAuthCode('http://localhost:8765/connectors/callback?code=4%2F0AX4XfWgEXAMPLE&state=abc123'),
+    '4/0AX4XfWgEXAMPLE');
+  assert.equal(
+    panel.extractOAuthCode('http://localhost:8765/connectors/callback?state=abc123&code=4%2F0AX4XfWgEXAMPLE'),
+    '4/0AX4XfWgEXAMPLE');
+  assert.equal(panel.extractOAuthCode('  '), '');
+  assert.equal(panel.extractOAuthCode(''), '');
+  assert.equal(panel.extractOAuthCode(null), '');
+});
+
 test('summaryLine counts authorized connectors truthfully', () => {
   const status = {
     enabled: true,

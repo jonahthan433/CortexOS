@@ -35,10 +35,15 @@ DRIVE_FILE = ("https://www.googleapis.com/auth/drive.file",)
 YOUTUBE_READ = ("https://www.googleapis.com/auth/youtube.readonly",)
 
 
-def authorization_url(client: dict, scopes: list[str], state: str, redirect_uri: str) -> str:
+def authorization_url(client: dict, scopes: list[str], state: str, redirect_uri: str,
+                      code_challenge: str = "", code_challenge_method: str = "S256") -> str:
     params = {"client_id": client["client_id"], "redirect_uri": redirect_uri, "response_type": "code",
               "scope": " ".join(scopes), "access_type": "offline", "prompt": "consent",
               "include_granted_scopes": "true", "state": state}
+    if code_challenge:
+        # PKCE: desktop clients cannot keep a secret; Google recommends S256.
+        params["code_challenge"] = code_challenge
+        params["code_challenge_method"] = code_challenge_method
     return GOOGLE_AUTH_URL + "?" + urlencode(params)
 
 

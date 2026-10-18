@@ -5,9 +5,12 @@ all over a mocked HTTP transport (no network, no real credentials)."""
 from __future__ import annotations
 
 import asyncio
+import base64
+import hashlib
 import json
 import time
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 import httpx
 import pytest
@@ -372,6 +375,9 @@ def test_oauth_start_requires_client_config_and_returns_scoped_url(tmp_path):
     assert CLIENT_SECRET not in start["url"] and "access_type=offline" in start["url"]
     assert "gmail.readonly" in start["url"] and "gmail.send" in start["url"]
     assert start["state"] and start["redirect_uri"].startswith("http://localhost")
+    # PKCE (S256) is part of every authorization URL.
+    query = parse_qs(urlparse(start["url"]).query)
+    assert query["code_challenge_method"] == ["S256"] and len(query["code_challenge"][0]) >= 43
 
 
 def test_oauth_exchange_stores_tokens_server_side_and_is_single_use(tmp_path):
@@ -386,6 +392,14 @@ def test_oauth_exchange_stores_tokens_server_side_and_is_single_use(tmp_path):
     exchanged = asyncio.run(runtime.oauth_exchange("gmail", start["state"], "auth-code-1"))
     assert exchanged["status"] == "ready"
     assert "ya29" not in json.dumps(exchanged) and "1//" not in json.dumps(exchanged)
+    # The exchange proves possession of the PKCE verifier behind the challenge.
+    challenge = parse_qs(urlparse(start["url"]).query)["code_challenge"][0]
+    body = parse_qs(api.calls[0]["body"])
+    assert body["code"] == ["auth-code-1"] and body["grant_type"] == ["authorization_code"]
+    verifier = body["code_verifier"][0]
+    expected = base64.urlsafe_b64encode(
+        hashlib.sha256(verifier.encode("ascii")).digest()).rstrip(b"=").decode("ascii")
+    assert expected == challenge and len(verifier) >= 43
     stored = runtime.store.token("gmail")
     assert stored["access_token"] == "ya29.oauth" and stored["refresh_token"] == "1//new-refresh"
     assert any(scope.endswith("/gmail.send") for scope in stored["scopes"])
@@ -418,3 +432,67 @@ def test_idempotency_keys_are_stable_and_client_keys_are_required():
     first = ConnectorRuntime._journal_key("test", content_operation, {"b": 1, "a": 2}, None)
     second = ConnectorRuntime._journal_key("test", content_operation, {"a": 2, "b": 1}, None)
     assert first == second and first.startswith("test:op:h:")
+
+
+# ----------------------------------------------------- draft-driven operations
+
+
+def test_connector_draft_read_runs_directly_and_is_audited(tmp_path):
+    settings = make_settings(tmp_path)
+    write_client(settings)
+    service = CortexService(settings)
+    api = MockAPI([httpx.Response(200, json={"messages": [{"id": "m-1"}]})])
+    service.connectors = ConnectorRuntime(settings, transport=api.transport())
+    write_token(service.connectors, scopes=list(GMAIL_READ))
+    draft = service.create_draft(kind="connector", body="recent invoices",
+                                 target={"connector": "gmail", "operation": "messages.search",
+                                         "args": {"query": "from:invoices", "max_results": 5}})
+    result = asyncio.run(service.save_draft(draft["id"]))
+    assert result["status"] == "saved"
+    assert result["connector"] == "gmail" and result["operation"] == "messages.search"
+    assert service.drafts.get(draft["id"])["status"] == "saved"
+    assert len(api.calls) == 1 and api.calls[0]["method"] == "GET"
+    assert api.calls[0]["path"] == "/gmail/v1/users/me/messages"
+    entries = receipts(settings.vault)
+    assert any(item.get("event") == "draft_saved" and item.get("kind") == "connector"
+               and item.get("status") == "completed" for item in entries)
+    blob = json.dumps(entries)
+    assert "ya29" not in blob and CLIENT_SECRET not in blob
+
+
+def test_email_draft_waits_for_fresh_approval_then_sends(tmp_path):
+    settings = make_settings(tmp_path)
+    write_client(settings)
+    service = CortexService(settings)
+    api = MockAPI([httpx.Response(200, json={"id": "msg-77"})])
+    service.connectors = ConnectorRuntime(settings, transport=api.transport())
+    write_token(service.connectors, scopes=list(GMAIL_READ) + list(GMAIL_SEND))
+    draft = service.create_draft(kind="email", body="Please review the attached numbers.",
+                                 title="Invoice follow-up",
+                                 target={"to": ["bob@example.com"], "subject": "Invoice"})
+    result = asyncio.run(service.save_draft(draft["id"]))
+    assert result["status"] == "awaiting_approval" and api.calls == []
+    approval_id = result["approval_id"]
+    assert service.drafts.get(draft["id"])["saved_ref"] == approval_id
+    pending = service.pending[approval_id]
+    assert pending["kind"] == "connector" and pending["operation"] == "messages.send"
+    assert pending["args"]["to"] == ["bob@example.com"] and pending["args"]["subject"] == "Invoice"
+    assert pending["args"]["body"] == "Please review the attached numbers."
+    approved = asyncio.run(service.approve(approval_id))
+    assert approved["status"] == "ok" and approved["result_ref"] == "msg-77"
+    assert len(api.calls) == 1 and api.calls[0]["method"] == "POST"
+
+
+def test_connector_draft_save_reports_blocked_credentials_without_approval(tmp_path):
+    settings = make_settings(tmp_path)
+    write_client(settings)  # client file exists, authorization has not happened
+    service = CortexService(settings)
+    api = MockAPI()
+    service.connectors = ConnectorRuntime(settings, transport=api.transport())
+    draft = service.create_draft(kind="connector", body="send it",
+                                 target={"connector": "gmail", "operation": "messages.send",
+                                         "args": {"to": ["bob@example.com"], "subject": "Hi", "body": "Hello"}})
+    with pytest.raises(ValueError, match="authorization"):
+        asyncio.run(service.save_draft(draft["id"]))
+    assert service.pending == {} and api.calls == []
+    assert service.drafts.get(draft["id"])["status"] == "draft"

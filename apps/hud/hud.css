@@ -450,6 +450,9 @@ body.side-collapsed .side-brand{justify-content:center}
 .connector-op{border-top:1px solid var(--line);padding:7px 0;display:flex;flex-direction:column;gap:3px}
 .connector-url{font-size:11px;color:var(--mint)}
 .connector-url-text{display:block;word-break:break-all;font-size:9px;color:var(--muted);margin:4px 0}
+.connector-exchange{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+.connector-exchange input{flex:1 1 260px;background:#071018;border:1px solid #20313a;border-radius:var(--radius-xs);padding:7px 9px;color:var(--text);font-size:10px;outline:none}
+.connector-exchange input:focus{border-color:#4b9986}
 .suggestions-note,.drafts-note,.connectors-note{font-size:11px;color:var(--amber);margin:4px 0 8px}
 .skill-problem{display:block;color:var(--amber);margin:2px 0}
 .skill-history{display:flex;flex-direction:column;gap:5px;margin-top:6px}

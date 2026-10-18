@@ -2,8 +2,7 @@
 
 A draft is created from voice or text, can be edited/regenerated, and only
 becomes an action through an explicit save/approval step elsewhere (vault note,
-durable queue task, or — once wired — a connector operation under the approval
-gate). Draft files live under ``state/drafts/`` with 0600 permissions and are
+durable queue task, or a connector operation under the approval gate). Draft files live under ``state/drafts/`` with 0600 permissions and are
 never exposed in logs or receipts beyond id/kind/target metadata.
 """
 from __future__ import annotations

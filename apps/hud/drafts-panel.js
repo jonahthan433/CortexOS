@@ -1,8 +1,9 @@
 /* CortexOS · Drafts panel for the JARVIS HUD.
  *
  * Drafts are local-only text until an explicit save: notes are written to the
- * vault, tasks are handed to the durable queue, and email/connector drafts
- * report honestly that execution is not wired yet. Regeneration uses the
+ * vault, tasks are handed to the durable queue, and email/connector drafts run
+ * through the connector approval gate (reads execute audited; sends and other
+ * external actions wait for fresh approval). Regeneration uses the
  * configured fast model and surfaces its failure instead of inventing text.
  * Pure helpers are tested with `node --test`.
  */

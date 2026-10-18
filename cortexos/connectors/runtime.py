@@ -12,6 +12,7 @@ and server-side (tokens are never returned by any API).
 from __future__ import annotations
 
 import asyncio
+import base64
 import hashlib
 import json
 import secrets
@@ -214,11 +215,14 @@ class ConnectorRuntime:
         if not client:
             raise ConnectorBlocked("not_configured", connector.spec.setup)
         state = secrets.token_urlsafe(16)
-        self._oauth_states[state] = {"connector": connector_id, "at": time.time()}
+        verifier = secrets.token_urlsafe(64)
+        challenge = base64.urlsafe_b64encode(
+            hashlib.sha256(verifier.encode("ascii")).digest()).rstrip(b"=").decode("ascii")
+        self._oauth_states[state] = {"connector": connector_id, "at": time.time(), "verifier": verifier}
         redirect_uri = self.store.redirect_uri(connector_id)
         scopes = list(connector.spec.scopes)
         return {"connector": connector_id, "state": state, "redirect_uri": redirect_uri, "scopes": scopes,
-                "url": authorization_url(client, scopes, state, redirect_uri),
+                "url": authorization_url(client, scopes, state, redirect_uri, challenge),
                 "note": ("Open the URL and approve access, then exchange the returned code (the browser redirect "
                          "may show a connection error page; copy the code parameter from its address bar). "
                          "Tokens are stored server-side and never displayed again.")}
@@ -235,6 +239,8 @@ class ConnectorRuntime:
             raise ConnectorBlocked("not_configured", connector.spec.setup)
         payload = {"code": code, "client_id": client["client_id"],
                    "redirect_uri": self.store.redirect_uri(connector_id), "grant_type": "authorization_code"}
+        if pending.get("verifier"):
+            payload["code_verifier"] = pending["verifier"]
         if client.get("client_secret"):
             payload["client_secret"] = client["client_secret"]
         response = await connector._http("POST", GOOGLE_TOKEN_URL, data=payload, timeout=20)

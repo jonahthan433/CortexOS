@@ -220,8 +220,27 @@ class CortexService:
         if draft["kind"] == "task":
             return {"available": True, "action": "enqueue_task",
                     "reason": "Creates a durable queue task; run-time approval gates still apply."}
+        if draft["kind"] == "connector":
+            return {"available": True, "action": "connector_operation",
+                    "reason": "Runs through the connector gate: reads execute audited, external actions wait for fresh approval."}
+        if draft["kind"] == "email":
+            return {"available": True, "action": "send_email",
+                    "reason": "Maps to gmail.messages.send; every send requires fresh approval and an authorized Gmail connector."}
         return {"available": False, "action": None,
-                "reason": "Connector execution is not wired in this build; the draft is stored locally only."}
+                "reason": "Unknown draft kind; nothing can run."}
+
+    @staticmethod
+    def connector_draft_request(draft: dict) -> tuple[str, str, dict]:
+        """Map a connector/email draft to its connector operation and arguments."""
+        target = draft.get("target") or {}
+        if draft.get("kind") == "email":
+            return "gmail", "messages.send", {
+                "to": [str(item) for item in (target.get("to") or [])],
+                "subject": str(target.get("subject") or draft.get("title") or ""),
+                "body": str(draft.get("body") or ""),
+            }
+        return (str(target.get("connector") or ""), str(target.get("operation") or ""),
+                dict(target.get("args") or {}))
 
     async def save_draft(self, draft_id: str) -> dict:
         draft = self.drafts.get(draft_id)
@@ -239,6 +258,8 @@ class CortexService:
                 "event": "draft_saved", "draft_id": draft["id"], "kind": "note",
                 "target": str(path), "status": "completed"})
             return {"status": "saved", "draft": saved, "reference": str(path), "receipt": str(receipt)}
+        if draft["kind"] in {"connector", "email"}:
+            return await self._save_connector_draft(draft)
         # kind == "task": hand off to the durable queue, or direct submit without one.
         origin = f"draft:{draft['id']}"
         detail: dict = {}
@@ -257,6 +278,34 @@ class CortexService:
             "event": "draft_saved", "draft_id": draft["id"], "kind": "task",
             "target": reference, "status": "completed"})
         return {"status": "saved", "draft": saved, "reference": reference, "receipt": str(receipt), **detail}
+
+    async def _save_connector_draft(self, draft: dict) -> dict:
+        """Connector/email drafts run through the connector gate: reads execute
+        audited, external actions create a fresh approval — never a bypass."""
+        connector_id, operation, args = self.connector_draft_request(draft)
+        if not connector_id or not operation:
+            raise ValueError("Connector drafts need target.connector and target.operation before they can run")
+        try:
+            outcome = await self.request_connector_operation(connector_id, operation, args)
+        except ConnectorError as exc:
+            raise ValueError(f"Connector draft cannot run: {scrub_secrets(str(exc))}") from exc
+        if outcome.get("status") == "awaiting_approval":
+            reference = str(outcome.get("approval_id") or draft["id"])
+            saved = self.drafts.mark_saved(draft["id"], reference)
+            receipt = self.vault.receipt(f"{draft['id']}-save", {
+                "event": "draft_saved", "draft_id": draft["id"], "kind": draft["kind"],
+                "target": reference, "status": "awaiting_approval"})
+            return {"status": "awaiting_approval", "draft": saved, "reference": reference,
+                    "approval_id": reference, "connector": connector_id, "operation": operation,
+                    "receipt": str(receipt),
+                    "message": outcome.get("message") or "Approval required before this runs."}
+        reference = str(outcome.get("result_ref") or f"{connector_id}.{operation}")
+        saved = self.drafts.mark_saved(draft["id"], reference)
+        receipt = self.vault.receipt(f"{draft['id']}-save", {
+            "event": "draft_saved", "draft_id": draft["id"], "kind": draft["kind"],
+            "target": reference, "status": "completed"})
+        return {"status": "saved", "draft": saved, "reference": reference, "receipt": str(receipt),
+                "connector": connector_id, "operation": operation, "result": outcome}
 
     async def regenerate_draft(self, draft_id: str) -> dict:
         draft = self.drafts.get(draft_id)
