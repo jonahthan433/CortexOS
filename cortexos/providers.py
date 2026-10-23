@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import signal
 from typing import Any
 
@@ -120,7 +121,9 @@ class AgentProvider:
             output += "\n\n[Output truncated after 20 MB]"
         if proc.returncode:
             raise ProviderError(f"{name} exited with code {proc.returncode}: {output[-3000:]}", retryable=True)
-        return output
+        # Hermes -Q writes its automation footer (session_id) to the merged
+        # descriptor; it is plumbing, not part of the agent's answer.
+        return re.sub(r"\n+session_id:[^\n]*$", "", output).strip()
 
     def interrupt(self, request_id: str) -> bool:
         proc = self.running.get(request_id)

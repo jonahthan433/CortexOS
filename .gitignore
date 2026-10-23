@@ -16,3 +16,6 @@ config/server.crt
 config/auth.json
 cortexos.egg-info/
 state/
+/backups/
+apps/obsidian-plugin/dist/
+config/*.bak-*

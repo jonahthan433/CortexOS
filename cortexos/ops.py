@@ -123,7 +123,7 @@ class BackupManager:
 
     def __init__(self, vault: Vault, backup_dir: Path | None = None):
         self.vault = vault
-        self.backup_dir = backup_dir or (vault.root / ".backups")
+        self.backup_dir = backup_dir or (vault.root.parent / "backups")
 
     def create(self) -> Path:
         self.backup_dir.mkdir(parents=True, exist_ok=True)

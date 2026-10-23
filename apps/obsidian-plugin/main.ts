@@ -6,7 +6,7 @@ import '@xterm/xterm/css/xterm.css';
 interface CortexSettings { bridgeUrl: string; backend: string; token: string }
 interface CortexAgent { id: string; name: string }
 async function bridgeRequest(plugin: CortexPlugin, options: any) { return requestUrl({ ...options, headers: { ...(options.headers || {}), Authorization: `Bearer ${plugin.settings.token}` } }); }
-const DEFAULTS: CortexSettings = { bridgeUrl: 'http://127.0.0.1:8765', backend: 'auto', token: '' };
+const DEFAULTS: CortexSettings = { bridgeUrl: 'https://192.168.1.13:8765', backend: 'auto', token: '' };
 
 class CortexPromptModal extends Modal {
   plugin: CortexPlugin;
@@ -293,14 +293,12 @@ class CortexSettingsTab extends PluginSettingTab {
   constructor(app: App, plugin: CortexPlugin) { super(app, plugin); this.plugin = plugin; }
   display() {
     const { containerEl } = this; containerEl.empty(); containerEl.createEl('h2', { text: 'CortexOS Bridge' });
-    new Setting(containerEl).setName('Bridge URL').setDesc('Keep the Bridge bound to localhost.').addText(text => text.setValue(this.plugin.settings.bridgeUrl).onChange(async value => { this.plugin.settings.bridgeUrl = value; await this.plugin.saveSettings(); }));
-    new Setting(containerEl).setName('Bridge token').setDesc('Get it with `python -m cortexos token` on the Bridge machine.').addText(text => text.setPlaceholder('Paste local token').setValue(this.plugin.settings.token).onChange(async value => { this.plugin.settings.token = value.trim(); await this.plugin.saveSettings(); }));
+    new Setting(containerEl).setName('Bridge URL').setDesc('The Bridge serves TLS over the LAN, e.g. https://192.168.1.13:8765 (the certificate is self-signed, so accept it once in your browser). Use http://127.0.0.1:8765 only when the Bridge runs on this machine without a certificate.').addText(text => text.setValue(this.plugin.settings.bridgeUrl).onChange(async value => { this.plugin.settings.bridgeUrl = value; await this.plugin.saveSettings(); }));
+    new Setting(containerEl).setName('Bridge token').setDesc('Get it with `.venv/bin/cortexos token` (or the `cortexos` CLI) on the Bridge machine.').addText(text => text.setPlaceholder('Paste local token').setValue(this.plugin.settings.token).onChange(async value => { this.plugin.settings.token = value.trim(); await this.plugin.saveSettings(); }));
     let backendDropdown: any;
-    new Setting(containerEl).setName('Agent').setDesc('Auto uses Tier 1/2 routing and the configured Codex default for Tier 3. Choose an agent to route work directly.').addDropdown(drop => {
+    new Setting(containerEl).setName('Agent').setDesc('Auto uses Tier 1/2 routing and the configured default backend for Tier 3. Choose an agent to route work directly.').addDropdown(drop => {
       backendDropdown = drop;
       drop.addOption('auto', 'Auto (Tier routing)');
-      drop.addOption('codex', 'Codex');
-      drop.addOption('claude', 'Claude Code');
       drop.setValue(this.plugin.settings.backend);
       drop.onChange(async value => { this.plugin.settings.backend = value; await this.plugin.saveSettings(); });
       return drop;

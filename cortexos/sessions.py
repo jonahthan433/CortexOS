@@ -92,9 +92,13 @@ class TerminalManager:
                 command, *args,
                 stdin=slave_fd, stdout=slave_fd, stderr=slave_fd,
                 cwd=str(self.settings.vault), env=env, start_new_session=True,
-                pass_fds=(slave_fd,), preexec_fn=lambda: fcntl.ioctl(slave_fd, termios.TIOCSCTTY, 0),
+                pass_fds=(slave_fd,),
             )
-        except (FileNotFoundError, PermissionError):
+        except Exception:
+            # uvloop implements no preexec_fn: a spawn that fails here must not
+            # leak the pty pair, and start_new_session already gives the child a tty.
+            # ponytail: no TIOCSCTTY preexec - spawn via `setsid -c` if a CLI ever
+            # needs a controlling terminal.
             os.close(master_fd)
             os.close(slave_fd)
             raise

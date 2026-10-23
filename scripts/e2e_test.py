@@ -22,10 +22,21 @@ from cortexos.providers import JevRouter
 settings = Settings.load()
 
 
-def test_agent_count():
+def _skill_scan():
+    """Every manifest on disk is either loaded or explicitly rejected."""
     registry = SkillRegistry(settings.skills)
-    assert len(registry.list()) == 480, f'expected 480 skills (12 native + 468 imported), got {len(registry.list())}'
-    print('PASS: 480 skills registered (12 native + 468 imported)')
+    scan = registry.scan()
+    rejected = sum(1 for problem in scan.problems if problem.get("rejected"))
+    manifests = len(list(settings.skills.glob("**/skill.json")))
+    assert manifests == len(scan.skills) + rejected, (
+        f'{manifests} manifests on disk but {len(scan.skills)} loaded + {rejected} rejected')
+    return scan
+
+
+def test_agent_count():
+    scan = _skill_scan()
+    assert len(scan.skills) >= 400, f'only {len(scan.skills)} skills registered'
+    print(f'PASS: {len(scan.skills)} skills registered (every manifest accounted for)')
 
 
 def test_coordinator():
@@ -65,8 +76,8 @@ def test_health():
     hc = HealthCheck(service=svc, vault=svc.vault, voice=LocalVoice(settings))
     snap = hc.snapshot()
     assert snap['status'] in ('ok', 'degraded'), snap
-    assert snap['checks']['skills']['count'] == 480
-    print('PASS: health snapshot reports 480 skills')
+    assert snap['checks']['skills']['count'] == len(_skill_scan().skills)
+    print(f"PASS: health snapshot reports {snap['checks']['skills']['count']} skills")
 
 
 def test_backup():

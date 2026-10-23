@@ -8,7 +8,7 @@ import time
 import uuid
 import hmac
 
-from fastapi import FastAPI, HTTPException, Request, WebSocket
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
 from fastapi.responses import Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints
@@ -1046,21 +1046,29 @@ async def reject(request_id: str):
     return result
 
 
-@app.post("/api/telegram/inbound")
+async def require_telegram_bridge_token(request: Request) -> None:
+    """Scoped token gate as a dependency: it must answer before body validation.
+
+    Adjusted as a dependency so an unauthenticated caller with a malformed body
+    gets 401, not a 422 schema report.
+    """
+    if telegram_bridge is None:
+        raise HTTPException(status_code=503, detail="Telegram bridge is disabled")
+    supplied = request.headers.get(telegram_module.BRIDGE_HEADER) or ""
+    if not supplied:
+        authorization = request.headers.get("authorization", "")
+        supplied = authorization[7:] if authorization.lower().startswith("bearer ") else ""
+    if not telegram_bridge.token_ok(supplied):
+        raise HTTPException(status_code=401, detail="Invalid bridge token")
+
+
+@app.post("/api/telegram/inbound", dependencies=[Depends(require_telegram_bridge_token)])
 async def telegram_inbound(body: TelegramInboundBody, request: Request):
     """Scoped ingress for the Hermes gateway Telegram plugin.
 
     Guarded by its own token file (never the main bridge token), the sender
     allowlist shared with Hermes, and a per-user rate limit. Returns the exact
     reply text for the bot to send back in the originating chat."""
-    if telegram_bridge is None:
-        return JSONResponse(status_code=503, content={"detail": "Telegram bridge is disabled"})
-    supplied = request.headers.get(telegram_module.BRIDGE_HEADER) or ""
-    if not supplied:
-        authorization = request.headers.get("authorization", "")
-        supplied = authorization[7:] if authorization.lower().startswith("bearer ") else ""
-    if not telegram_bridge.token_ok(supplied):
-        return JSONResponse(status_code=401, content={"detail": "Invalid bridge token"})
     if not telegram_bridge.user_allowed(body.user_id):
         logger.warning("telegram bridge rejected an unauthorized sender")
         return JSONResponse(status_code=403, content={"detail": "Sender is not authorized"})

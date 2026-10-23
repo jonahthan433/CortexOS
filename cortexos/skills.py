@@ -138,7 +138,9 @@ def validate_manifest(data, manifest: Path) -> tuple[dict | None, list[str]]:
     skill_id = data.get("id")
     if not isinstance(skill_id, str) or not ID_PATTERN.match(skill_id):
         return None, [f"missing or invalid skill id: {skill_id!r}"]
-    if skill_id != manifest.parent.name:
+    # Two sanctioned shapes: id == folder, or "<domain>-<folder>" (the first-party
+    # convention, e.g. skills/research/morning-intel -> research-morning-intel).
+    if skill_id not in {manifest.parent.name, f"{manifest.parent.parent.name}-{manifest.parent.name}"}:
         problems.append(f"id '{skill_id}' does not match directory '{manifest.parent.name}'")
     name = data.get("name")
     if not isinstance(name, str) or not name.strip():

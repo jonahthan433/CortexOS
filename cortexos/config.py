@@ -65,7 +65,9 @@ class Settings:
     @property
     def agent_ids(self) -> list[str]:
         configured = list((self.providers or {}).keys())
-        return list(dict.fromkeys(["codex", "claude", *configured]))
+        # Only providers that are actually configured: a hardcoded entry for an
+        # uninstalled CLI shows up as a selectable agent that can only 503.
+        return list(dict.fromkeys(configured))
 
     @property
     def agents(self) -> list[dict[str, str]]:
